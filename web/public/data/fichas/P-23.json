@@ -1,0 +1,478 @@
+{
+ "id": "P-23",
+ "nombre": "Payunia P-23 (maqueta)",
+ "region": "payunia",
+ "control": null,
+ "etiqueta": "no_alcanza",
+ "orden": 7,
+ "orden_candidatas": 4,
+ "lugar": {
+  "lat": -36.58,
+  "lon": -69.05,
+  "alt_m": 1679.4030811382936
+ },
+ "C": 0.6055,
+ "E": 0.8,
+ "L": 0.4844,
+ "U": 0.6844,
+ "umbral": 0.7,
+ "requisitos": {
+  "vegetacion": {
+   "estado": "cumple",
+   "valor": 0.12,
+   "limite": 0.2,
+   "unidad": "NDVI percentil 90 anual"
+  },
+  "pendiente": {
+   "estado": "cumple",
+   "valor": 6.091,
+   "limite": 15.0,
+   "unidad": "grados (mediana a 60 m)"
+  }
+ },
+ "propiedades": {
+  "pendiente": {
+   "estado": "conocida",
+   "peso": 0.3,
+   "distancia": 0.8865,
+   "tolerancia": 3.0,
+   "utilidad": 0.744164,
+   "unidad": "grados (W1)"
+  },
+  "luz_rasante": {
+   "estado": "conocida",
+   "peso": 0.3,
+   "distancia": 0.04327,
+   "tolerancia": 0.05,
+   "utilidad": 0.420864,
+   "unidad": "fracción en sombra (media de |Δf̄| de 1,5° a 10°)"
+  },
+  "rugosidad": {
+   "estado": "conocida",
+   "peso": 0.2,
+   "distancia": 0.39903,
+   "tolerancia": 1.0,
+   "utilidad": 0.674582,
+   "unidad": "W1/τ, media de las escalas de 200 a 1.600 m",
+   "detalle": {
+    "200": {
+     "w1_m": 0.1894,
+     "tolerancia_m": 0.4521,
+     "utilidad": 0.657802
+    },
+    "400": {
+     "w1_m": 0.2729,
+     "tolerancia_m": 1.0055,
+     "utilidad": 0.762311
+    },
+    "800": {
+     "w1_m": 0.7502,
+     "tolerancia_m": 2.1416,
+     "utilidad": 0.704486
+    },
+    "1600": {
+     "w1_m": 2.3315,
+     "tolerancia_m": 4.1964,
+     "utilidad": 0.573731
+    }
+   }
+  },
+  "material": {
+   "estado": "faltante",
+   "peso": 0.1,
+   "distancia": null,
+   "tolerancia": null,
+   "utilidad": null,
+   "unidad": "utilidad declarada por una medición"
+  },
+  "transitabilidad_fina": {
+   "estado": "faltante",
+   "peso": 0.1,
+   "distancia": null,
+   "tolerancia": null,
+   "utilidad": null,
+   "unidad": "utilidad declarada por una medición"
+  }
+ },
+ "dimensiones": {
+  "relieve": {
+   "valor": "fuerte",
+   "fuente": "calculada"
+  },
+  "iluminacion": {
+   "valor": "debil",
+   "fuente": "calculada"
+  },
+  "operaciones_roboticas": {
+   "valor": "fuerte",
+   "fuente": "calculada"
+  },
+  "materiales": {
+   "valor": "no_comparable",
+   "fuente": "juicio_equipo"
+  },
+  "temperatura": {
+   "valor": "debil",
+   "fuente": "juicio_equipo"
+  },
+  "agua_hielo": {
+   "valor": "debil",
+   "fuente": "juicio_equipo"
+  },
+  "polvo_viento": {
+   "valor": "desconocido",
+   "fuente": "juicio_equipo"
+  },
+  "biologia": {
+   "valor": "debil",
+   "fuente": "juicio_equipo"
+  }
+ },
+ "luz_rasante": {
+  "e_deg": [
+   1.5,
+   2.0,
+   2.5,
+   3.0,
+   3.5,
+   4.0,
+   4.5,
+   5.0,
+   5.5,
+   6.0,
+   6.5,
+   7.0,
+   7.5,
+   8.0,
+   8.5,
+   9.0,
+   9.5,
+   10.0
+  ],
+  "f_parcela": [
+   0.717,
+   0.6409,
+   0.5709,
+   0.5068,
+   0.4483,
+   0.395,
+   0.3467,
+   0.3031,
+   0.2638,
+   0.2286,
+   0.1972,
+   0.1694,
+   0.1447,
+   0.1231,
+   0.1041,
+   0.0876,
+   0.0733,
+   0.061
+  ],
+  "f_referencia": [
+   0.6906,
+   0.6053,
+   0.5282,
+   0.4588,
+   0.3966,
+   0.3411,
+   0.2918,
+   0.2483,
+   0.21,
+   0.1767,
+   0.1477,
+   0.1227,
+   0.1012,
+   0.083,
+   0.0675,
+   0.0546,
+   0.0437,
+   0.0348
+  ]
+ },
+ "horario": [
+  {
+   "tipo": "amanecer",
+   "fecha": "2026-11-14",
+   "desde": "06:30",
+   "hasta": "07:00",
+   "azimut": [
+    112.0,
+    107.7
+   ],
+   "e_desde": 1.5,
+   "e_hasta": 7.0,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.1
+  },
+  {
+   "tipo": "atardecer",
+   "fecha": "2026-11-14",
+   "desde": "19:41",
+   "hasta": "20:11",
+   "azimut": [
+    252.2,
+    247.8
+   ],
+   "e_desde": 7.0,
+   "e_hasta": 1.5,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.1
+  },
+  {
+   "tipo": "amanecer",
+   "fecha": "2026-11-15",
+   "desde": "06:29",
+   "hasta": "06:59",
+   "azimut": [
+    112.3,
+    108.0
+   ],
+   "e_desde": 1.5,
+   "e_hasta": 7.0,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.1
+  },
+  {
+   "tipo": "atardecer",
+   "fecha": "2026-11-15",
+   "desde": "19:42",
+   "hasta": "20:12",
+   "azimut": [
+    251.8,
+    247.5
+   ],
+   "e_desde": 7.0,
+   "e_hasta": 1.5,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.2
+  },
+  {
+   "tipo": "amanecer",
+   "fecha": "2026-11-16",
+   "desde": "06:29",
+   "hasta": "06:59",
+   "azimut": [
+    112.7,
+    108.3
+   ],
+   "e_desde": 1.5,
+   "e_hasta": 7.0,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.2
+  },
+  {
+   "tipo": "atardecer",
+   "fecha": "2026-11-16",
+   "desde": "19:43",
+   "hasta": "20:13",
+   "azimut": [
+    251.5,
+    247.2
+   ],
+   "e_desde": 7.0,
+   "e_hasta": 1.5,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.2
+  },
+  {
+   "tipo": "amanecer",
+   "fecha": "2026-11-17",
+   "desde": "06:28",
+   "hasta": "06:58",
+   "azimut": [
+    113.0,
+    108.6
+   ],
+   "e_desde": 1.5,
+   "e_hasta": 7.0,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.2
+  },
+  {
+   "tipo": "atardecer",
+   "fecha": "2026-11-17",
+   "desde": "19:44",
+   "hasta": "20:14",
+   "azimut": [
+    251.2,
+    246.9
+   ],
+   "e_desde": 7.0,
+   "e_hasta": 1.5,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.3
+  },
+  {
+   "tipo": "amanecer",
+   "fecha": "2026-11-18",
+   "desde": "06:27",
+   "hasta": "06:58",
+   "azimut": [
+    113.3,
+    108.9
+   ],
+   "e_desde": 1.5,
+   "e_hasta": 7.0,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.3
+  },
+  {
+   "tipo": "atardecer",
+   "fecha": "2026-11-18",
+   "desde": "19:45",
+   "hasta": "20:15",
+   "azimut": [
+    250.9,
+    246.6
+   ],
+   "e_desde": 7.0,
+   "e_hasta": 1.5,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.4
+  },
+  {
+   "tipo": "amanecer",
+   "fecha": "2026-11-19",
+   "desde": "06:27",
+   "hasta": "06:57",
+   "azimut": [
+    113.6,
+    109.2
+   ],
+   "e_desde": 1.5,
+   "e_hasta": 7.0,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.4
+  },
+  {
+   "tipo": "atardecer",
+   "fecha": "2026-11-19",
+   "desde": "19:45",
+   "hasta": "20:16",
+   "azimut": [
+    250.6,
+    246.3
+   ],
+   "e_desde": 7.0,
+   "e_hasta": 1.5,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.4
+  },
+  {
+   "tipo": "amanecer",
+   "fecha": "2026-11-20",
+   "desde": "06:26",
+   "hasta": "06:57",
+   "azimut": [
+    113.9,
+    109.5
+   ],
+   "e_desde": 1.5,
+   "e_hasta": 7.0,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.4
+  },
+  {
+   "tipo": "atardecer",
+   "fecha": "2026-11-20",
+   "desde": "19:46",
+   "hasta": "20:17",
+   "azimut": [
+    250.4,
+    246.0
+   ],
+   "e_desde": 7.0,
+   "e_hasta": 1.5,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.5
+  }
+ ],
+ "no_transfiere": [
+  "energia",
+  "contraste_sombras",
+  "gravedad",
+  "vacio",
+  "radiacion",
+  "polvo",
+  "tiempo"
+ ],
+ "medir_primero": [
+  "material",
+  "transitabilidad_fina"
+ ],
+ "dato_que_cambia": [
+  {
+   "propiedad": "material",
+   "peor": {
+    "L": 0.4844,
+    "U": 0.5844,
+    "etiqueta": "no_alcanza",
+    "orden": 4
+   },
+   "mejor": {
+    "L": 0.5844,
+    "U": 0.6844,
+    "etiqueta": "no_alcanza",
+    "orden": 2
+   },
+   "cambia_etiqueta": false,
+   "cambia_primer_lugar": false
+  },
+  {
+   "propiedad": "transitabilidad_fina",
+   "peor": {
+    "L": 0.4844,
+    "U": 0.5844,
+    "etiqueta": "no_alcanza",
+    "orden": 4
+   },
+   "mejor": {
+    "L": 0.5844,
+    "U": 0.6844,
+    "etiqueta": "no_alcanza",
+    "orden": 2
+   },
+   "cambia_etiqueta": false,
+   "cambia_primer_lugar": false
+  }
+ ],
+ "robustez": {
+  "primera_frac": 0.0,
+  "n": 1000,
+  "alfa": 100.0
+ },
+ "fuentes": [
+  {
+   "id": "maqueta_terra_x",
+   "sha256": null
+  }
+ ],
+ "maqueta": true,
+ "meta": {
+  "producto": "tarjeta_analogo",
+  "version_formato": 1,
+  "motor_version": "0.1.0",
+  "parametros_sha256": "346a6cd22cc8cb1c75852fd8310971a78d50b2bf33d4c0710658e79e8556231c",
+  "generado_utc": "2026-11-14T16:33:45Z",
+  "uso_si": "Código del motor físico (Parte 3) redactado con SI (Claude Code, Anthropic) a partir de los documentos 02 y 04, con pruebas de resultado conocido escritas antes del código. Los números los calcula el motor determinista con datos y parámetros publicados; ningún modelo de lenguaje interviene en el cálculo.",
+  "notas": [
+   "Compatibilidad y evidencia van separadas: un valor de C no es un porcentaje de parecido.",
+   "L y U son límites algebraicos (utilidad 0 o 1 en lo que falta), no un intervalo de confianza."
+  ]
+ }
+}

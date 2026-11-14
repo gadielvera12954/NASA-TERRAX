@@ -1,0 +1,226 @@
+# TERRA-X · parametros.yaml
+# Dueño: Jean (Parte 3, motor físico). Se congela el sábado 14/11/2026, antes de ver datos reales.
+#
+# Regla (Método de trabajo): este archivo NO se toca después de ver resultados. Si hay que cambiar
+# un umbral, lo decide una persona del equipo y se anota en parametros/CAMBIOS.md con el porqué.
+# La huella SHA-256 de este archivo queda en parametros/CONGELADO.json y la prueba
+# motor/tests/test_parametros.py falla si alguien lo edita sin registrar el cambio.
+#
+# Origen de cada valor (columna "origen" del bloque `origen` al final):
+#   doc01 La idea · doc02 Documento científico · doc03 Diseño de la app · doc04 Arquitectura
+#   nasa  cifra publicada por NASA (citada en doc02, sección 4)
+#   si    hueco que los documentos no fijaban: propuesta redactada con SI (Claude Code).
+#         La confirma una persona del equipo ANTES de ver datos reales (lista en `confirmar`).
+#
+# Uso de SI: este archivo se redactó con Claude Code a partir de los documentos 01 a 04.
+
+version: 1
+
+# ---------------------------------------------------------------------------------------------
+# Decisión y etiquetas (F11, regla de etiquetas, doc02 §3.6)
+# ---------------------------------------------------------------------------------------------
+decision:
+  umbral_theta: 0.70            # doc02
+  evidencia_minima: 0.50        # doc02
+  criterio_orden: L             # si: se ordena por el peor caso L (no premia lo poco medido); empate por C
+  etiquetas:                    # doc01 / doc03 (inglés de la interfaz entre paréntesis)
+    - analogo_sostenido         # Sustained analog · círculo lleno
+    - con_huecos                # With gaps · círculo con muesca
+    - no_alcanza                # Not enough for this test · círculo vacío
+    - no_podemos_concluir       # Cannot conclude · signo de pregunta
+    - incompatible              # Incompatible · cruz
+
+tarea: movilidad_camaras        # doc02: "movilidad y cámaras con luz rasante"
+
+pesos:                          # doc02 (suman 1,00)
+  pendiente: 0.30
+  luz_rasante: 0.30
+  rugosidad: 0.20
+  material: 0.10
+  transitabilidad_fina: 0.10
+
+tolerancias:                    # doc02 (F18: u = exp(-W1/τ))
+  pendiente_deg: 3.0                    # doc02
+  rugosidad_fraccion_ref: 0.25          # doc02: 25 % del valor de referencia
+  rugosidad_valor_ref: mediana          # si: "valor de referencia" = mediana de la distribución de Mons Mouton a esa escala
+  rugosidad_combinar_escalas: media     # si: la utilidad de rugosidad es la media de las utilidades de las 4 escalas
+  luz_rasante: 0.05                     # doc02: tolerancia de f̄(e)
+  luz_rasante_distancia: media_absoluta # si: media de |f̄P(e) − f̄Q(e)| en la grilla de e (W1 de F10 restringida a 1,5°–10° y normalizada)
+
+requisitos:                     # doc02: requisitos indispensables de la tarea
+  vegetacion_ndvi_p90_max: 0.20         # doc02: NDVI percentil 90 anual menor a 0,20 (incumple si >= 0,20)
+  pendiente_mediana_max_deg: 15.0       # doc02: mediana a 60 m menor a 15° (incumple si >= 15°)
+
+luz_rasante:                    # doc01/doc02: Sol de 1,5° a 10°
+  e_min_deg: 1.5
+  e_max_deg: 10.0
+  e_paso_deg: 0.5               # si: 18 alturas de Sol (1,5; 2,0; … 10,0)
+
+robustez:                       # F12
+  n: 1000                       # doc02
+  dirichlet_alfa: 100           # doc02
+  semilla: 20261114             # si: semilla fija para que el resultado sea reproducible
+
+perfil_dimensiones:             # perfil de 8 dimensiones del enunciado (doc01, doc03)
+  fuerte_desde_utilidad: 0.60   # si: una dimensión calculada es "fuerte" si su utilidad media es >= 0,60, si no "débil"
+  juicio_equipo:                # doc03 (maqueta de la ficha) y doc02 §2.6. No se calculan en el hackatón:
+    materiales: no_comparable   #   doc02 §2.6: Payunia es basalto; el polo sur, tierras altas
+    temperatura: debil          #   doc03
+    agua_hielo: debil           #   doc03
+    polvo_viento: desconocido   #   doc03
+    biologia: debil             #   doc03
+
+no_transfiere:                  # doc01 (Límites) y doc03 (ficha): lo que la Tierra no reproduce
+  - energia
+  - contraste_sombras
+  - gravedad
+  - vacio
+  - radiacion
+  - polvo
+  - tiempo
+
+medir_despues:                  # doc03: "Measure first: surface material, then rock size"
+  - material
+  - transitabilidad_fina
+
+# ---------------------------------------------------------------------------------------------
+# Escala y horizonte (F2, F16, doc02 §2.3 y §7.1)
+# ---------------------------------------------------------------------------------------------
+grilla:
+  pixel_m: 60                   # doc02: múltiplo de 20 m (LOLA) y 30 m (Tierra); nunca se interpola hacia abajo
+  parcela_km: 3                 # doc02
+  margen_tierra_km: 30          # doc02
+  margen_luna_km: 300           # doc02: el horizonte lunar usa relieve de hasta 300 km
+  destino_lado_km: 30           # doc02 §7.1: recorte de 30 × 30 km (500 × 500 píxeles)
+
+escalas_rugosidad_m: [200, 400, 800, 1600]   # doc02 (F9)
+
+horizonte:
+  azimutes_mapa: 72             # doc02: 72 en mapas (cada 5°)
+  azimutes_rover: 360           # doc02: 360 en el punto del rover
+  altura_observador_m: 1.0      # doc02: altura del panel (supuesto)
+  altura_observador_nasa_m: 0.0 # doc02: el mapa de iluminación de NASA es de superficie
+  muestreo: bilineal            # si: la superficie se evalúa a lo largo del rayo; no crea grilla más fina
+  paso_minimo_px: 0.5           # si: paso mínimo del rayo, en píxeles de la capa que se muestrea
+  paso_relativo: 0.001          # si: paso = max(paso_minimo, d · 0,001) → error angular < 0,06°
+  codificacion:                 # contrato de horizontes.bin (esquemas/horizontes_bin.md)
+    desplazamiento: 128
+    divisor: 10                 # ángulo = (byte − 128) / 10 grados → de −12,8° a +12,7°
+
+cuerpos:
+  luna:
+    radio_km: 1737.4            # nasa (NSSDCA)
+    k_refraccion: 0.0           # doc02: en la Luna k = 0
+  tierra:
+    radio_km: 6371.0            # nasa (NSSDCA)
+    k_refraccion: 0.13          # doc02: valor usual en geodesia (supuesto)
+
+# ---------------------------------------------------------------------------------------------
+# Sol (F3, F15) y control contra JPL Horizons
+# ---------------------------------------------------------------------------------------------
+sol:
+  efemerides: de421.bsp                 # doc02
+  marco_luna: MOON_ME_DE421             # doc02: mismo marco que LOLA
+  kernels_luna: [moon_080317.tf, pck00008.tpc, moon_pa_de421_1900-2050.bpc]
+  radio_angular_deg: 0.267              # doc02 (F3)
+  meta_vs_horizons_deg: 0.1             # doc02: "Sol en la Luna: menos de 0,1° frente a Horizons"
+  refraccion:                           # doc02 (F15, fórmula de Sæmundsson)
+    presion_ref_mbar: 1010
+    temperatura_ref_c: 10
+    temperatura_c: 10                   # si: misma condición estándar que usa Horizons; el campo puede pasar la medida
+    presion_por_altura: true            # si: atmósfera estándar ISA según la altura del sitio (doc02: "en la Puna el efecto baja")
+  horizons_api: https://ssd.jpl.nasa.gov/api/horizons.api
+
+# ---------------------------------------------------------------------------------------------
+# Destino: rover tipo VIPER en Mons Mouton (F4 a F7, F20)
+# ---------------------------------------------------------------------------------------------
+vehiculo:
+  plantilla: viper-publico              # nasa: plantilla con cifras públicas, no es simulación oficial
+  panel_w: 320                          # nasa
+  lados_deg: [0, 90, 180]               # nasa (paneles en tres lados) · doc02 F4
+  bateria_wh: 5420                      # nasa (inicio de vida útil, 0 °C)
+  supervivencia_h: 50                   # nasa
+  pendiente_max_deg: 15                 # nasa
+  p_surv_w: 108.4                       # doc02 F6: 5420 Wh / 50 h (cota derivada, no publicada)
+  consumo_w: 60                         # doc04: supuesto del equipo (los consumos no son públicos)
+  consumo_sensibilidad_w: [50, 60, 80, 95, 108.4]   # doc02: probar de 50 a 108 W; 95 W ≈ prueba de vacío térmico
+  reserva_frac: 0.20                    # doc03: reserva de batería de 20 % (E_res, decisión del equipo)
+  bateria_inicial_frac: 1.0             # si: el período de cálculo arranca con batería llena
+  paneles: verticales                   # doc02: el ángulo no es público; se suponen verticales
+  esquina_publicada_w: 450              # nasa: 450 W con el Sol en una esquina (control F4)
+
+destino:
+  sitio: mons-mouton-meseta
+  centro: {lat: -84.60, lon: 31.00}     # nasa (USGS/IAU, Feature 16070)
+  im2: {lat: -84.7906, lon: 29.1957}    # doc02 / Horizons (sitio de IM-2)
+  paso_h: 1                             # doc02: hora por hora
+  rumbo: sol-en-esquina                 # doc04 (escenario): el rover mantiene el Sol en una esquina
+  inclinacion_ab_deg: 15                # doc01: el mismo rover en plano y en pendiente de 15°
+  limite_refugio_h: 50                  # doc02 F20: refugio si T_osc ≤ 50 h
+  lunaciones:                           # doc01 / doc02 (figura 5): fechas reales de 2027
+    verano: {desde: "2027-10-27", hasta: "2027-11-26"}
+    invierno: {desde: "2027-05-03", hasta: "2027-06-01"}
+  noches_completas: true                # si: la oscuridad se mide entera aunque cruce el borde de la ventana
+  margen_noches_dias: 16                # si: se calcula 16 días antes y después para no cortar ninguna noche
+
+# ---------------------------------------------------------------------------------------------
+# Horario de ensayo en la Tierra y medición de campo (F14, F15, F19)
+# ---------------------------------------------------------------------------------------------
+horario:
+  e_alto_deg: 7.0                       # doc02/doc03: Sol "como en Mons Mouton", de 7° a 1,5°
+  e_bajo_deg: 1.5
+  desde: "2026-11-14"                   # doc01: fin de semana del hackatón
+  dias: 7                               # si: próximas 7 ventanas de atardecer y de amanecer
+  zona_horaria: "-03:00"                # doc06: UTC−3 (Ley 7354/2024, igual que Argentina)
+
+campo:
+  lugar: {nombre: "Ciudad del Este", lat: -25.51, lon: -54.61, alt_m: 200}   # doc02 (sección 5.2)
+  fecha: "2026-11-14"
+  tablita_alto_m: 0.50                  # doc01/doc02
+  tablita_ancho_min_m: 0.10             # doc02
+  e_min_deg: 5.0                        # doc02 H2: error ≤ 5 % con el Sol entre 5° y 15°
+  e_max_deg: 15.0
+  meta_error_frac: 0.05                 # doc02
+
+# ---------------------------------------------------------------------------------------------
+# Validación (doc02 §6): metas escritas antes de ver resultados
+# ---------------------------------------------------------------------------------------------
+validacion:
+  poste_error_max_px: 1                 # doc02
+  esfera_px_en_sombra: 0                # doc02
+  gaussiana_error_max_puntos: 3         # doc02: f dentro de 3 puntos de la curva teórica
+  gaussiana_e_min_deg: 2.0
+  gaussiana_e_max_deg: 15.0
+  cuenco_error_max_px: 1                # doc02
+  esquina_viper_error_frac: 0.01        # doc02: dentro del 1 % de 450 W
+  sol_horizons_max_deg: 0.1             # doc02
+  iluminacion_nasa_rho_min: 0.8         # doc02 (H3, F13)
+  iluminacion_nasa_puntos: 10000        # doc02
+  iluminacion_nasa_anios: 18.6          # doc02
+  iluminacion_nasa_paso_h: 3            # doc02
+  rugosidad_nasa_rho_min: 0.6           # doc02
+  redundancia_rho_max: 0.9              # doc02 (H1b)
+  caso_a_mano: {C: 0.94, E: 0.75, L: 0.705, U: 0.955}   # doc02 (F11)
+  paridad_casos: 1000                   # doc02
+  ia_respuestas_limpias_min: 9          # doc02 (de 10)
+
+# ---------------------------------------------------------------------------------------------
+# Huecos completados con SI: una persona del equipo los confirma antes de ver datos reales
+# ---------------------------------------------------------------------------------------------
+confirmar:
+  - decision.criterio_orden
+  - tolerancias.rugosidad_valor_ref
+  - tolerancias.rugosidad_combinar_escalas
+  - tolerancias.luz_rasante_distancia
+  - luz_rasante.e_paso_deg
+  - robustez.semilla
+  - perfil_dimensiones.fuerte_desde_utilidad
+  - horizonte.muestreo
+  - horizonte.paso_minimo_px
+  - horizonte.paso_relativo
+  - sol.refraccion.temperatura_c
+  - sol.refraccion.presion_por_altura
+  - vehiculo.bateria_inicial_frac
+  - destino.noches_completas
+  - destino.margen_noches_dias
+  - horario.dias

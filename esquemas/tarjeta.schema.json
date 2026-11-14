@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tarjeta.schema.json",
+  "title": "Tarjeta de Análogo Abierta (fichas/<id>.json)",
+  "description": "Salida de motor/puntaje. Compatibilidad (C) y evidencia (E) van siempre separadas; L y U son límites algebraicos, no un intervalo de confianza ni un porcentaje de parecido.",
+  "type": "object",
+  "required": ["id", "nombre", "region", "control", "etiqueta", "orden", "lugar", "C", "E", "L", "U", "umbral", "requisitos", "propiedades", "dimensiones", "horario", "no_transfiere", "medir_primero", "dato_que_cambia", "robustez", "fuentes", "maqueta", "meta"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "nombre": { "type": "string" },
+    "region": { "type": "string" },
+    "control": { "enum": [null, "positivo", "negativo", "positivo_ruido"] },
+    "etiqueta": { "$ref": "#/$defs/etiqueta" },
+    "orden": { "type": ["integer", "null"], "minimum": 1, "description": "Puesto entre todas, controles incluidos (por L, empate por C). null si es Incompatible." },
+    "orden_candidatas": { "type": ["integer", "null"], "minimum": 1, "description": "Puesto solo entre las candidatas reales." },
+    "lugar": { "$ref": "comun.schema.json#/$defs/lugar" },
+    "C": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+    "E": { "type": "number", "minimum": 0, "maximum": 1 },
+    "L": { "type": "number", "minimum": 0, "maximum": 1 },
+    "U": { "type": "number", "minimum": 0, "maximum": 1 },
+    "umbral": { "type": "number", "minimum": 0, "maximum": 1 },
+    "requisitos": {
+      "type": "object",
+      "required": ["vegetacion", "pendiente"],
+      "additionalProperties": { "$ref": "#/$defs/requisito" }
+    },
+    "propiedades": {
+      "type": "object",
+      "required": ["pendiente", "luz_rasante", "rugosidad", "material", "transitabilidad_fina"],
+      "additionalProperties": { "$ref": "#/$defs/propiedad" }
+    },
+    "dimensiones": {
+      "type": "object",
+      "required": ["relieve", "iluminacion", "materiales", "temperatura", "agua_hielo", "polvo_viento", "biologia", "operaciones_roboticas"],
+      "additionalProperties": { "$ref": "#/$defs/dimension" }
+    },
+    "luz_rasante": {
+      "type": "object",
+      "properties": {
+        "e_deg": { "type": "array", "items": { "type": "number" } },
+        "f_parcela": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 } },
+        "f_referencia": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 } }
+      }
+    },
+    "horario": { "type": "array", "items": { "$ref": "#/$defs/ventana" } },
+    "no_transfiere": { "type": "array", "items": { "type": "string" } },
+    "medir_primero": { "type": "array", "items": { "type": "string" } },
+    "dato_que_cambia": { "type": "array", "items": { "$ref": "#/$defs/cambio" } },
+    "robustez": {
+      "type": "object",
+      "required": ["primera_frac", "n", "alfa"],
+      "properties": {
+        "primera_frac": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "n": { "type": "integer", "minimum": 1 },
+        "alfa": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "fuentes": { "type": "array", "items": { "$ref": "comun.schema.json#/$defs/fuente" } },
+    "maqueta": { "type": "boolean" },
+    "meta": { "$ref": "comun.schema.json#/$defs/meta" }
+  },
+  "$defs": {
+    "etiqueta": { "enum": ["analogo_sostenido", "con_huecos", "no_alcanza", "no_podemos_concluir", "incompatible"] },
+    "requisito": {
+      "type": "object",
+      "required": ["estado", "valor", "limite", "unidad"],
+      "properties": {
+        "estado": { "enum": ["cumple", "incumple", "desconocido"] },
+        "valor": { "type": ["number", "null"] },
+        "limite": { "type": "number" },
+        "unidad": { "type": "string" }
+      }
+    },
+    "propiedad": {
+      "type": "object",
+      "required": ["estado", "peso", "distancia", "tolerancia", "utilidad", "unidad"],
+      "properties": {
+        "estado": { "enum": ["conocida", "faltante"] },
+        "peso": { "type": "number", "minimum": 0 },
+        "distancia": { "type": ["number", "null"], "minimum": 0 },
+        "tolerancia": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "utilidad": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "unidad": { "type": "string" },
+        "detalle": { "type": "object" }
+      }
+    },
+    "dimension": {
+      "type": "object",
+      "required": ["valor", "fuente"],
+      "properties": {
+        "valor": { "enum": ["fuerte", "debil", "desconocido", "no_comparable"] },
+        "fuente": { "enum": ["calculada", "juicio_equipo", "control"] }
+      }
+    },
+    "ventana": {
+      "type": "object",
+      "required": ["tipo", "fecha", "desde", "hasta", "azimut", "e_desde", "e_hasta", "zona"],
+      "properties": {
+        "tipo": { "enum": ["atardecer", "amanecer"] },
+        "fecha": { "$ref": "comun.schema.json#/$defs/fecha" },
+        "desde": { "$ref": "comun.schema.json#/$defs/hora" },
+        "hasta": { "$ref": "comun.schema.json#/$defs/hora" },
+        "azimut": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+        "e_desde": { "type": "number" },
+        "e_hasta": { "type": "number" },
+        "zona": { "type": "string" },
+        "horizonte": { "enum": ["liso", "relieve"] }
+      }
+    },
+    "estado_alternativo": {
+      "type": "object",
+      "required": ["L", "U", "etiqueta", "orden"],
+      "properties": {
+        "L": { "type": "number" },
+        "U": { "type": "number" },
+        "etiqueta": { "$ref": "#/$defs/etiqueta" },
+        "orden": { "type": ["integer", "null"] }
+      }
+    },
+    "cambio": {
+      "type": "object",
+      "required": ["propiedad", "peor", "mejor", "cambia_etiqueta", "cambia_primer_lugar"],
+      "properties": {
+        "propiedad": { "type": "string" },
+        "peor": { "$ref": "#/$defs/estado_alternativo" },
+        "mejor": { "$ref": "#/$defs/estado_alternativo" },
+        "cambia_etiqueta": { "type": "boolean" },
+        "cambia_primer_lugar": { "type": "boolean" }
+      }
+    }
+  }
+}

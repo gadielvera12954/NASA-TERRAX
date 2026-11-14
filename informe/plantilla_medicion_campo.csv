@@ -1,0 +1,2 @@
+hora_local,largo_sombra_m,inclinacion_suelo_deg,alto_m,ancho_m,temperatura_c,foto,notas
+18:05:30,,,0.50,0.10,,IMG_0001.jpg,ejemplo: hora con segundos (UTC-3); inclinacion positiva si el suelo sube a lo largo de la sombra

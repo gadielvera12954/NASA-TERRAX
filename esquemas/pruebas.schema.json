@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pruebas.schema.json",
+  "title": "Resultados de la validación (pruebas.json) para la pantalla Tests",
+  "description": "Incluye todas las pruebas del plan de validación del documento 02, también las que fallan y las que todavía no se pudieron correr. Una prueba sin comprobar nunca figura como aprobada.",
+  "type": "object",
+  "required": ["resumen", "pruebas", "maqueta", "meta"],
+  "properties": {
+    "resumen": {
+      "type": "object",
+      "required": ["total", "pasa", "falla", "pendiente"],
+      "properties": {
+        "total": { "type": "integer" },
+        "pasa": { "type": "integer" },
+        "falla": { "type": "integer" },
+        "pendiente": { "type": "integer" }
+      }
+    },
+    "pruebas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "grupo", "nombre_en", "nombre_es", "formula", "demuestra", "meta", "resultado", "estado", "datos", "dueno", "evidencia"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+          "grupo": { "enum": ["respuesta_conocida", "mundo_real"] },
+          "nombre_en": { "type": "string" },
+          "nombre_es": { "type": "string" },
+          "formula": { "type": ["string", "null"] },
+          "demuestra": { "type": "string" },
+          "meta": {
+            "type": "object",
+            "required": ["texto", "valor", "unidad", "comparacion"],
+            "properties": {
+              "texto": { "type": "string" },
+              "valor": { "type": ["number", "null"] },
+              "unidad": { "type": "string" },
+              "comparacion": { "enum": ["<=", ">=", "<", ">", "==", "orden", "etiqueta"] }
+            }
+          },
+          "resultado": {
+            "type": "object",
+            "required": ["valor", "texto"],
+            "properties": {
+              "valor": { "type": ["number", "boolean", "null"] },
+              "texto": { "type": "string" },
+              "detalle": { "type": "object" }
+            }
+          },
+          "estado": { "enum": ["pasa", "falla", "pendiente"] },
+          "motivo_pendiente": { "type": ["string", "null"] },
+          "datos": { "enum": ["sinteticos", "reales", "maqueta", "ninguno"] },
+          "dueno": { "type": "string" },
+          "evidencia": { "type": "string" },
+          "ejecutada_utc": { "anyOf": [ { "$ref": "comun.schema.json#/$defs/utc" }, { "type": "null" } ] }
+        }
+      }
+    },
+    "maqueta": { "type": "boolean" },
+    "meta": { "$ref": "comun.schema.json#/$defs/meta" }
+  }
+}

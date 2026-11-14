@@ -1,0 +1,16 @@
+horizontes (72 azimutes, puede tardar varios minutos):
+  filas 50/500 ·  10.0 % · faltan ~14.9 min
+  filas 100/500 ·  20.0 % · faltan ~12.3 min
+  filas 150/500 ·  30.0 % · faltan ~ 9.7 min
+  filas 200/500 ·  40.0 % · faltan ~ 8.4 min
+  filas 250/500 ·  50.0 % · faltan ~ 7.1 min
+  filas 300/500 ·  60.0 % · faltan ~ 5.7 min
+  filas 350/500 ·  70.0 % · faltan ~ 4.0 min
+  filas 400/500 ·  80.0 % · faltan ~ 2.5 min
+  filas 450/500 ·  90.0 % · faltan ~ 1.2 min
+  filas 500/500 · 100.0 % · faltan ~ 0.0 min
+  refugios verano: 500×500 píxeles
+  ficha_verano.json: refugio en 0.0 % del terreno, tramo oscuro 422 h en el punto del rover, riesgo=True
+  refugios invierno: 500×500 píxeles
+  ficha_invierno.json: refugio en 0.0 % del terreno, tramo oscuro 616 h en el punto del rover, riesgo=True
+  paridad.json: 1000 casos sobre horizontes.bin

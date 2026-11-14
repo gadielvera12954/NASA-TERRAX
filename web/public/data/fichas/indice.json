@@ -1,0 +1,265 @@
+{
+ "region": "payunia",
+ "umbral": 0.7,
+ "candidatas": [
+  {
+   "id": "CTRL-MM",
+   "nombre": "Recorte de Mons Mouton (control positivo)",
+   "control": "positivo",
+   "etiqueta": "analogo_sostenido",
+   "orden": 1,
+   "lugar": {
+    "lat": -84.6,
+    "lon": 31.0,
+    "alt_m": 0.0
+   },
+   "C": 1.0,
+   "E": 0.8,
+   "L": 0.8,
+   "U": 1.0,
+   "primera_frac": null,
+   "archivo": "CTRL-MM.json"
+  },
+  {
+   "id": "P-07",
+   "nombre": "Payunia P-07 (maqueta)",
+   "control": null,
+   "etiqueta": "analogo_sostenido",
+   "orden": 2,
+   "lugar": {
+    "lat": -36.41,
+    "lon": -69.2,
+    "alt_m": 1614.8741643228648
+   },
+   "C": 0.8863,
+   "E": 0.8,
+   "L": 0.709,
+   "U": 0.909,
+   "primera_frac": 1.0,
+   "archivo": "P-07.json"
+  },
+  {
+   "id": "CTRL-MM-R1",
+   "nombre": "Recorte de Mons Mouton con ruido 1 (control)",
+   "control": "positivo_ruido",
+   "etiqueta": "con_huecos",
+   "orden": 3,
+   "lugar": {
+    "lat": -84.6,
+    "lon": 31.0,
+    "alt_m": 0.0
+   },
+   "C": 0.7917,
+   "E": 0.8,
+   "L": 0.6333,
+   "U": 0.8333,
+   "primera_frac": null,
+   "archivo": "CTRL-MM-R1.json"
+  },
+  {
+   "id": "P-09",
+   "nombre": "Payunia P-09 (maqueta)",
+   "control": null,
+   "etiqueta": "con_huecos",
+   "orden": 4,
+   "lugar": {
+    "lat": -36.36,
+    "lon": -68.98,
+    "alt_m": 1898.291293667049
+   },
+   "C": 0.714,
+   "E": 0.8,
+   "L": 0.5712,
+   "U": 0.7712,
+   "primera_frac": 0.0,
+   "archivo": "P-09.json"
+  },
+  {
+   "id": "CTRL-MM-R2",
+   "nombre": "Recorte de Mons Mouton con ruido 2 (control)",
+   "control": "positivo_ruido",
+   "etiqueta": "con_huecos",
+   "orden": 5,
+   "lugar": {
+    "lat": -84.6,
+    "lon": 31.0,
+    "alt_m": 0.0
+   },
+   "C": 0.6317,
+   "E": 0.8,
+   "L": 0.5053,
+   "U": 0.7053,
+   "primera_frac": null,
+   "archivo": "CTRL-MM-R2.json"
+  },
+  {
+   "id": "P-19",
+   "nombre": "Payunia P-19 (maqueta)",
+   "control": null,
+   "etiqueta": "no_alcanza",
+   "orden": 6,
+   "lugar": {
+    "lat": -36.62,
+    "lon": -69.12,
+    "alt_m": 2072.0574137081567
+   },
+   "C": 0.6247,
+   "E": 0.8,
+   "L": 0.4997,
+   "U": 0.6997,
+   "primera_frac": 0.0,
+   "archivo": "P-19.json"
+  },
+  {
+   "id": "P-23",
+   "nombre": "Payunia P-23 (maqueta)",
+   "control": null,
+   "etiqueta": "no_alcanza",
+   "orden": 7,
+   "lugar": {
+    "lat": -36.58,
+    "lon": -69.05,
+    "alt_m": 1679.4030811382936
+   },
+   "C": 0.6055,
+   "E": 0.8,
+   "L": 0.4844,
+   "U": 0.6844,
+   "primera_frac": 0.0,
+   "archivo": "P-23.json"
+  },
+  {
+   "id": "CTRL-MM-R3",
+   "nombre": "Recorte de Mons Mouton con ruido 3 (control)",
+   "control": "positivo_ruido",
+   "etiqueta": "no_alcanza",
+   "orden": 8,
+   "lugar": {
+    "lat": -84.6,
+    "lon": 31.0,
+    "alt_m": 0.0
+   },
+   "C": 0.5078,
+   "E": 0.8,
+   "L": 0.4062,
+   "U": 0.6062,
+   "primera_frac": null,
+   "archivo": "CTRL-MM-R3.json"
+  },
+  {
+   "id": "P-01",
+   "nombre": "Payunia P-01 (maqueta)",
+   "control": null,
+   "etiqueta": "no_alcanza",
+   "orden": 9,
+   "lugar": {
+    "lat": -36.22,
+    "lon": -69.48,
+    "alt_m": 1877.937082977102
+   },
+   "C": 0.2249,
+   "E": 0.8,
+   "L": 0.18,
+   "U": 0.38,
+   "primera_frac": 0.0,
+   "archivo": "P-01.json"
+  },
+  {
+   "id": "P-15",
+   "nombre": "Payunia P-15 (maqueta)",
+   "control": null,
+   "etiqueta": "no_alcanza",
+   "orden": 10,
+   "lugar": {
+    "lat": -36.49,
+    "lon": -69.37,
+    "alt_m": 1700.7930834315573
+   },
+   "C": 0.1234,
+   "E": 0.8,
+   "L": 0.0987,
+   "U": 0.2987,
+   "primera_frac": 0.0,
+   "archivo": "P-15.json"
+  },
+  {
+   "id": "P-03",
+   "nombre": "Payunia P-03 (maqueta)",
+   "control": null,
+   "etiqueta": "no_alcanza",
+   "orden": 11,
+   "lugar": {
+    "lat": -36.27,
+    "lon": -69.31,
+    "alt_m": 2124.305249145102
+   },
+   "C": 0.118,
+   "E": 0.8,
+   "L": 0.0944,
+   "U": 0.2944,
+   "primera_frac": 0.0,
+   "archivo": "P-03.json"
+  },
+  {
+   "id": "P-12",
+   "nombre": "Payunia P-12 (maqueta)",
+   "control": null,
+   "etiqueta": "no_alcanza",
+   "orden": 12,
+   "lugar": {
+    "lat": -36.3,
+    "lon": -68.92,
+    "alt_m": 2110.4215610547335
+   },
+   "C": 0.1142,
+   "E": 0.8,
+   "L": 0.0914,
+   "U": 0.2914,
+   "primera_frac": 0.0,
+   "archivo": "P-12.json"
+  },
+  {
+   "id": "CTRL-MEDANOS",
+   "nombre": "Médanos del Chaco (control negativo)",
+   "control": "negativo",
+   "etiqueta": "incompatible",
+   "orden": null,
+   "lugar": {
+    "lat": -20.15,
+    "lon": -61.6,
+    "alt_m": 250.0
+   },
+   "C": 0.9183,
+   "E": 0.8,
+   "L": 0.7346,
+   "U": 0.9346,
+   "primera_frac": null,
+   "archivo": "CTRL-MEDANOS.json"
+  }
+ ],
+ "controles": {
+  "recorte_primero": true,
+  "copias_en_orden": true,
+  "vegetacion_rechazada": true,
+  "confiable": true,
+  "recorte_primero_frac": 1.0,
+  "detalle": [
+   "Recorte de Mons Mouton: puesto 1 (primero en 100.0 % de los pesos de robustez)",
+   "Copias con ruido: puestos 3, 5, 8",
+   "Control negativo: CTRL-MEDANOS → incompatible"
+  ]
+ },
+ "maqueta": true,
+ "meta": {
+  "producto": "tarjeta_analogo",
+  "version_formato": 1,
+  "motor_version": "0.1.0",
+  "parametros_sha256": "346a6cd22cc8cb1c75852fd8310971a78d50b2bf33d4c0710658e79e8556231c",
+  "generado_utc": "2026-11-14T16:33:45Z",
+  "uso_si": "Código del motor físico (Parte 3) redactado con SI (Claude Code, Anthropic) a partir de los documentos 02 y 04, con pruebas de resultado conocido escritas antes del código. Los números los calcula el motor determinista con datos y parámetros publicados; ningún modelo de lenguaje interviene en el cálculo.",
+  "notas": [
+   "Compatibilidad y evidencia van separadas: un valor de C no es un porcentaje de parecido.",
+   "L y U son límites algebraicos (utilidad 0 o 1 en lo que falta), no un intervalo de confianza."
+  ]
+ }
+}

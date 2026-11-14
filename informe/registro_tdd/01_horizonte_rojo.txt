@@ -1,0 +1,49 @@
+
+=================================== ERRORS ====================================
+___________ ERROR collecting motor/tests/test_formato_horizontes.py ___________
+ImportError while importing test module 'C:\Users\lol xdd\OneDrive\Desktop\Nasa Final\Terra-X Sistema\motor\tests\test_formato_horizontes.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+motor\tests\test_formato_horizontes.py:7: in <module>
+    from motor.horizonte import formato
+E   ImportError: cannot import name 'formato' from 'motor.horizonte' (unknown location)
+_______ ERROR collecting motor/tests/test_horizonte_cuenco_gaussiana.py _______
+ImportError while importing test module 'C:\Users\lol xdd\OneDrive\Desktop\Nasa Final\Terra-X Sistema\motor\tests\test_horizonte_cuenco_gaussiana.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+motor\tests\test_horizonte_cuenco_gaussiana.py:7: in <module>
+    from motor.horizonte import Capa, calcular_horizontes, calcular_horizontes_puntos, sombra_mapa
+E   ImportError: cannot import name 'Capa' from 'motor.horizonte' (unknown location)
+____________ ERROR collecting motor/tests/test_horizonte_esfera.py ____________
+ImportError while importing test module 'C:\Users\lol xdd\OneDrive\Desktop\Nasa Final\Terra-X Sistema\motor\tests\test_horizonte_esfera.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+motor\tests\test_horizonte_esfera.py:7: in <module>
+    from motor.horizonte import Capa, calcular_horizontes, calcular_horizontes_puntos, sombra_mapa
+E   ImportError: cannot import name 'Capa' from 'motor.horizonte' (unknown location)
+____________ ERROR collecting motor/tests/test_horizonte_poste.py _____________
+ImportError while importing test module 'C:\Users\lol xdd\OneDrive\Desktop\Nasa Final\Terra-X Sistema\motor\tests\test_horizonte_poste.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+motor\tests\test_horizonte_poste.py:7: in <module>
+    from motor.horizonte import Capa, calcular_horizontes, sombra_mapa
+E   ImportError: cannot import name 'Capa' from 'motor.horizonte' (unknown location)
+=========================== short test summary info ===========================
+ERROR motor/tests/test_formato_horizontes.py
+ERROR motor/tests/test_horizonte_cuenco_gaussiana.py
+ERROR motor/tests/test_horizonte_esfera.py
+ERROR motor/tests/test_horizonte_poste.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 4 errors during collection !!!!!!!!!!!!!!!!!!!
+4 errors in 0.62s

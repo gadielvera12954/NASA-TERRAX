@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sol.schema.json",
+  "title": "Serie del Sol (sol/<lugar>_<periodo>.json)",
+  "description": "Salida de motor/sol. Azimut geográfico desde el norte, en sentido horario (igual que JPL Horizons). Las listas son paralelas: el elemento i corresponde a t0_utc + i·paso_s.",
+  "type": "object",
+  "required": ["cuerpo", "lugar", "t0_utc", "paso_s", "n", "azimut_deg", "elevacion_deg", "refraccion", "marco", "efemerides", "resumen", "maqueta", "meta"],
+  "properties": {
+    "nombre": { "type": "string" },
+    "cuerpo": { "enum": ["luna", "tierra"] },
+    "lugar": { "$ref": "comun.schema.json#/$defs/lugar" },
+    "t0_utc": { "$ref": "comun.schema.json#/$defs/utc" },
+    "paso_s": { "type": "number", "exclusiveMinimum": 0 },
+    "n": { "type": "integer", "minimum": 1 },
+    "azimut_deg": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 360 } },
+    "elevacion_deg": { "type": "array", "items": { "type": "number", "minimum": -90, "maximum": 90 } },
+    "refraccion": {
+      "type": "object",
+      "required": ["aplicada"],
+      "properties": {
+        "aplicada": { "type": "boolean" },
+        "formula": { "type": "string" },
+        "presion_mbar": { "type": "number" },
+        "temperatura_c": { "type": "number" }
+      }
+    },
+    "marco": { "type": "string" },
+    "efemerides": { "type": "string" },
+    "resumen": {
+      "type": "object",
+      "required": ["sol_max_deg", "sol_min_deg"],
+      "properties": {
+        "sol_max_deg": { "type": "number" },
+        "sol_min_deg": { "type": "number" },
+        "fecha_sol_max_utc": { "$ref": "comun.schema.json#/$defs/utc" },
+        "fraccion_sobre_horizonte_liso": { "type": "number" },
+        "noches_horizonte_liso": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["desde_utc", "hasta_utc", "horas"],
+            "properties": {
+              "desde_utc": { "$ref": "comun.schema.json#/$defs/utc" },
+              "hasta_utc": { "$ref": "comun.schema.json#/$defs/utc" },
+              "horas": { "type": "number" },
+              "completa": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "maqueta": { "type": "boolean" },
+    "meta": { "$ref": "comun.schema.json#/$defs/meta" }
+  }
+}

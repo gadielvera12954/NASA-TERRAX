@@ -39,7 +39,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ onSeleccionarParcela
     },
     {
       id: 'Control-1',
-      coords: '85.50°S 31.40°E',
+      coords: '84.60°S 31.00°E',
       nombre: 'Control: Mons Mouton crop',
       etiqueta: 'Sustained',
       clase: 'sost',

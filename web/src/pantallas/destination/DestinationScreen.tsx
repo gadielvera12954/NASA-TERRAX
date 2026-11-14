@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSol } from '../../luz/SolContext';
 import { PerfilHorizonte } from '../../graficos/PerfilHorizonte';
 import { RecorridoSolLunacion } from '../../graficos/RecorridoSolLunacion';
@@ -10,41 +10,54 @@ export const DestinationScreen: React.FC = () => {
   const [estacion, setEstacion] = useState<'summer' | 'winter'>('summer');
   const [vistaMapa, setVistaMapa] = useState<'refugios' | 'canvas3d'>('refugios');
 
-  // Stats vary between summer and winter lunations based on JPL Horizons and team models
+  // Real destination cards written by the physics engine (motor/destino): ficha_<lunation>.json uses LOLA relief;
+  // if it is not there yet, ficha_liso_<lunation>.json (real Sun, flat horizon) is shown and labelled as such.
+  const [fichas, setFichas] = useState<Record<string, any>>({});
+  useEffect(() => {
+    const cargar = async (n: string) => {
+      for (const archivo of [`ficha_${n}.json`, `ficha_liso_${n}.json`]) {
+        const r = await fetch(`/data/destino/${archivo}`);
+        if (r.ok) return r.json();
+      }
+      return null;
+    };
+    Promise.all([cargar('verano'), cargar('invierno')]).then(([verano, invierno]) => setFichas({ summer: verano, winter: invierno }));
+  }, []);
+  const f = fichas[estacion];
+  const r = f?.resultado;
+  const pct = (x?: number) => (x === undefined || x === null ? '—' : `${Math.round(100 * x)} %`);
+  const fechaPico = f ? new Date(f.lunacion.fecha_sol_max).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }) : '—';
   const datosEstacion = {
-    summer: {
-      picoSol: '6.94°',
-      fechaPico: 'Nov 11, 2027',
-      supervivenciaPct: 18,
-      solEnPaneles: '61 % of the lunation',
-      tramoOscuroMax: '38 h',
-      bateriaMin: '34 %',
-      refugioCercano: '1.2 km',
-      condicionCritica: 'With the rover tilted 15°, the dark stretch rises to 57 h.',
-      horasTotalesOscuridad: '148 h',
-    },
-    winter: {
-      picoSol: '3.87°',
-      fechaPico: 'May 18, 2027',
-      supervivenciaPct: 4,
-      solEnPaneles: '32 % of the lunation',
-      tramoOscuroMax: '64 h (EXCEEDS 50h LIMIT)',
-      bateriaMin: '0 % (Depleted)',
-      refugioCercano: '4.8 km',
-      condicionCritica: 'Without active route repositioning, VIPER freezes permanently.',
-      horasTotalesOscuridad: '210 h',
-    },
-  }[estacion];
+    picoSol: f ? `${f.lunacion.sol_max_deg.toFixed(2)}°` : '—',
+    fechaPico,
+    supervivenciaPct: f?.refugios ? Math.round(1000 * f.refugios.fraccion_terreno) / 10 : null,
+    solEnPaneles: r ? `${pct(r.sol_en_paneles_frac)} of the lunation` : '—',
+    tramoOscuroMax: r ? `${Math.round(r.tramo_oscuro_mas_largo_h)} h${r.tramo_oscuro_mas_largo_h > 50 ? ' (EXCEEDS 50 h LIMIT)' : ''}` : '—',
+    bateriaMin: r ? `${pct(r.bateria_minima_frac)}${r.bateria_minima_frac === 0 ? ' (Depleted)' : ''}` : '—',
+    refugioCercano: f?.refugios?.refugio_mas_cercano_km != null ? `${f.refugios.refugio_mas_cercano_km.toFixed(1)} km` : 'None in this crop',
+    condicionCritica: f
+      ? `With the rover tilted ${f.ab.inclinacion_deg}°, the longest stretch below 108.4 W is ${Math.round(f.ab.inclinado.tramo_oscuro_mas_largo_h)} h (flat ground: ${Math.round(f.ab.plano.tramo_oscuro_mas_largo_h)} h).`
+      : 'Loading…',
+    horizonte: f?.horizonte?.tipo === 'relieve' ? 'LOLA relief (PGDA 90), 60 m grid' : 'Flat horizon (no relief yet)',
+    maqueta: Boolean(f?.maqueta),
+    mapa: f?.refugios ? `/data/destino/vista_refugios_${estacion === 'summer' ? 'verano' : 'invierno'}.png` : '/img/ui_refugios.png',
+  };
 
   return (
     <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px 20px 80px' }}>
       {/* Screen Title & First Verdict Header */}
       <div style={{ marginBottom: '20px' }}>
         <div className="et" style={{ marginBottom: '4px' }}>
-          Destination · Lunar South Pole (Mons Mouton Plateau · 85.5°S, 31.4°E)
+          Destination · Lunar South Pole (Mons Mouton · 84.60°S, 31.00°E)
         </div>
         <h1 style={{ fontSize: '30px', fontWeight: 900 }}>
-          The mission survives on <span style={{ color: 'var(--sol)' }}>{datosEstacion.supervivenciaPct} %</span> of this terrain.
+          {datosEstacion.supervivenciaPct === null ? (
+            <>On flat ground, a parked rover <span style={{ color: 'var(--sol)' }}>does not survive</span> the lunar night.</>
+          ) : datosEstacion.supervivenciaPct === 0 ? (
+            <>No point of this 30 × 30 km area <span style={{ color: 'var(--sol)' }}>survives the lunar night</span>.</>
+          ) : (
+            <>The mission survives on <span style={{ color: 'var(--sol)' }}>{datosEstacion.supervivenciaPct} %</span> of this terrain.</>
+          )}
         </h1>
         <p style={{ color: 'var(--texto-sec)', fontSize: '14px', marginTop: '4px' }}>
           Current Grazing Sun: <b style={{ color: 'var(--sol)' }}>{elevacion.toFixed(2)}°</b> @ <b style={{ color: 'var(--dato)' }}>{azimut.toFixed(0)}°</b>. Elsewhere, darkness exceeds the 50 h VIPER battery survival limit.
@@ -113,13 +126,13 @@ export const DestinationScreen: React.FC = () => {
             {vistaMapa === 'refugios' ? (
               <>
                 <img
-                  src="/img/ui_refugios.png"
+                  src={datosEstacion.mapa}
                   alt="Safe-haven map showing darkness stretches across Mons Mouton"
                   style={{
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',
-                    filter: estacion === 'winter' ? 'hue-rotate(180deg) brightness(0.7)' : 'none',
+                    filter: 'none',
                     transition: 'filter 0.3s ease',
                   }}
                 />
@@ -173,7 +186,7 @@ export const DestinationScreen: React.FC = () => {
 
           {/* Subtext info */}
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', fontSize: '11px', color: 'var(--sec-dark)' }}>
-            <span>Mons Mouton LOLA 5m DEM · USGS/NASA</span>
+            <span>{datosEstacion.horizonte}{datosEstacion.maqueta ? ' · MOCK DATA' : ''}</span>
             <span>Sun Peak: <b style={{ color: 'var(--sol)' }}>{datosEstacion.picoSol}</b> · {datosEstacion.fechaPico}</span>
           </div>
         </div>
@@ -234,7 +247,7 @@ export const DestinationScreen: React.FC = () => {
 
           {/* Horizon Profile widget */}
           <div className="panel" style={{ padding: '12px' }}>
-            <PerfilHorizonte ancho={460} alto={140} sitio="Mons Mouton Rim (85.5°S)" />
+            <PerfilHorizonte ancho={460} alto={140} sitio="Mons Mouton (84.60°S)" />
           </div>
         </div>
       </div>

@@ -1,0 +1,533 @@
+{
+ "resumen": {
+  "total": 17,
+  "pasa": 9,
+  "falla": 0,
+  "pendiente": 8
+ },
+ "pruebas": [
+  {
+   "id": "poste_plano",
+   "grupo": "respuesta_conocida",
+   "nombre_en": "Post on a plane",
+   "nombre_es": "Poste en plano",
+   "formula": "F1",
+   "demuestra": "El cálculo de sombras es correcto",
+   "meta": {
+    "texto": "Error de 1 píxel o menos",
+    "valor": 1,
+    "unidad": "px",
+    "comparacion": "<=",
+    "texto_en": "Error of 1 pixel or less"
+   },
+   "resultado": {
+    "valor": 0.0,
+    "texto": "0.00 px en 32 casos (8 azimutes × 4 alturas de Sol)",
+    "texto_en": "Result: 0.0 px"
+   },
+   "estado": "pasa",
+   "motivo_pendiente": null,
+   "datos": "sinteticos",
+   "dueno": "Jean",
+   "evidencia": "motor/tests/test_horizonte_poste.py",
+   "ejecutada_utc": "2026-11-14T18:39:18Z",
+   "demuestra_en": "Shadow calculation is correct",
+   "dueno_en": "Jean"
+  },
+  {
+   "id": "esfera_perfecta",
+   "grupo": "respuesta_conocida",
+   "nombre_en": "Perfect sphere",
+   "nombre_es": "Esfera perfecta",
+   "formula": "F2",
+   "demuestra": "La curvatura está bien corregida",
+   "meta": {
+    "texto": "0 píxeles en sombra por relieve",
+    "valor": 0,
+    "unidad": "px",
+    "comparacion": "==",
+    "texto_en": "0 pixels shadowed by relief"
+   },
+   "resultado": {
+    "valor": 0,
+    "texto": "0 píxeles en sombra (101 × 101 píxeles, 72 azimutes, Sol de 0,1° a 7°)",
+    "detalle": {
+     "torre_5km_horizonte_deg": -4.3385,
+     "torre_5km_teorico_deg": -4.3385
+    },
+    "texto_en": "Result: 0 px"
+   },
+   "estado": "pasa",
+   "motivo_pendiente": null,
+   "datos": "sinteticos",
+   "dueno": "Jean",
+   "evidencia": "motor/tests/test_horizonte_esfera.py",
+   "ejecutada_utc": "2026-11-14T18:39:27Z",
+   "demuestra_en": "Curvature is corrected",
+   "dueno_en": "Jean"
+  },
+  {
+   "id": "superficie_gaussiana",
+   "grupo": "respuesta_conocida",
+   "nombre_en": "Gaussian surface vs Smith",
+   "nombre_es": "Superficie gaussiana contra Smith",
+   "formula": "F17",
+   "demuestra": "El horizonte da la estadística correcta",
+   "meta": {
+    "texto": "f dentro de 3 puntos de la curva teórica, de 2° a 15°",
+    "valor": 3,
+    "unidad": "puntos",
+    "comparacion": "<=",
+    "texto_en": "Within 3 points of the theoretical curve, 2° to 15°"
+   },
+   "resultado": {
+    "valor": 2.12,
+    "texto": "2.1 puntos de diferencia máxima (pendiente RMS de 5°, 10° y 20°)",
+    "detalle": {
+     "rms_5": 2.12,
+     "rms_10": 2.12,
+     "rms_20": 1.96
+    },
+    "texto_en": "Result: 2.12 points"
+   },
+   "estado": "pasa",
+   "motivo_pendiente": null,
+   "datos": "sinteticos",
+   "dueno": "Jean",
+   "evidencia": "motor/tests/test_horizonte_cuenco_gaussiana.py",
+   "ejecutada_utc": "2026-11-14T18:39:32Z",
+   "demuestra_en": "Horizon gives the right statistics",
+   "dueno_en": "Jean"
+  },
+  {
+   "id": "cuenco_sintetico",
+   "grupo": "respuesta_conocida",
+   "nombre_en": "Synthetic bowl crater",
+   "nombre_es": "Cuenco sintético",
+   "formula": null,
+   "demuestra": "Sombra de un cráter con resultado conocido",
+   "meta": {
+    "texto": "Largo de sombra interna dentro de 1 píxel",
+    "valor": 1,
+    "unidad": "px",
+    "comparacion": "<=",
+    "texto_en": "Inner shadow length within 1 pixel"
+   },
+   "resultado": {
+    "valor": 0.936,
+    "texto": "0.94 px de diferencia máxima (Sol a 5°, 10° y 20°)",
+    "texto_en": "Result: 0.936 px"
+   },
+   "estado": "pasa",
+   "motivo_pendiente": null,
+   "datos": "sinteticos",
+   "dueno": "Jean",
+   "evidencia": "motor/tests/test_horizonte_cuenco_gaussiana.py",
+   "ejecutada_utc": "2026-11-14T18:39:33Z",
+   "demuestra_en": "Crater shadow with a known answer",
+   "dueno_en": "Jean"
+  },
+  {
+   "id": "esquina_viper",
+   "grupo": "respuesta_conocida",
+   "nombre_en": "VIPER corner, 450 W",
+   "nombre_es": "Esquina de VIPER",
+   "formula": "F4",
+   "demuestra": "El modelo de paneles es razonable",
+   "meta": {
+    "texto": "Dentro del 1 % de 450 W",
+    "valor": 1.0,
+    "unidad": "%",
+    "comparacion": "<=",
+    "texto_en": "Within 1 % of 450 W"
+   },
+   "resultado": {
+    "valor": 0.184,
+    "texto": "450.8 W con el Sol a 5° en una esquina: 0.18 % de diferencia",
+    "texto_en": "Result: 0.184 %"
+   },
+   "estado": "pasa",
+   "motivo_pendiente": null,
+   "datos": "sinteticos",
+   "dueno": "Jean",
+   "evidencia": "motor/tests/test_destino.py",
+   "ejecutada_utc": "2026-11-14T18:39:33Z",
+   "demuestra_en": "Panel model is reasonable",
+   "dueno_en": "Jean"
+  },
+  {
+   "id": "sol_luna_horizons",
+   "grupo": "respuesta_conocida",
+   "nombre_en": "Sun vs JPL Horizons",
+   "nombre_es": "Sol contra JPL Horizons",
+   "formula": null,
+   "demuestra": "La geometría solar es correcta",
+   "meta": {
+    "texto": "Menos de 0,1° frente a Horizons",
+    "valor": 0.1,
+    "unidad": "°",
+    "comparacion": "<",
+    "texto_en": "Less than 0.1° from JPL Horizons"
+   },
+   "resultado": {
+    "valor": 0.000637,
+    "texto": "0.00001° en la Luna y 0.0006° en total (consultas de Horizons: 2026-11-07, 2026-11-14)",
+    "detalle": {
+     "consultas": "2026-11-07, 2026-11-14"
+    },
+    "texto_en": "Result: 0.000637 °"
+   },
+   "estado": "pasa",
+   "motivo_pendiente": null,
+   "datos": "reales",
+   "dueno": "Jean",
+   "evidencia": "informe/datos/control_sol_horizons.json",
+   "ejecutada_utc": "2026-11-14T18:39:33Z",
+   "demuestra_en": "Solar geometry is correct",
+   "dueno_en": "Jean"
+  },
+  {
+   "id": "caso_a_mano",
+   "grupo": "respuesta_conocida",
+   "nombre_en": "Hand-worked case",
+   "nombre_es": "Caso a mano",
+   "formula": "F11",
+   "demuestra": "Las fórmulas están bien programadas",
+   "meta": {
+    "texto": "0,705 y 0,955",
+    "valor": null,
+    "unidad": "",
+    "comparacion": "==",
+    "texto_en": "0.705 and 0.955"
+   },
+   "resultado": {
+    "valor": null,
+    "texto": "L = 0.705 y U = 0.955",
+    "texto_en": "Result matches the target"
+   },
+   "estado": "pasa",
+   "motivo_pendiente": null,
+   "datos": "sinteticos",
+   "dueno": "Jean",
+   "evidencia": "motor/tests/test_puntaje.py",
+   "ejecutada_utc": "2026-11-14T18:39:33Z",
+   "demuestra_en": "Formulas are coded correctly",
+   "dueno_en": "Jean"
+  },
+  {
+   "id": "paridad_python_navegador",
+   "grupo": "respuesta_conocida",
+   "nombre_en": "Python and browser give the same shadow",
+   "nombre_es": "Paridad Python y navegador",
+   "formula": null,
+   "demuestra": "Lo que se ve es lo que se calculó",
+   "meta": {
+    "texto": "Misma sombra en 1.000 casos de prueba",
+    "valor": 1000,
+    "unidad": "casos",
+    "comparacion": "==",
+    "texto_en": "Same shadow in 1,000 test cases"
+   },
+   "resultado": {
+    "valor": null,
+    "texto": "Pendiente",
+    "detalle": {
+     "casos_en_el_archivo": 1000,
+     "sha256_horizontes": "7c29f7f56d8fd8cd974da32b6b7ac3002265f8db67c826465102b598da575e3d"
+    },
+    "texto_en": "Waiting for real input data."
+   },
+   "estado": "pendiente",
+   "motivo_pendiente": "El archivo de paridad está listo; falta que la prueba de Vitest de Erwan lo corra en el navegador",
+   "datos": "ninguno",
+   "dueno": "Erwan (navegador) · Jean (archivo)",
+   "evidencia": "salida/destino/paridad.json",
+   "ejecutada_utc": null,
+   "demuestra_en": "What you see is what was computed",
+   "dueno_en": "Erwan (browser) · Jean (file)"
+  },
+  {
+   "id": "reproducibilidad",
+   "grupo": "respuesta_conocida",
+   "nombre_en": "Reproducibility hash",
+   "nombre_es": "Reproducibilidad",
+   "formula": null,
+   "demuestra": "Otro equipo obtiene lo mismo",
+   "meta": {
+    "texto": "Mismos archivos, mismo código de verificación",
+    "valor": null,
+    "unidad": "",
+    "comparacion": "==",
+    "texto_en": "Same files, same verification code"
+   },
+   "resultado": {
+    "valor": true,
+    "texto": "Dos corridas dan el mismo SHA-256 (7f51c9919181…)",
+    "texto_en": "Result: yes"
+   },
+   "estado": "pasa",
+   "motivo_pendiente": null,
+   "datos": "sinteticos",
+   "dueno": "Jean",
+   "evidencia": "motor/tests/validacion.py",
+   "ejecutada_utc": "2026-11-14T18:39:34Z",
+   "demuestra_en": "Another team gets the same result",
+   "dueno_en": "Jean"
+  },
+  {
+   "id": "iluminacion_nasa",
+   "grupo": "mundo_real",
+   "nombre_en": "NASA illumination map, ρ",
+   "nombre_es": "Iluminación promedio contra NASA",
+   "formula": "F13",
+   "demuestra": "Las sombras con relieve real se parecen a las de NASA",
+   "meta": {
+    "texto": "ρ de 0,8 o más, en el mismo período de 18,6 años",
+    "valor": 0.8,
+    "unidad": "ρ",
+    "comparacion": ">=",
+    "texto_en": "ρ of 0.8 or more over the same 18.6 years"
+   },
+   "resultado": {
+    "valor": 0.985,
+    "texto": "ρ = 0.99, error cuadrático medio 2.5 puntos (10000 puntos)",
+    "texto_en": "Result: 0.985 ρ"
+   },
+   "estado": "pasa",
+   "motivo_pendiente": null,
+   "datos": "reales",
+   "dueno": "Jean",
+   "evidencia": "informe/datos/iluminacion_nasa.json",
+   "ejecutada_utc": "2026-11-14T18:39:34Z",
+   "demuestra_en": "Real-relief shadows match NASA's map",
+   "dueno_en": "Jean"
+  },
+  {
+   "id": "rugosidad_nasa",
+   "grupo": "mundo_real",
+   "nombre_en": "Roughness vs NASA, ρ",
+   "nombre_es": "Rugosidad contra NASA",
+   "formula": "F9",
+   "demuestra": "La huella ordena el terreno como NASA",
+   "meta": {
+    "texto": "ρ de 0,6 o más (mide otra cosa, ver 3.4)",
+    "valor": 0.6,
+    "unidad": "ρ",
+    "comparacion": ">=",
+    "texto_en": "ρ of 0.6 or more"
+   },
+   "resultado": {
+    "valor": null,
+    "texto": "Todavía no se corrió",
+    "texto_en": "Waiting for real input data."
+   },
+   "estado": "pendiente",
+   "motivo_pendiente": "La corre motor/huella (Mathias) con el mapa de rugosidad de PGDA 90",
+   "datos": "ninguno",
+   "dueno": "Mathias",
+   "evidencia": "motor/huella",
+   "ejecutada_utc": null,
+   "demuestra_en": "Footprint orders terrain like NASA",
+   "dueno_en": "Mathias"
+  },
+  {
+   "id": "control_positivo",
+   "grupo": "mundo_real",
+   "nombre_en": "Mons Mouton crop ranks first",
+   "nombre_es": "El recorte de Mons Mouton queda primero",
+   "formula": null,
+   "demuestra": "La búsqueda encuentra lo que debe encontrar",
+   "meta": {
+    "texto": "Recorte lunar primero; copias con ruido en orden",
+    "valor": null,
+    "unidad": "",
+    "comparacion": "orden",
+    "texto_en": "Lunar crop first; noisy copies in order"
+   },
+   "resultado": {
+    "valor": null,
+    "texto": "Pendiente",
+    "detalle": {
+     "maqueta_recorte_primero": true,
+     "maqueta_copias_en_orden": true,
+     "maqueta_vegetacion_rechazada": true,
+     "maqueta_rho_h1b": 0.9761904761904763
+    },
+    "texto_en": "Waiting for real input data. Tested only with mock data so far."
+   },
+   "estado": "pendiente",
+   "motivo_pendiente": "Faltan las distribuciones reales de huella (Mathias, domingo 8:00). El resultado con la maqueta está en el detalle.",
+   "datos": "maqueta",
+   "dueno": "Jean",
+   "evidencia": "salida/fichas/indice.json",
+   "ejecutada_utc": null,
+   "demuestra_en": "Search finds what it must find",
+   "dueno_en": "Jean"
+  },
+  {
+   "id": "control_negativo",
+   "grupo": "mundo_real",
+   "nombre_en": "Vegetated parcel rejected",
+   "nombre_es": "La parcela con vegetación sale Incompatible",
+   "formula": null,
+   "demuestra": "Un requisito incumplido no se compensa",
+   "meta": {
+    "texto": "Médanos del Chaco sale \"Incompatible\"",
+    "valor": null,
+    "unidad": "",
+    "comparacion": "etiqueta",
+    "texto_en": "Médanos del Chaco is Incompatible"
+   },
+   "resultado": {
+    "valor": null,
+    "texto": "Pendiente",
+    "detalle": {
+     "maqueta_recorte_primero": true,
+     "maqueta_copias_en_orden": true,
+     "maqueta_vegetacion_rechazada": true,
+     "maqueta_rho_h1b": 0.9761904761904763
+    },
+    "texto_en": "Waiting for real input data. Tested only with mock data so far."
+   },
+   "estado": "pendiente",
+   "motivo_pendiente": "Faltan las distribuciones reales de huella (Mathias, domingo 8:00). El resultado con la maqueta está en el detalle.",
+   "datos": "maqueta",
+   "dueno": "Jean",
+   "evidencia": "salida/fichas/indice.json",
+   "ejecutada_utc": null,
+   "demuestra_en": "A failed requirement is never compensated",
+   "dueno_en": "Jean"
+  },
+  {
+   "id": "redundancia_h1b",
+   "grupo": "mundo_real",
+   "nombre_en": "Grazing light adds information (H1b)",
+   "nombre_es": "La luz rasante aporta algo propio (H1b)",
+   "formula": "F16, F17",
+   "demuestra": "La luz rasante aporta algo propio",
+   "meta": {
+    "texto": "ρ menor a 0,9; si no, se baja su peso y se dice",
+    "valor": 0.9,
+    "unidad": "ρ",
+    "comparacion": "<",
+    "texto_en": "ρ below 0.9; otherwise its weight drops"
+   },
+   "resultado": {
+    "valor": null,
+    "texto": "Pendiente",
+    "detalle": {
+     "maqueta_recorte_primero": true,
+     "maqueta_copias_en_orden": true,
+     "maqueta_vegetacion_rechazada": true,
+     "maqueta_rho_h1b": 0.9761904761904763
+    },
+    "texto_en": "Waiting for real input data. Tested only with mock data so far."
+   },
+   "estado": "pendiente",
+   "motivo_pendiente": "Faltan las distribuciones reales de huella (Mathias, domingo 8:00). El resultado con la maqueta está en el detalle.",
+   "datos": "maqueta",
+   "dueno": "Jean",
+   "evidencia": "informe/datos/puntaje_controles.json",
+   "ejecutada_utc": null,
+   "demuestra_en": "Grazing light adds its own information",
+   "dueno_en": "Jean"
+  },
+  {
+   "id": "medicion_atardecer",
+   "grupo": "mundo_real",
+   "nombre_en": "Sunset shadows, Ciudad del Este",
+   "nombre_es": "Sombras al atardecer en Ciudad del Este",
+   "formula": "F14",
+   "demuestra": "La geometría se transfiere a la Tierra",
+   "meta": {
+    "texto": "Error de 5 % o menos, de 5° a 15°",
+    "valor": 5.0,
+    "unidad": "%",
+    "comparacion": "<=",
+    "texto_en": "Error of 5 % or less, Sun 5° to 15°"
+   },
+   "resultado": {
+    "valor": null,
+    "texto": "Todavía no se corrió",
+    "texto_en": "Waiting for real input data."
+   },
+   "estado": "pendiente",
+   "motivo_pendiente": "La medición se hace el sábado 14/11 de 17:50 a 18:36 (si llueve, el domingo). Cargarla en campo/medicion_2026-11-14.csv con el formato de informe/plantilla_medicion_campo.csv",
+   "datos": "ninguno",
+   "dueno": "Jean",
+   "evidencia": "campo/medicion_2026-11-14.csv",
+   "ejecutada_utc": null,
+   "demuestra_en": "Geometry transfers to Earth",
+   "dueno_en": "Jean"
+  },
+  {
+   "id": "verificador_si",
+   "grupo": "mundo_real",
+   "nombre_en": "SI verifier: no invented numbers",
+   "nombre_es": "Verificador de la función SI",
+   "formula": null,
+   "demuestra": "La SI no inventa cifras",
+   "meta": {
+    "texto": "9 de 10 respuestas limpias",
+    "valor": 9,
+    "unidad": "de 10",
+    "comparacion": ">=",
+    "texto_en": "9 of 10 clean answers"
+   },
+   "resultado": {
+    "valor": null,
+    "texto": "Todavía no se corrió",
+    "texto_en": "Waiting for real input data."
+   },
+   "estado": "pendiente",
+   "motivo_pendiente": "La corre Mathias con el banco de 10 preguntas (domingo 15:00)",
+   "datos": "ninguno",
+   "dueno": "Mathias",
+   "evidencia": "api/",
+   "ejecutada_utc": null,
+   "demuestra_en": "The SI function invents no numbers",
+   "dueno_en": "Mathias"
+  },
+  {
+   "id": "prueba_con_personas",
+   "grupo": "mundo_real",
+   "nombre_en": "People understand the cards",
+   "nombre_es": "Prueba con personas",
+   "formula": null,
+   "demuestra": "Las fichas se entienden",
+   "meta": {
+    "texto": "3 personas ajenas dicen qué falta y qué harían después",
+    "valor": 3,
+    "unidad": "personas",
+    "comparacion": ">=",
+    "texto_en": "3 outside people say what is missing and what they would do next"
+   },
+   "resultado": {
+    "valor": null,
+    "texto": "Todavía no se corrió",
+    "texto_en": "Waiting for real input data."
+   },
+   "estado": "pendiente",
+   "motivo_pendiente": "La hace quien lidera el equipo con 3 personas ajenas",
+   "datos": "ninguno",
+   "dueno": "Quien lidera",
+   "evidencia": "informe/",
+   "ejecutada_utc": null,
+   "demuestra_en": "The cards are understood",
+   "dueno_en": "Team lead"
+  }
+ ],
+ "maqueta": false,
+ "meta": {
+  "producto": "pruebas",
+  "version_formato": 1,
+  "motor_version": "0.1.0",
+  "parametros_sha256": "346a6cd22cc8cb1c75852fd8310971a78d50b2bf33d4c0710658e79e8556231c",
+  "generado_utc": "2026-11-14T18:39:34Z",
+  "uso_si": "Código del motor físico (Parte 3) redactado con SI (Claude Code, Anthropic) a partir de los documentos 02 y 04, con pruebas de resultado conocido escritas antes del código. Los números los calcula el motor determinista con datos y parámetros publicados; ningún modelo de lenguaje interviene en el cálculo.",
+  "notas": [
+   "Incluye todas las pruebas del plan de validación, también las que fallan y las pendientes.",
+   "Una prueba contra el mundo real corrida con datos de maqueta figura como pendiente."
+  ]
+ }
+}

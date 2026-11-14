@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SolProvider } from './luz/SolContext';
 import { BarraHorizonte } from './luz/BarraHorizonte';
 import { MissionScreen } from './pantallas/mission/MissionScreen';
@@ -30,7 +30,14 @@ export const AppContent: React.FC = () => {
   const [candidataSeleccionada, setCandidataSeleccionada] = useState<string>('P-07');
   const [idioma, setIdioma] = useState<'EN' | 'ES' | 'GN'>('EN');
   const [mostrarRecorrido, setMostrarRecorrido] = useState<boolean>(false);
-  const [isMockData] = useState<boolean>(true); // Controlled by manifest
+  // The MOCK DATA band follows manifest.json: it stays on while any data file is marked "maqueta": true.
+  const [isMockData, setIsMockData] = useState<boolean>(true);
+  useEffect(() => {
+    fetch('/data/manifest.json')
+      .then((r) => r.json())
+      .then((m) => setIsMockData(Boolean(m.maqueta)))
+      .catch(() => setIsMockData(true));
+  }, []);
 
   const navItems: { id: PantallaId; label: string }[] = [
     { id: 'mission', label: 'Mission' },
@@ -66,7 +73,7 @@ export const AppContent: React.FC = () => {
             <AlertCircle size={13} />
             <span>MOCK DATA ACTIVE · PRECOMPUTED HORIZON CONTRATO v1.0.0</span>
           </div>
-          <span>ALL FIGURES BACKED BY REPRODUCIBLE TESTS</span>
+          <span>SOME FILES ARE STILL MOCK DATA · SEE TESTS AND DATA</span>
         </div>
       )}
 

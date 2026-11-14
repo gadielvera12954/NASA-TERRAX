@@ -1,0 +1,23 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\LOLXDD~1\AppData\Local\Temp\claude\65c6e2a7bc6e8a7f\e6b9c63b-2396-4509-a787-883a5b6e6b8e\scratchpad\venv_motor\Scripts\python.exe
+rootdir: C:\Users\lol xdd\OneDrive\Desktop\Nasa Final\Terra-X Sistema
+collecting ... collected 16 items
+
+motor/tests/test_sol.py::test_f15_numeros_del_documento PASSED           [  6%]
+motor/tests/test_sol.py::test_f15_menos_presion_menos_refraccion PASSED  [ 12%]
+motor/tests/test_sol.py::test_sol_en_la_luna_contra_horizons[luna_mons_mouton_centro_2027_2028--84.6-31.0] PASSED [ 18%]
+motor/tests/test_sol.py::test_sol_en_la_luna_contra_horizons[luna_im2_athena_2027_2028--84.7906-29.1957] PASSED [ 25%]
+motor/tests/test_sol.py::test_sol_en_la_luna_contra_horizons[luna_mons_mouton_norte_2027_2028--83.3-31.0] PASSED [ 31%]
+motor/tests/test_sol.py::test_sol_en_la_luna_contra_horizons[luna_mons_mouton_sur_2027_2028--86.22-31.0] PASSED [ 37%]
+motor/tests/test_sol.py::test_sol_en_la_tierra_contra_horizons PASSED    [ 43%]
+motor/tests/test_sol.py::test_vector_del_sol_en_marco_lunar_da_lo_mismo_que_skyfield PASSED [ 50%]
+motor/tests/test_sol.py::test_horarios_del_documento_02[Ciudad del Este--25.51--54.61-200.0-esperado0] PASSED [ 56%]
+motor/tests/test_sol.py::test_horarios_del_documento_02[Payunia--36.42--69.25-1800.0-esperado1] PASSED [ 62%]
+motor/tests/test_sol.py::test_horarios_del_documento_02[Puna--26.06--67.4-3400.0-esperado2] PASSED [ 68%]
+motor/tests/test_sol.py::test_ventana_de_ensayo_payunia_coincide_con_la_ficha_de_ejemplo PASSED [ 75%]
+motor/tests/test_sol.py::test_estaciones_lunares_en_mons_mouton PASSED   [ 81%]
+motor/tests/test_sol.py::test_sol_maximo_2027_2028_en_cuatro_puntos PASSED [ 87%]
+motor/tests/test_sol.py::test_noches_completas_sobre_horizonte_liso PASSED [ 93%]
+motor/tests/test_sol.py::test_el_148_de_los_documentos_es_media_noche PASSED [100%]
+
+============================= 16 passed in 2.64s ==============================

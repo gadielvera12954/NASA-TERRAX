@@ -239,7 +239,7 @@ export const DosMundosScreen: React.FC = () => {
         {/* Left Side: Moon Raycast Canvas */}
         <div className="panel">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <span className="et">Moon: Mons Mouton LOLA 5m DEM</span>
+            <span className="et">Moon: Mons Mouton LOLA DEM (PGDA 90), 60 m</span>
             <span className="etq sost">{lunaStats.shadowPercent}% Shadowed</span>
           </div>
           <TerrainShadowCanvas

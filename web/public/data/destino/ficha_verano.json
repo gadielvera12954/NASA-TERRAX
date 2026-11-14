@@ -1,0 +1,159 @@
+{
+ "sitio": "mons-mouton-meseta",
+ "cuerpo": "luna",
+ "lunacion": {
+  "nombre": "verano",
+  "desde": "2027-10-27",
+  "hasta": "2027-11-26",
+  "sol_max_deg": 6.94,
+  "sol_min_deg": -4.066,
+  "fecha_sol_max": "2027-11-11T04:00:00Z"
+ },
+ "punto": {
+  "lat": -84.59934,
+  "lon": 30.99254,
+  "fila": 249,
+  "col": 249
+ },
+ "horizonte": {
+  "tipo": "relieve",
+  "n_az": 360,
+  "altura_observador_m": 1.0
+ },
+ "vehiculo": {
+  "plantilla": "viper-publico",
+  "panel_w": 320,
+  "lados_deg": [
+   0,
+   90,
+   180
+  ],
+  "bateria_wh": 5420,
+  "supervivencia_h": 50,
+  "p_surv_w": 108.4,
+  "consumo_w": {
+   "valor": 60,
+   "supuesto": true
+  },
+  "reserva_frac": 0.2,
+  "rumbo": "sol-en-esquina"
+ },
+ "resultado": {
+  "sol_en_paneles_frac": 0.4083,
+  "sobre_p_surv_frac": 0.4056,
+  "potencia_media_w": 181.2,
+  "tramo_oscuro_mas_largo_h": 422.0,
+  "noche_geometrica_h": 424.0,
+  "bateria_minima_wh": 0.0,
+  "bateria_minima_frac": 0.0,
+  "condiciones": {
+   "oscuridad": true,
+   "bateria": true,
+   "pendiente": false
+  },
+  "en_riesgo": true,
+  "consumo_w": 60.0,
+  "pendiente_local_deg": 11.15,
+  "inclinacion_deg": 0.0
+ },
+ "ab": {
+  "plano": {
+   "sol_en_paneles_frac": 0.4083,
+   "sobre_p_surv_frac": 0.4056,
+   "potencia_media_w": 181.2,
+   "tramo_oscuro_mas_largo_h": 422.0,
+   "noche_geometrica_h": 424.0,
+   "bateria_minima_wh": 0.0,
+   "bateria_minima_frac": 0.0,
+   "condiciones": {
+    "oscuridad": true,
+    "bateria": true,
+    "pendiente": false
+   },
+   "en_riesgo": true,
+   "consumo_w": 60.0,
+   "pendiente_local_deg": 0.0,
+   "inclinacion_deg": 0.0
+  },
+  "inclinado": {
+   "sol_en_paneles_frac": 0.4083,
+   "sobre_p_surv_frac": 0.4042,
+   "potencia_media_w": 174.2,
+   "tramo_oscuro_mas_largo_h": 422.0,
+   "noche_geometrica_h": 424.0,
+   "bateria_minima_wh": 0.0,
+   "bateria_minima_frac": 0.0,
+   "condiciones": {
+    "oscuridad": true,
+    "bateria": true,
+    "pendiente": false
+   },
+   "en_riesgo": true,
+   "consumo_w": 60.0,
+   "pendiente_local_deg": 15.0,
+   "inclinacion_deg": 15.0
+  },
+  "inclinacion_deg": 15.0,
+  "orientacion_pendiente_deg": 0.0
+ },
+ "sensibilidad_consumo": [
+  {
+   "consumo_w": 50.0,
+   "tramo_oscuro_mas_largo_h": 422.0,
+   "bateria_minima_frac": 0.0,
+   "en_riesgo": true
+  },
+  {
+   "consumo_w": 60.0,
+   "tramo_oscuro_mas_largo_h": 422.0,
+   "bateria_minima_frac": 0.0,
+   "en_riesgo": true
+  },
+  {
+   "consumo_w": 80.0,
+   "tramo_oscuro_mas_largo_h": 422.0,
+   "bateria_minima_frac": 0.0,
+   "en_riesgo": true
+  },
+  {
+   "consumo_w": 95.0,
+   "tramo_oscuro_mas_largo_h": 422.0,
+   "bateria_minima_frac": 0.0,
+   "en_riesgo": true
+  },
+  {
+   "consumo_w": 108.4,
+   "tramo_oscuro_mas_largo_h": 422.0,
+   "bateria_minima_frac": 0.0,
+   "en_riesgo": true
+  }
+ ],
+ "refugios": {
+  "limite_h": 50.0,
+  "fraccion_terreno": 0.0,
+  "refugio_mas_cercano_km": null,
+  "mapa": "refugios_verano.png",
+  "codificacion": "PNG gris de 16 bits: horas seguidas sin Sol (0 a 65534); 65535 = sin dato",
+  "horas_p50": 407.0
+ },
+ "supuestos": [
+  "Plantilla con cifras públicas de VIPER (NASA): no es una simulación oficial de esa misión.",
+  "Consumo de 60 W: supuesto del equipo (los consumos de VIPER no son públicos); sensibilidad de 50 a 108,4 W.",
+  "Paneles verticales (el ángulo no es público).",
+  "Batería llena al comienzo del cálculo; reserva de 20 % (decisión del equipo).",
+  "Sin temperatura, polvo, degradación ni sombra del propio rover.",
+  "Las noches se miden enteras aunque crucen el borde de la ventana de la lunación."
+ ],
+ "maqueta": false,
+ "meta": {
+  "producto": "ficha_destino",
+  "version_formato": 1,
+  "motor_version": "0.1.0",
+  "parametros_sha256": "346a6cd22cc8cb1c75852fd8310971a78d50b2bf33d4c0710658e79e8556231c",
+  "generado_utc": "2026-11-14T18:37:21Z",
+  "uso_si": "Código del motor físico (Parte 3) redactado con SI (Claude Code, Anthropic) a partir de los documentos 02 y 04, con pruebas de resultado conocido escritas antes del código. Los números los calcula el motor determinista con datos y parámetros publicados; ningún modelo de lenguaje interviene en el cálculo.",
+  "notas": [
+   "Horizonte del punto del rover con 360 azimutes."
+  ]
+ }
+}

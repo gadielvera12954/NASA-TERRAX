@@ -1,0 +1,9 @@
+# Motor físico de TERRA-X (Parte 3). Python 3.10 o más; probado con Python 3.14.
+numpy>=2.0
+scipy>=1.13
+numba>=0.60
+skyfield>=1.49
+pyyaml>=6.0
+jsonschema>=4.21
+referencing>=0.35
+pytest>=8.0

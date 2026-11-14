@@ -1,36 +1,277 @@
 {
-  "proyecto": "TERRA-X",
-  "version": "1.0.0-maqueta",
-  "maqueta": true,
-  "fecha": "2026-11-14",
-  "hash_reproducibilidad": "4a7f28c9b19e73d4a21183cf98e7235a",
-  "parametros": {
-    "sol_elevacion_min": 1.5,
-    "sol_elevacion_max": 10.0,
-    "altura_virtual_panel_px": 2.0,
-    "umbral_limites": 0.70,
-    "resolucion_metros": 60,
-    "azimutes_horizonte": 72
+ "proyecto": "TERRA-X",
+ "version": "1.0.0",
+ "maqueta": true,
+ "fecha": "2026-11-14",
+ "parametros_sha256": "346a6cd22cc8cb1c75852fd8310971a78d50b2bf33d4c0710658e79e8556231c",
+ "parametros": {
+  "sol_elevacion_min": 1.5,
+  "sol_elevacion_max": 10.0,
+  "umbral_limites": 0.7,
+  "resolucion_metros": 60,
+  "azimutes_horizonte": 72
+ },
+ "fuentes": [
+  {
+   "id": "JPL Horizons API v1.2",
+   "entidad": "NASA JPL Solar System Dynamics",
+   "coordenadas": "Mons Mouton (84.60°S, 31.00°E), IM-2, rim points; Ciudad del Este, Payunia, Puna",
+   "resolucion": "2 h (Moon 2027-2028) and 1 min (Earth, Nov 14-15, 2026); queried Nov 7 and Nov 14, 2026",
+   "licencia": "NASA Open Data",
+   "sha256": null
   },
-  "fuentes": [
-    {
-      "id": "jpl_horizons",
-      "nombre": "JPL Horizons On-Line Ephemeris System v1.2",
-      "licencia": "NASA Public Domain",
-      "consulta": "2026-11-07T16:04:36+00:00",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
-    {
-      "id": "nasadem",
-      "nombre": "NASADEM Merged DEM Global 1 arc second V001",
-      "licencia": "NASA Public Domain",
-      "sha256": "7a35c5e882a201c107297e64de06815cf1f39c81b5c4f2bb76fe17188b8e0d37"
-    },
-    {
-      "id": "pgda78",
-      "nombre": "Mons Mouton LOLA/Kaguya merged DEM 5m",
-      "licencia": "USGS / NASA Public Domain",
-      "sha256": "1f893e481b490f2307b22a0096f131a9c336b132a488e0f63b468903c72b7a94"
-    }
-  ]
+  {
+   "id": "NAIF kernel de421.bsp",
+   "entidad": "NASA JPL NAIF (used by Skyfield)",
+   "coordenadas": "Solar system ephemeris DE421 and lunar MOON_ME frame",
+   "resolucion": "—",
+   "licencia": "NASA Open Data",
+   "sha256": "a20a7139da04cbc462454634918e9a9ca69127044e2cc9d4f9c16e238d2deedc"
+  },
+  {
+   "id": "NAIF kernel moon_080317.tf",
+   "entidad": "NASA JPL NAIF (used by Skyfield)",
+   "coordenadas": "Solar system ephemeris DE421 and lunar MOON_ME frame",
+   "resolucion": "—",
+   "licencia": "NASA Open Data",
+   "sha256": "78732477b96f9863e7b0d65bcee3c22b8707ca5ed0db56d1173319cb2e8c7993"
+  },
+  {
+   "id": "NAIF kernel pck00008.tpc",
+   "entidad": "NASA JPL NAIF (used by Skyfield)",
+   "coordenadas": "Solar system ephemeris DE421 and lunar MOON_ME frame",
+   "resolucion": "—",
+   "licencia": "NASA Open Data",
+   "sha256": "ca07df56e9f1bca85a4c6748b618a46c0bf8e081f96f81e324896f2fdc54ea27"
+  },
+  {
+   "id": "NAIF kernel moon_pa_de421_1900-2050.bpc",
+   "entidad": "NASA JPL NAIF (used by Skyfield)",
+   "coordenadas": "Solar system ephemeris DE421 and lunar MOON_ME frame",
+   "resolucion": "—",
+   "licencia": "NASA Open Data",
+   "sha256": "656f90616403d75a75f0cd6c8830fc5b44f8cb4facb5ccb8915e752b397520cf"
+  },
+  {
+   "id": "LOLA LDEM_80S_20MPP_ADJ (PGDA 90), target crop",
+   "entidad": "NASA GSFC Planetary Geology, Geophysics and Geochemistry Lab (LOLA team)",
+   "coordenadas": "30 × 30 km around Mons Mouton",
+   "resolucion": "20 m averaged in 3 × 3 blocks to 60 m (no interpolation)",
+   "licencia": "NASA Open Data (cite Barker et al. 2023; Mazarico et al. 2011)",
+   "sha256": "c19914b1fc45fadd86611819fd10b4165d221b13fe6abdbaa78e6dff3740fa30"
+  },
+  {
+   "id": "LOLA LDEM_60S_60MPP_ADJ (PGDA 90), near relief",
+   "entidad": "NASA GSFC Planetary Geology, Geophysics and Geochemistry Lab (LOLA team)",
+   "coordenadas": "±60 km around Mons Mouton",
+   "resolucion": "60 m native",
+   "licencia": "NASA Open Data (cite Barker et al. 2023; Mazarico et al. 2011)",
+   "sha256": "d82aa5426e5c50c166a9f83e2ca0d489dfb76aabea6f153ab056a507ab1903c0"
+  },
+  {
+   "id": "LOLA LDEM_60S_240MPP_ADJ (PGDA 90), far relief",
+   "entidad": "NASA GSFC Planetary Geology, Geophysics and Geochemistry Lab (LOLA team)",
+   "coordenadas": "±312 km around Mons Mouton",
+   "resolucion": "240 m native",
+   "licencia": "NASA Open Data (cite Barker et al. 2023; Mazarico et al. 2011)",
+   "sha256": "2be359e79416a00324831c51591dd6e569be511a63a9dfbdd4b56f2725e09efa"
+  },
+  {
+   "id": "NASA AVGVISIB_85S_060M_201608 (PGDA 69), average illumination",
+   "entidad": "NASA GSFC Planetary Geology, Geophysics and Geochemistry Lab (LOLA team)",
+   "coordenadas": "Target crop (inside 85°S map extent)",
+   "resolucion": "60 m native; DN × 0.00004",
+   "licencia": "NASA Open Data (cite Barker et al. 2023; Mazarico et al. 2011)",
+   "sha256": "1788c227c4876112598370521717256aeca31f1fbb6e746123acf20d1df067f6"
+  }
+ ],
+ "archivos": [
+  {
+   "archivo": "destino/ficha_invierno.json",
+   "bytes": 4298,
+   "sha256": "863665061fe6633584729ec2e2c8939766daeb127ed385e12f6c02045a2ff061",
+   "maqueta": false
+  },
+  {
+   "archivo": "destino/ficha_liso_invierno.json",
+   "bytes": 4170,
+   "sha256": "648d61495f35683adbe1b9cd246f1fdd65636ca0697e303072f3a621500f3cff",
+   "maqueta": false
+  },
+  {
+   "archivo": "destino/ficha_liso_verano.json",
+   "bytes": 4159,
+   "sha256": "f01b35c0154b95187ece50789407bdbed8f0438f9c652acd165e6387d0132ff4",
+   "maqueta": false
+  },
+  {
+   "archivo": "destino/ficha_verano.json",
+   "bytes": 4294,
+   "sha256": "af8bfa9ddc54dea7f46a5bbd441a8350893e0f6dc87ad23cb5b1d26b302a65b5",
+   "maqueta": false
+  },
+  {
+   "archivo": "destino/horizontes.bin",
+   "bytes": 18000032,
+   "sha256": "7c29f7f56d8fd8cd974da32b6b7ac3002265f8db67c826465102b598da575e3d",
+   "maqueta": null
+  },
+  {
+   "archivo": "destino/horizontes.json",
+   "bytes": 768,
+   "sha256": "9640a43edbb9c2710fea3e06813e791d2e858253f0e5ce1654123afeb052fe3e",
+   "maqueta": false
+  },
+  {
+   "archivo": "destino/paridad.json",
+   "bytes": 179670,
+   "sha256": "3c7bc22f6d7abf94100029c4203839d86a283a02a8b302734a171f6b18ec56ce",
+   "maqueta": false
+  },
+  {
+   "archivo": "destino/refugios_invierno.png",
+   "bytes": 211982,
+   "sha256": "9ffec0ec4d9c4889b08c9f180f6366f471d603e80888248c474587abfffd53d8",
+   "maqueta": null
+  },
+  {
+   "archivo": "destino/refugios_verano.png",
+   "bytes": 236008,
+   "sha256": "312093e48cc30e3f3db7cce6b47e2fb4c8be113f84e8865785c1ddab3df7f4db",
+   "maqueta": null
+  },
+  {
+   "archivo": "destino/vista_refugios_invierno.png",
+   "bytes": 406019,
+   "sha256": "b685bc576d35bb9052ed4414fc2e5ec47d8c1863f2b3ad2be9c944f88f42957c",
+   "maqueta": null
+  },
+  {
+   "archivo": "destino/vista_refugios_verano.png",
+   "bytes": 492957,
+   "sha256": "c81c5f1da2176f54540eb29418694ee44188c0d2de2d8d81a457b7e28d51cfe3",
+   "maqueta": null
+  },
+  {
+   "archivo": "fichas/CTRL-MEDANOS.json",
+   "bytes": 8251,
+   "sha256": "e9f1bf139e481b8a1adf5366099599a81cfceeb601aa21fc396aed547f8bdf24",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/CTRL-MM-R1.json",
+   "bytes": 4394,
+   "sha256": "36b98c2cf152b3d61647034b4c2b5b5944e7569cb1546263b05cfcbf722a967c",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/CTRL-MM-R2.json",
+   "bytes": 4392,
+   "sha256": "722a3c0fcbadb932da311d16dadf03ada1578a935ae16da7ed60b12fb866ff5d",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/CTRL-MM-R3.json",
+   "bytes": 4389,
+   "sha256": "f334520774ad179e36ffa006b20ee33a8b0986a09f08e87fe9ae76dee06d7fdb",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/CTRL-MM.json",
+   "bytes": 4325,
+   "sha256": "7068ee359159a3025e18292b0eb68ac54e1a0590956e0c472d30ecf921d790c0",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/indice.json",
+   "bytes": 5887,
+   "sha256": "01ad09eb3ad0b25d1a5d9fd740734b1493c73c1e698c561bb1d15cb0de61feae",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/P-01.json",
+   "bytes": 8880,
+   "sha256": "29e908726f3599faa75ecc84813493b9fe16ab7a57f29d8a15a42695ab2d60de",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/P-03.json",
+   "bytes": 8903,
+   "sha256": "e54ba1b613946c8632599fdce9c16cad601c9f061a1f483f4d22ae11ed925ada",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/P-07.json",
+   "bytes": 8930,
+   "sha256": "e7a74897368bf0e965a504f3c9e3be7360460303b94d7d711ede78cf89da81b8",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/P-09.json",
+   "bytes": 8903,
+   "sha256": "ad9e2b20c3854e1830d7199fe5f36cb0e66fa9f9ca4e04d9204ad172a7949c79",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/P-12.json",
+   "bytes": 8888,
+   "sha256": "780d5f2d6bd07552c68a706aa416c436e84baa5f9e8474c9e58e7b8081b28408",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/P-15.json",
+   "bytes": 8906,
+   "sha256": "288bfcb271c0a05ead3c3754b504df5f2af2d194ec0626d18e061a5ecd5c1c1d",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/P-19.json",
+   "bytes": 8903,
+   "sha256": "4ffb36eba358fef77ad890223da5bac13944fadcfc657accf0fbe6084a58651f",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/P-23.json",
+   "bytes": 8905,
+   "sha256": "c8f3afd46d8351e60ea0bbb084b0fd27c4d50b9fba6ed87d9bbe43a67dbf395b",
+   "maqueta": true
+  },
+  {
+   "archivo": "manifest_parte3.json",
+   "bytes": 6242,
+   "sha256": "f9d266b5eacca75fab94b6fbe4d6dd52fa72285364d5487b510ee59be65fd4fb",
+   "maqueta": null
+  },
+  {
+   "archivo": "pruebas.json",
+   "bytes": 17283,
+   "sha256": "137936ef532ffacf3b6c33c68f9255ce56368bb1d9740e8f9a006c1103eb5b60",
+   "maqueta": false
+  },
+  {
+   "archivo": "sol/luna_mons_mouton_invierno_2027.json",
+   "bytes": 11244,
+   "sha256": "00baf6579c8dfb333708d9eee0c8707a779ee3c538a88f1eeeed8b3db3e2cb96",
+   "maqueta": false
+  },
+  {
+   "archivo": "sol/luna_mons_mouton_verano_2027.json",
+   "bytes": 11453,
+   "sha256": "452da515f6ba5a33ddf3948f4c170aa1d206e82dbb2e95a5359d9de149b66f48",
+   "maqueta": false
+  },
+  {
+   "archivo": "sol/lunaciones.json",
+   "bytes": 5333,
+   "sha256": "84f913c772b2c214b54fa0dc2b11474b6d28b02f73cd471cfce9d7c29d2962b2",
+   "maqueta": false
+  },
+  {
+   "archivo": "sol/tierra_ciudad_del_este_2026-11-14.json",
+   "bytes": 2653,
+   "sha256": "ca8ec1bb5106081f24397dd2f247ba28cd20931dbb16ed111c92d813a444ba67",
+   "maqueta": false
+  }
+ ],
+ "nota": "Escrito por puente_lola/exportar_web.py hasta que exista motor/exportar."
 }

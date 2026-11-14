@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "grilla.schema.json",
+  "title": "Metadatos de una grilla de alturas (entrada del motor físico)",
+  "description": "Acompaña a <nombre>.npy (float32, alto × ancho, metros, NaN = sin dato). Ver esquemas/grilla_entrada.md.",
+  "type": "object",
+  "required": ["nombre", "cuerpo", "pixel_m", "x0_m", "y0_m", "proyeccion", "fuentes", "maqueta"],
+  "properties": {
+    "nombre": { "type": "string" },
+    "cuerpo": { "enum": ["luna", "tierra", "sintetico"] },
+    "pixel_m": { "type": "number", "exclusiveMinimum": 0 },
+    "x0_m": { "type": "number" },
+    "y0_m": { "type": "number" },
+    "proyeccion": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["tipo", "radio_m", "lon0_deg"],
+          "properties": {
+            "tipo": { "const": "polar_estereografica_sur" },
+            "radio_m": { "type": "number", "exclusiveMinimum": 0 },
+            "lon0_deg": { "type": "number" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["tipo", "zona", "hemisferio", "lat_centro_deg", "lon_centro_deg"],
+          "properties": {
+            "tipo": { "const": "utm" },
+            "zona": { "type": "integer", "minimum": 1, "maximum": 60 },
+            "hemisferio": { "enum": ["N", "S"] },
+            "lat_centro_deg": { "type": "number" },
+            "lon_centro_deg": { "type": "number" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["tipo"],
+          "properties": { "tipo": { "const": "plano_local" }, "lat_centro_deg": { "type": "number" }, "lon_centro_deg": { "type": "number" } }
+        }
+      ]
+    },
+    "promediado": { "type": "string" },
+    "fuentes": { "type": "array", "items": { "$ref": "comun.schema.json#/$defs/fuente" } },
+    "maqueta": { "type": "boolean" }
+  }
+}

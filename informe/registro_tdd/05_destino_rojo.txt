@@ -1,0 +1,16 @@
+
+=================================== ERRORS ====================================
+________________ ERROR collecting motor/tests/test_destino.py _________________
+ImportError while importing test module 'C:\Users\lol xdd\OneDrive\Desktop\Nasa Final\Terra-X Sistema\motor\tests\test_destino.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+motor\tests\test_destino.py:16: in <module>
+    from motor.destino import energia, paridad, png16, refugios, simulacion
+E   ImportError: cannot import name 'energia' from 'motor.destino' (C:\Users\lol xdd\OneDrive\Desktop\Nasa Final\Terra-X Sistema\motor\destino\__init__.py)
+=========================== short test summary info ===========================
+ERROR motor/tests/test_destino.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.52s
