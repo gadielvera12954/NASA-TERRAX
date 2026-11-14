@@ -26,9 +26,10 @@ def epsg_utm(lat_deg: float, lon_deg: float) -> int:
 
 
 def a_utm(z: np.ndarray, transform, crs_origen, lat_centro: float, lon_centro: float, lado_m: float,
-          alto_m: float | None = None, pixel_m: float = PIXEL_M, nodata_origen=None) -> dict:
+          alto_m: float | None = None, pixel_m: float = PIXEL_M, nodata_origen=None, otras=()) -> dict:
     """Reproyecta `z` (con su transformación afín y CRS) a una grilla UTM centrada en (lat, lon).
 
+    `otras`: más teselas (z, transform) en el mismo CRS; llenan lo que la primera no cubre (mosaico).
     Devuelve un dict con `z` (float32, NaN = sin dato), `pixel_m`, `x0_m`, `y0_m` (centro de la celda
     [0, 0]), `proyeccion` (contrato de esquemas/grilla.schema.json) y `epsg`.
     """
@@ -49,12 +50,17 @@ def a_utm(z: np.ndarray, transform, crs_origen, lat_centro: float, lon_centro: f
     origen = np.asarray(z, dtype=np.float32)
     if nodata_origen is not None:
         origen = np.where(origen == nodata_origen, np.nan, origen).astype(np.float32)
-    reproject(
-        source=origen, destination=destino,
-        src_transform=transform, src_crs=crs_origen, src_nodata=np.nan,
-        dst_transform=from_origin(x_izq, y_sup, pixel_m, pixel_m), dst_crs=f"EPSG:{epsg}", dst_nodata=np.nan,
-        resampling=Resampling.average,
-    )
+    t_dst = from_origin(x_izq, y_sup, pixel_m, pixel_m)
+    for k, (zo, to) in enumerate([(origen, transform), *otras]):
+        parcial = np.full_like(destino, np.nan)
+        reproject(
+            source=np.asarray(zo, dtype=np.float32), destination=parcial,
+            src_transform=to, src_crs=crs_origen, src_nodata=np.nan,
+            dst_transform=t_dst, dst_crs=f"EPSG:{epsg}", dst_nodata=np.nan,
+            resampling=Resampling.average,
+        )
+        hueco = np.isnan(destino) & np.isfinite(parcial)
+        destino[hueco] = parcial[hueco]
     del rasterio
     return {
         "z": destino,
