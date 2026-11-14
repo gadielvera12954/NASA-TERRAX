@@ -1,0 +1,316 @@
+/* ==========================================================================
+   TERRA-X · DESIGN TOKENS & SYSTEM STYLES
+   According to TERRA-X Team Method & doc03_diseno
+   - Instrument typography (Fira Sans / Overpass / Overpass Mono)
+   - 2px corners, 1px lines
+   - Physically projected shadows from dynamic Sol variables
+   ========================================================================== */
+
+:root {
+  /* Core Color Tokens */
+  --noche: #07173F;
+  --noche-panel: #0C1E4D;
+  --noche-card: #11255B;
+  --azul-electrico: #0042A6;
+  --sol: #E7F434;
+  --sol-glow: rgba(231, 244, 52, 0.25);
+  --tierra: #C2410C;
+  --tierra-bg: rgba(194, 65, 12, 0.15);
+  --luna: #F4F6FB;
+  --luna-bg: rgba(244, 246, 251, 0.12);
+  --dato: #2491FF;
+  --alerta: #8B0A03;
+  --alerta-bg: rgba(139, 10, 3, 0.25);
+  --pizarra: #3D4551;
+  --sec-dark: #8F9CAE;
+  --borde-dark: #1E3160;
+  --borde-light: #324779;
+  --texto: #FFFFFF;
+  --texto-sec: #C0CAD8;
+
+  /* Verdict Label Colors */
+  --sost: #10B981;
+  --huec: #E7F434;
+  --noal: #F59E0B;
+  --nopo: #8F9CAE;
+  --inco: #EF4444;
+
+  /* Typography */
+  --tit: 'Fira Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --txt: 'Overpass', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'Overpass Mono', monospace;
+
+  /* Dynamic Physical Sun & Shadow variables (updated by Erwan's useSol engine) */
+  --sol-el: 3.0deg;
+  --sol-az: 250.0deg;
+  --sombra-x: -35px;
+  --sombra-y: 12px;
+  --sombra-blur: 0px;
+  --sombra-color: rgba(0, 0, 0, 0.82);
+
+  /* Geometry & Rhythm */
+  --radius: 2px;
+  --border-w: 1px;
+}
+
+/* Base Reset & Instrument Feel */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--noche);
+  color: var(--texto);
+  font-family: var(--txt);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--tit);
+  font-weight: 900;
+  color: var(--texto);
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: 32px; line-height: 1.15; }
+h2 { font-size: 24px; line-height: 1.2; }
+h3 { font-size: 19px; line-height: 1.25; }
+h4 { font-size: 16px; line-height: 1.3; }
+h5 { font-size: 14px; line-height: 1.35; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* Fixed Navigation Bar */
+.terra-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 24px;
+  background-color: #05102D;
+  border-bottom: var(--border-w) solid var(--borde-dark);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.terra-nav .logo {
+  font-family: var(--tit);
+  font-weight: 900;
+  font-size: 17px;
+  letter-spacing: 0.08em;
+  color: var(--texto);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.terra-nav .logo .symbol {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--sol);
+  background: linear-gradient(90deg, #8E9BAE 50%, var(--tierra) 50%);
+  display: inline-block;
+}
+
+.terra-nav .nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.terra-nav .nav-link {
+  font-family: var(--txt);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texto-sec);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.terra-nav .nav-link:hover {
+  color: var(--texto);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.terra-nav .nav-link.active {
+  color: var(--noche);
+  background-color: var(--sol);
+  font-weight: 700;
+  border-color: var(--sol);
+}
+
+/* Top Banner for Mock Data */
+.banner-mock {
+  background-color: #F59E0B;
+  color: #07173F;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 4px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 105;
+}
+
+/* Panels with Real Physical Shadows */
+.panel {
+  background-color: var(--noche-panel);
+  border: var(--border-w) solid var(--borde-dark);
+  border-radius: var(--radius);
+  padding: 16px;
+  position: relative;
+  transition: box-shadow 0.2s ease;
+  box-shadow: var(--sombra-x) var(--sombra-y) var(--sombra-blur) var(--sombra-color);
+}
+
+.panel:hover {
+  border-color: var(--borde-light);
+}
+
+.panel-lit {
+  border-color: var(--sol);
+  box-shadow: 0 0 12px var(--sol-glow), var(--sombra-x) var(--sombra-y) var(--sombra-blur) var(--sombra-color);
+}
+
+/* Key Metrics & Cifras */
+.cifra-grande {
+  font-family: var(--tit);
+  font-weight: 900;
+  font-size: 28px;
+  line-height: 1.05;
+  color: var(--sol);
+}
+
+.cifra-label {
+  font-size: 11px;
+  color: var(--sec-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 4px;
+}
+
+/* Data Rows */
+.fila-dato {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 13px;
+}
+
+.fila-dato:last-child {
+  border-bottom: none;
+}
+
+.fila-dato .label {
+  color: var(--texto-sec);
+}
+
+.fila-dato .val {
+  font-family: var(--mono);
+  font-weight: 600;
+  color: var(--texto);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--tit);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--sol);
+  background-color: var(--sol);
+  color: var(--noche);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn:hover {
+  background-color: #f7ff55;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn.sec {
+  background-color: transparent;
+  color: var(--texto);
+  border-color: var(--borde-light);
+}
+
+.btn.sec:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: var(--texto);
+}
+
+.btn.tierra {
+  background-color: var(--tierra);
+  border-color: var(--tierra);
+  color: #FFFFFF;
+}
+
+/* Verdict Tags */
+.etq {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: var(--radius);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.etq.sost { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid #10B981; }
+.etq.huec { background: rgba(231, 244, 52, 0.15); color: #E7F434; border: 1px solid #E7F434; }
+.etq.noal { background: rgba(245, 158, 11, 0.15); color: #FBBF24; border: 1px solid #F59E0B; }
+.etq.nopo { background: rgba(143, 156, 174, 0.15); color: #CBD5E1; border: 1px solid #8F9CAE; }
+.etq.inco { background: rgba(239, 68, 68, 0.15); color: #F87171; border: 1px solid #EF4444; }
+
+/* Subtext / Tags */
+.et {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sec-dark);
+}
+
+/* Bottom Horizon Bar Container */
+.horizonte-bar-fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background-color: #050E28;
+  border-top: 1px solid var(--borde-dark);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+}

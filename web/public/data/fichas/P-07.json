@@ -1,0 +1,47 @@
+{
+  "id": "P-07",
+  "etiqueta": "con_huecos",
+  "etiqueta_en": "With gaps",
+  "lugar": {
+    "lat": -36.41,
+    "lon": -69.20,
+    "region": "Payunia, Mendoza, Argentina",
+    "nombre": "Volcán Malacara / Payenia"
+  },
+  "C": 0.82,
+  "E": 0.70,
+  "L": 0.574,
+  "U": 0.874,
+  "requisitos": {
+    "vegetacion": "cumple",
+    "pendiente": "cumple"
+  },
+  "dimensiones": {
+    "relieve": "Strong",
+    "iluminacion": "Strong",
+    "materiales": "Not comparable",
+    "temperatura": "Weak",
+    "agua_hielo": "Weak",
+    "polvo_viento": "Unknown",
+    "biologia": "Weak",
+    "operaciones_roboticas": "Strong"
+  },
+  "horario": [
+    {
+      "fecha": "2026-11-14",
+      "desde": "19:41",
+      "hasta": "20:12",
+      "azimut": [252, 248],
+      "sol_elevacion": [7.0, 1.5]
+    }
+  ],
+  "no_transfiere": [
+    "Solar power profile",
+    "Vacuum & sharp shadow contrast",
+    "Lunar gravity (1/6 g)",
+    "Electrostatic regolith dust"
+  ],
+  "medir_primero": "Surface material composition, then rock distribution.",
+  "resumen": "Fits what we know. Measuring the surface material could change first place.",
+  "maqueta": true
+}

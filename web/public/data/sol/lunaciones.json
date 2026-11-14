@@ -1,0 +1,914 @@
+{
+ "centro": {
+  "global_max": 6.958,
+  "global_min": -6.956,
+  "lunaciones": [
+   {
+    "inicio": "2027-02-04",
+    "pico": "2027-02-18",
+    "emax": 5.15,
+    "emin": -6.05,
+    "frac_sobre_0": 0.485,
+    "horas_seguidas_bajo_0": 190
+   },
+   {
+    "inicio": "2027-03-05",
+    "pico": "2027-03-20",
+    "emax": 4.39,
+    "emin": -6.67,
+    "frac_sobre_0": 0.444,
+    "horas_seguidas_bajo_0": 202
+   },
+   {
+    "inicio": "2027-04-04",
+    "pico": "2027-04-18",
+    "emax": 3.93,
+    "emin": -6.93,
+    "frac_sobre_0": 0.416,
+    "horas_seguidas_bajo_0": 208
+   },
+   {
+    "inicio": "2027-05-03",
+    "pico": "2027-05-18",
+    "emax": 3.87,
+    "emin": -6.93,
+    "frac_sobre_0": 0.414,
+    "horas_seguidas_bajo_0": 210
+   },
+   {
+    "inicio": "2027-06-01",
+    "pico": "2027-06-16",
+    "emax": 4.23,
+    "emin": -6.78,
+    "frac_sobre_0": 0.433,
+    "horas_seguidas_bajo_0": 206
+   },
+   {
+    "inicio": "2027-07-01",
+    "pico": "2027-07-16",
+    "emax": 4.89,
+    "emin": -6.26,
+    "frac_sobre_0": 0.472,
+    "horas_seguidas_bajo_0": 194
+   },
+   {
+    "inicio": "2027-07-30",
+    "pico": "2027-08-14",
+    "emax": 5.69,
+    "emin": -5.52,
+    "frac_sobre_0": 0.518,
+    "horas_seguidas_bajo_0": 178
+   },
+   {
+    "inicio": "2027-08-29",
+    "pico": "2027-09-13",
+    "emax": 6.42,
+    "emin": -4.74,
+    "frac_sobre_0": 0.558,
+    "horas_seguidas_bajo_0": 164
+   },
+   {
+    "inicio": "2027-09-27",
+    "pico": "2027-10-12",
+    "emax": 6.88,
+    "emin": -4.14,
+    "frac_sobre_0": 0.586,
+    "horas_seguidas_bajo_0": 150
+   },
+   {
+    "inicio": "2027-10-27",
+    "pico": "2027-11-11",
+    "emax": 6.94,
+    "emin": -4.07,
+    "frac_sobre_0": 0.587,
+    "horas_seguidas_bajo_0": 148
+   },
+   {
+    "inicio": "2027-11-26",
+    "pico": "2027-12-10",
+    "emax": 6.55,
+    "emin": -4.65,
+    "frac_sobre_0": 0.566,
+    "horas_seguidas_bajo_0": 158
+   },
+   {
+    "inicio": "2027-12-25",
+    "pico": "2028-01-09",
+    "emax": 5.83,
+    "emin": -5.47,
+    "frac_sobre_0": 0.522,
+    "horas_seguidas_bajo_0": 176
+   },
+   {
+    "inicio": "2028-01-24",
+    "pico": "2028-02-07",
+    "emax": 4.98,
+    "emin": -6.26,
+    "frac_sobre_0": 0.476,
+    "horas_seguidas_bajo_0": 192
+   },
+   {
+    "inicio": "2028-02-22",
+    "pico": "2028-03-08",
+    "emax": 4.27,
+    "emin": -6.81,
+    "frac_sobre_0": 0.435,
+    "horas_seguidas_bajo_0": 204
+   },
+   {
+    "inicio": "2028-03-23",
+    "pico": "2028-04-07",
+    "emax": 3.9,
+    "emin": -6.96,
+    "frac_sobre_0": 0.412,
+    "horas_seguidas_bajo_0": 208
+   },
+   {
+    "inicio": "2028-04-21",
+    "pico": "2028-05-06",
+    "emax": 3.96,
+    "emin": -6.96,
+    "frac_sobre_0": 0.416,
+    "horas_seguidas_bajo_0": 208
+   },
+   {
+    "inicio": "2028-05-21",
+    "pico": "2028-06-05",
+    "emax": 4.41,
+    "emin": -6.69,
+    "frac_sobre_0": 0.445,
+    "horas_seguidas_bajo_0": 202
+   },
+   {
+    "inicio": "2028-06-19",
+    "pico": "2028-07-04",
+    "emax": 5.13,
+    "emin": -6.09,
+    "frac_sobre_0": 0.483,
+    "horas_seguidas_bajo_0": 190
+   },
+   {
+    "inicio": "2028-07-19",
+    "pico": "2028-08-03",
+    "emax": 5.93,
+    "emin": -5.31,
+    "frac_sobre_0": 0.53,
+    "horas_seguidas_bajo_0": 174
+   },
+   {
+    "inicio": "2028-08-17",
+    "pico": "2028-09-01",
+    "emax": 6.6,
+    "emin": -4.57,
+    "frac_sobre_0": 0.566,
+    "horas_seguidas_bajo_0": 160
+   },
+   {
+    "inicio": "2028-09-16",
+    "pico": "2028-10-01",
+    "emax": 6.96,
+    "emin": -4.05,
+    "frac_sobre_0": 0.589,
+    "horas_seguidas_bajo_0": 148
+   },
+   {
+    "inicio": "2028-10-15",
+    "pico": "2028-10-30",
+    "emax": 6.9,
+    "emin": -4.19,
+    "frac_sobre_0": 0.583,
+    "horas_seguidas_bajo_0": 150
+   },
+   {
+    "inicio": "2028-11-14",
+    "pico": "2028-11-29",
+    "emax": 6.41,
+    "emin": -4.85,
+    "frac_sobre_0": 0.553,
+    "horas_seguidas_bajo_0": 164
+   }
+  ]
+ },
+ "im2": {
+  "global_max": 6.769,
+  "global_min": -6.765,
+  "lunaciones": [
+   {
+    "inicio": "2027-02-04",
+    "pico": "2027-02-18",
+    "emax": 4.96,
+    "emin": -5.86,
+    "frac_sobre_0": 0.485,
+    "horas_seguidas_bajo_0": 188
+   },
+   {
+    "inicio": "2027-03-05",
+    "pico": "2027-03-20",
+    "emax": 4.2,
+    "emin": -6.48,
+    "frac_sobre_0": 0.441,
+    "horas_seguidas_bajo_0": 202
+   },
+   {
+    "inicio": "2027-04-04",
+    "pico": "2027-04-18",
+    "emax": 3.74,
+    "emin": -6.74,
+    "frac_sobre_0": 0.41,
+    "horas_seguidas_bajo_0": 210
+   },
+   {
+    "inicio": "2027-05-03",
+    "pico": "2027-05-18",
+    "emax": 3.68,
+    "emin": -6.74,
+    "frac_sobre_0": 0.411,
+    "horas_seguidas_bajo_0": 210
+   },
+   {
+    "inicio": "2027-06-02",
+    "pico": "2027-06-16",
+    "emax": 4.04,
+    "emin": -6.58,
+    "frac_sobre_0": 0.431,
+    "horas_seguidas_bajo_0": 206
+   },
+   {
+    "inicio": "2027-07-01",
+    "pico": "2027-07-16",
+    "emax": 4.7,
+    "emin": -6.06,
+    "frac_sobre_0": 0.473,
+    "horas_seguidas_bajo_0": 194
+   },
+   {
+    "inicio": "2027-07-30",
+    "pico": "2027-08-14",
+    "emax": 5.5,
+    "emin": -5.32,
+    "frac_sobre_0": 0.517,
+    "horas_seguidas_bajo_0": 180
+   },
+   {
+    "inicio": "2027-08-29",
+    "pico": "2027-09-13",
+    "emax": 6.23,
+    "emin": -4.55,
+    "frac_sobre_0": 0.561,
+    "horas_seguidas_bajo_0": 162
+   },
+   {
+    "inicio": "2027-09-28",
+    "pico": "2027-10-12",
+    "emax": 6.69,
+    "emin": -3.95,
+    "frac_sobre_0": 0.589,
+    "horas_seguidas_bajo_0": 148
+   },
+   {
+    "inicio": "2027-10-27",
+    "pico": "2027-11-11",
+    "emax": 6.75,
+    "emin": -3.88,
+    "frac_sobre_0": 0.592,
+    "horas_seguidas_bajo_0": 146
+   },
+   {
+    "inicio": "2027-11-26",
+    "pico": "2027-12-10",
+    "emax": 6.36,
+    "emin": -4.46,
+    "frac_sobre_0": 0.567,
+    "horas_seguidas_bajo_0": 158
+   },
+   {
+    "inicio": "2027-12-25",
+    "pico": "2028-01-09",
+    "emax": 5.63,
+    "emin": -5.28,
+    "frac_sobre_0": 0.522,
+    "horas_seguidas_bajo_0": 176
+   },
+   {
+    "inicio": "2028-01-24",
+    "pico": "2028-02-08",
+    "emax": 4.78,
+    "emin": -6.08,
+    "frac_sobre_0": 0.473,
+    "horas_seguidas_bajo_0": 194
+   },
+   {
+    "inicio": "2028-02-23",
+    "pico": "2028-03-08",
+    "emax": 4.08,
+    "emin": -6.62,
+    "frac_sobre_0": 0.429,
+    "horas_seguidas_bajo_0": 206
+   },
+   {
+    "inicio": "2028-03-23",
+    "pico": "2028-04-07",
+    "emax": 3.71,
+    "emin": -6.76,
+    "frac_sobre_0": 0.41,
+    "horas_seguidas_bajo_0": 210
+   },
+   {
+    "inicio": "2028-04-22",
+    "pico": "2028-05-06",
+    "emax": 3.77,
+    "emin": -6.76,
+    "frac_sobre_0": 0.414,
+    "horas_seguidas_bajo_0": 210
+   },
+   {
+    "inicio": "2028-05-21",
+    "pico": "2028-06-05",
+    "emax": 4.23,
+    "emin": -6.49,
+    "frac_sobre_0": 0.442,
+    "horas_seguidas_bajo_0": 202
+   },
+   {
+    "inicio": "2028-06-19",
+    "pico": "2028-07-04",
+    "emax": 4.95,
+    "emin": -5.89,
+    "frac_sobre_0": 0.484,
+    "horas_seguidas_bajo_0": 190
+   },
+   {
+    "inicio": "2028-07-19",
+    "pico": "2028-08-03",
+    "emax": 5.74,
+    "emin": -5.12,
+    "frac_sobre_0": 0.531,
+    "horas_seguidas_bajo_0": 174
+   },
+   {
+    "inicio": "2028-08-17",
+    "pico": "2028-09-01",
+    "emax": 6.41,
+    "emin": -4.38,
+    "frac_sobre_0": 0.569,
+    "horas_seguidas_bajo_0": 158
+   },
+   {
+    "inicio": "2028-09-16",
+    "pico": "2028-10-01",
+    "emax": 6.77,
+    "emin": -3.86,
+    "frac_sobre_0": 0.592,
+    "horas_seguidas_bajo_0": 146
+   },
+   {
+    "inicio": "2028-10-16",
+    "pico": "2028-10-30",
+    "emax": 6.7,
+    "emin": -4.0,
+    "frac_sobre_0": 0.589,
+    "horas_seguidas_bajo_0": 148
+   },
+   {
+    "inicio": "2028-11-14",
+    "pico": "2028-11-29",
+    "emax": 6.22,
+    "emin": -4.66,
+    "frac_sobre_0": 0.556,
+    "horas_seguidas_bajo_0": 164
+   }
+  ]
+ },
+ "norte": {
+  "global_max": 8.258,
+  "global_min": -8.256,
+  "lunaciones": [
+   {
+    "inicio": "2027-02-03",
+    "pico": "2027-02-18",
+    "emax": 6.45,
+    "emin": -7.35,
+    "frac_sobre_0": 0.487,
+    "horas_seguidas_bajo_0": 186
+   },
+   {
+    "inicio": "2027-03-05",
+    "pico": "2027-03-20",
+    "emax": 5.69,
+    "emin": -7.97,
+    "frac_sobre_0": 0.454,
+    "horas_seguidas_bajo_0": 198
+   },
+   {
+    "inicio": "2027-04-04",
+    "pico": "2027-04-18",
+    "emax": 5.23,
+    "emin": -8.23,
+    "frac_sobre_0": 0.431,
+    "horas_seguidas_bajo_0": 202
+   },
+   {
+    "inicio": "2027-05-03",
+    "pico": "2027-05-18",
+    "emax": 5.17,
+    "emin": -8.23,
+    "frac_sobre_0": 0.429,
+    "horas_seguidas_bajo_0": 204
+   },
+   {
+    "inicio": "2027-06-02",
+    "pico": "2027-06-16",
+    "emax": 5.53,
+    "emin": -8.08,
+    "frac_sobre_0": 0.448,
+    "horas_seguidas_bajo_0": 198
+   },
+   {
+    "inicio": "2027-07-01",
+    "pico": "2027-07-16",
+    "emax": 6.19,
+    "emin": -7.56,
+    "frac_sobre_0": 0.479,
+    "horas_seguidas_bajo_0": 190
+   },
+   {
+    "inicio": "2027-07-30",
+    "pico": "2027-08-14",
+    "emax": 6.99,
+    "emin": -6.82,
+    "frac_sobre_0": 0.514,
+    "horas_seguidas_bajo_0": 178
+   },
+   {
+    "inicio": "2027-08-29",
+    "pico": "2027-09-13",
+    "emax": 7.72,
+    "emin": -6.04,
+    "frac_sobre_0": 0.548,
+    "horas_seguidas_bajo_0": 166
+   },
+   {
+    "inicio": "2027-09-27",
+    "pico": "2027-10-12",
+    "emax": 8.18,
+    "emin": -5.44,
+    "frac_sobre_0": 0.569,
+    "horas_seguidas_bajo_0": 156
+   },
+   {
+    "inicio": "2027-10-27",
+    "pico": "2027-11-11",
+    "emax": 8.24,
+    "emin": -5.37,
+    "frac_sobre_0": 0.57,
+    "horas_seguidas_bajo_0": 154
+   },
+   {
+    "inicio": "2027-11-26",
+    "pico": "2027-12-10",
+    "emax": 7.85,
+    "emin": -5.95,
+    "frac_sobre_0": 0.552,
+    "horas_seguidas_bajo_0": 162
+   },
+   {
+    "inicio": "2027-12-25",
+    "pico": "2028-01-09",
+    "emax": 7.13,
+    "emin": -6.77,
+    "frac_sobre_0": 0.52,
+    "horas_seguidas_bajo_0": 176
+   },
+   {
+    "inicio": "2028-01-24",
+    "pico": "2028-02-07",
+    "emax": 6.28,
+    "emin": -7.56,
+    "frac_sobre_0": 0.479,
+    "horas_seguidas_bajo_0": 190
+   },
+   {
+    "inicio": "2028-02-22",
+    "pico": "2028-03-08",
+    "emax": 5.57,
+    "emin": -8.11,
+    "frac_sobre_0": 0.449,
+    "horas_seguidas_bajo_0": 198
+   },
+   {
+    "inicio": "2028-03-23",
+    "pico": "2028-04-07",
+    "emax": 5.2,
+    "emin": -8.26,
+    "frac_sobre_0": 0.429,
+    "horas_seguidas_bajo_0": 202
+   },
+   {
+    "inicio": "2028-04-21",
+    "pico": "2028-05-06",
+    "emax": 5.26,
+    "emin": -8.26,
+    "frac_sobre_0": 0.433,
+    "horas_seguidas_bajo_0": 202
+   },
+   {
+    "inicio": "2028-05-21",
+    "pico": "2028-06-05",
+    "emax": 5.71,
+    "emin": -7.99,
+    "frac_sobre_0": 0.455,
+    "horas_seguidas_bajo_0": 198
+   },
+   {
+    "inicio": "2028-06-19",
+    "pico": "2028-07-04",
+    "emax": 6.43,
+    "emin": -7.38,
+    "frac_sobre_0": 0.487,
+    "horas_seguidas_bajo_0": 186
+   },
+   {
+    "inicio": "2028-07-19",
+    "pico": "2028-08-03",
+    "emax": 7.23,
+    "emin": -6.61,
+    "frac_sobre_0": 0.525,
+    "horas_seguidas_bajo_0": 174
+   },
+   {
+    "inicio": "2028-08-17",
+    "pico": "2028-09-01",
+    "emax": 7.9,
+    "emin": -5.87,
+    "frac_sobre_0": 0.554,
+    "horas_seguidas_bajo_0": 162
+   },
+   {
+    "inicio": "2028-09-16",
+    "pico": "2028-10-01",
+    "emax": 8.26,
+    "emin": -5.35,
+    "frac_sobre_0": 0.572,
+    "horas_seguidas_bajo_0": 154
+   },
+   {
+    "inicio": "2028-10-15",
+    "pico": "2028-10-30",
+    "emax": 8.2,
+    "emin": -5.49,
+    "frac_sobre_0": 0.569,
+    "horas_seguidas_bajo_0": 154
+   },
+   {
+    "inicio": "2028-11-14",
+    "pico": "2028-11-29",
+    "emax": 7.71,
+    "emin": -6.15,
+    "frac_sobre_0": 0.545,
+    "horas_seguidas_bajo_0": 166
+   }
+  ]
+ },
+ "sur": {
+  "global_max": 5.339,
+  "global_min": -5.336,
+  "lunaciones": [
+   {
+    "inicio": "2027-02-04",
+    "pico": "2027-02-18",
+    "emax": 3.54,
+    "emin": -4.43,
+    "frac_sobre_0": 0.479,
+    "horas_seguidas_bajo_0": 194
+   },
+   {
+    "inicio": "2027-03-05",
+    "pico": "2027-03-20",
+    "emax": 2.78,
+    "emin": -5.05,
+    "frac_sobre_0": 0.418,
+    "horas_seguidas_bajo_0": 212
+   },
+   {
+    "inicio": "2027-04-04",
+    "pico": "2027-04-18",
+    "emax": 2.31,
+    "emin": -5.31,
+    "frac_sobre_0": 0.377,
+    "horas_seguidas_bajo_0": 222
+   },
+   {
+    "inicio": "2027-05-03",
+    "pico": "2027-05-18",
+    "emax": 2.25,
+    "emin": -5.31,
+    "frac_sobre_0": 0.371,
+    "horas_seguidas_bajo_0": 224
+   },
+   {
+    "inicio": "2027-06-01",
+    "pico": "2027-06-16",
+    "emax": 2.61,
+    "emin": -5.16,
+    "frac_sobre_0": 0.402,
+    "horas_seguidas_bajo_0": 218
+   },
+   {
+    "inicio": "2027-07-01",
+    "pico": "2027-07-16",
+    "emax": 3.27,
+    "emin": -4.64,
+    "frac_sobre_0": 0.459,
+    "horas_seguidas_bajo_0": 200
+   },
+   {
+    "inicio": "2027-07-30",
+    "pico": "2027-08-14",
+    "emax": 4.07,
+    "emin": -3.9,
+    "frac_sobre_0": 0.525,
+    "horas_seguidas_bajo_0": 178
+   },
+   {
+    "inicio": "2027-08-29",
+    "pico": "2027-09-13",
+    "emax": 4.8,
+    "emin": -3.13,
+    "frac_sobre_0": 0.583,
+    "horas_seguidas_bajo_0": 156
+   },
+   {
+    "inicio": "2027-09-27",
+    "pico": "2027-10-12",
+    "emax": 5.26,
+    "emin": -2.52,
+    "frac_sobre_0": 0.623,
+    "horas_seguidas_bajo_0": 138
+   },
+   {
+    "inicio": "2027-10-27",
+    "pico": "2027-11-11",
+    "emax": 5.32,
+    "emin": -2.45,
+    "frac_sobre_0": 0.624,
+    "horas_seguidas_bajo_0": 136
+   },
+   {
+    "inicio": "2027-11-26",
+    "pico": "2027-12-10",
+    "emax": 4.93,
+    "emin": -3.03,
+    "frac_sobre_0": 0.593,
+    "horas_seguidas_bajo_0": 152
+   },
+   {
+    "inicio": "2027-12-25",
+    "pico": "2028-01-09",
+    "emax": 4.21,
+    "emin": -3.85,
+    "frac_sobre_0": 0.535,
+    "horas_seguidas_bajo_0": 174
+   },
+   {
+    "inicio": "2028-01-24",
+    "pico": "2028-02-07",
+    "emax": 3.36,
+    "emin": -4.64,
+    "frac_sobre_0": 0.465,
+    "horas_seguidas_bajo_0": 198
+   },
+   {
+    "inicio": "2028-02-22",
+    "pico": "2028-03-08",
+    "emax": 2.65,
+    "emin": -5.19,
+    "frac_sobre_0": 0.404,
+    "horas_seguidas_bajo_0": 216
+   },
+   {
+    "inicio": "2028-03-23",
+    "pico": "2028-04-07",
+    "emax": 2.28,
+    "emin": -5.34,
+    "frac_sobre_0": 0.37,
+    "horas_seguidas_bajo_0": 224
+   },
+   {
+    "inicio": "2028-04-21",
+    "pico": "2028-05-06",
+    "emax": 2.34,
+    "emin": -5.34,
+    "frac_sobre_0": 0.38,
+    "horas_seguidas_bajo_0": 222
+   },
+   {
+    "inicio": "2028-05-21",
+    "pico": "2028-06-05",
+    "emax": 2.79,
+    "emin": -5.07,
+    "frac_sobre_0": 0.419,
+    "horas_seguidas_bajo_0": 212
+   },
+   {
+    "inicio": "2028-06-19",
+    "pico": "2028-07-04",
+    "emax": 3.51,
+    "emin": -4.47,
+    "frac_sobre_0": 0.479,
+    "horas_seguidas_bajo_0": 194
+   },
+   {
+    "inicio": "2028-07-19",
+    "pico": "2028-08-03",
+    "emax": 4.31,
+    "emin": -3.7,
+    "frac_sobre_0": 0.542,
+    "horas_seguidas_bajo_0": 172
+   },
+   {
+    "inicio": "2028-08-17",
+    "pico": "2028-09-01",
+    "emax": 4.98,
+    "emin": -2.95,
+    "frac_sobre_0": 0.594,
+    "horas_seguidas_bajo_0": 152
+   },
+   {
+    "inicio": "2028-09-16",
+    "pico": "2028-10-01",
+    "emax": 5.34,
+    "emin": -2.43,
+    "frac_sobre_0": 0.628,
+    "horas_seguidas_bajo_0": 134
+   },
+   {
+    "inicio": "2028-10-15",
+    "pico": "2028-10-30",
+    "emax": 5.28,
+    "emin": -2.57,
+    "frac_sobre_0": 0.618,
+    "horas_seguidas_bajo_0": 140
+   },
+   {
+    "inicio": "2028-11-14",
+    "pico": "2028-11-29",
+    "emax": 4.79,
+    "emin": -3.23,
+    "frac_sobre_0": 0.583,
+    "horas_seguidas_bajo_0": 156
+   }
+  ]
+ },
+ "tierra": {
+  "tierra_cde_2026-11-14_refractada": {
+   "15": [
+    "17:50",
+    256.4
+   ],
+   "10": [
+    "18:13",
+    254.2
+   ],
+   "7": [
+    "18:27",
+    252.9
+   ],
+   "5": [
+    "18:36",
+    251.9
+   ],
+   "3": [
+    "18:46",
+    250.9
+   ],
+   "1.5": [
+    "18:54",
+    250.1
+   ],
+   "0": [
+    "19:02",
+    249.2
+   ]
+  },
+  "tierra_cde_2026-11-14_geometrica": {
+   "15": [
+    "17:49",
+    256.5
+   ],
+   "10": [
+    "18:12",
+    254.3
+   ],
+   "7": [
+    "18:26",
+    252.9
+   ],
+   "5": [
+    "18:35",
+    252.0
+   ],
+   "3": [
+    "18:45",
+    251.0
+   ],
+   "1.5": [
+    "18:52",
+    250.3
+   ],
+   "0": [
+    "18:59",
+    249.5
+   ]
+  },
+  "tierra_cde_2026-11-15_refractada": {
+   "15": [
+    "17:50",
+    256.2
+   ],
+   "10": [
+    "18:13",
+    254.0
+   ],
+   "7": [
+    "18:27",
+    252.6
+   ],
+   "5": [
+    "18:37",
+    251.6
+   ],
+   "3": [
+    "18:47",
+    250.6
+   ],
+   "1.5": [
+    "18:54",
+    249.8
+   ],
+   "0": [
+    "19:02",
+    248.9
+   ]
+  },
+  "tierra_payunia_2026-11-14_refractada": {
+   "15": [
+    "19:00",
+    257.9
+   ],
+   "10": [
+    "19:26",
+    254.4
+   ],
+   "7": [
+    "19:41",
+    252.2
+   ],
+   "5": [
+    "19:52",
+    250.6
+   ],
+   "3": [
+    "20:03",
+    249.1
+   ],
+   "1.5": [
+    "20:12",
+    247.8
+   ],
+   "0": [
+    "20:21",
+    246.4
+   ]
+  },
+  "tierra_puna_2026-11-14_refractada": {
+   "15": [
+    "18:41",
+    256.5
+   ],
+   "10": [
+    "19:05",
+    254.3
+   ],
+   "7": [
+    "19:19",
+    252.8
+   ],
+   "5": [
+    "19:28",
+    251.9
+   ],
+   "3": [
+    "19:38",
+    250.8
+   ],
+   "1.5": [
+    "19:46",
+    250.0
+   ],
+   "0": [
+    "19:54",
+    249.1
+   ]
+  }
+ }
+}
