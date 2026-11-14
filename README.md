@@ -11,7 +11,15 @@ Built from scratch during the NASA Space Apps Challenge 2026 (Ciudad del Este lo
 
 ---
 
-## Key Highlights & Innovations
+## Current frontend MVP
+
+The current MVP provides a simplified English/Spanish interface, a candidate search and card loaded from JSON, a source/verification registry, an illustrative Earth/Moon comparison, an optional 90-second tour, JSON download and browser print-to-PDF. It supports keyboard navigation, mobile layouts and offline use after the first complete production visit. English is the default; the language selection is saved locally.
+
+The bilingual MVP adapts the current physics-engine exports without changing their source files. Earth candidates remain **mock data**; the lunar products include real data, and the verification section reads the exported report with pending tests explicitly shown. The comparison images are synthetic illustrations, not validated terrain simulations. The original main interface is preserved at `/team.html` (specialist workspace, English), reachable from Guide. This is not a claim of complete scientific validation.
+
+See [web/MVP.md](web/MVP.md) for scope, remaining team integration and browser checks. Run `npm run test:e2e` inside `web/` to run the MVP browser suite (Microsoft Edge by default).
+
+## Target Capabilities & Scientific Design
 
 1. **Grazing Sun Optical Engine (`web/src/luz`)**:
    At the lunar south pole (Mons Mouton, 84.60°S, 31.00°E), the Sun never rises above 7.0° elevation. TERRA-X models real grazing shadow geometry where shadow length equals:
