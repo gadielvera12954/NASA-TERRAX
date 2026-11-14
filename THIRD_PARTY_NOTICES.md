@@ -36,3 +36,15 @@ TERRA-X incorporates and references open scientific datasets and open-source sof
 ### Lucide React
 - **License**: ISC
 - **Copyright**: (c) Lucide Contributors.
+
+### NumPy · SciPy (used by `motor/escala`, `motor/huella`)
+- **License**: BSD-3-Clause
+- **Copyright**: (c) NumPy Developers · (c) SciPy Developers.
+
+### rasterio (used by `motor/escala`)
+- **License**: BSD-3-Clause
+- **Copyright**: (c) Mapbox and rasterio contributors.
+
+### pyproj (used by `motor/escala`)
+- **License**: MIT
+- **Copyright**: (c) pyproj contributors.
