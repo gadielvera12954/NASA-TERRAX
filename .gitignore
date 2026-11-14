@@ -41,6 +41,6 @@ motor/sol/kernels/*.tpc
 salida/maqueta/
 salida/destino/_iluminacion_*.npy
 # Datos bajados por el puente (grandes; se regeneran con python -m puente_lola.bajar)
-datos/
+/datos/
 # Salidas intermedias del motor (se copian a web/public/data con puente_lola/exportar_web.py)
-salida/
+/salida/
