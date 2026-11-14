@@ -39,10 +39,10 @@ export const RecorridoSolLunacion: React.FC<RecorridoSolLunacionProps> = ({
     return 'M ' + pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' L ');
   };
 
-  // Summer: Oct 27 - Nov 26, 2027 (Peak: +6.94°, Min: -4.07°, 148h below horizon)
+  // Summer: Oct 27 - Nov 26, 2027 (Peak: +6.94°, Min: -4.07°, longest full night touching it: 298 h, flat horizon)
   const veranoPath = generateCurve(6.94, -4.07, 0);
 
-  // Winter: May 03 - Jun 01, 2027 (Peak: +3.87°, Min: -6.93°, 210h below horizon)
+  // Winter: May 03 - Jun 01, 2027 (Peak: +3.87°, Min: -6.93°, longest full night touching it: 418 h, flat horizon)
   const inviernoPath = generateCurve(3.87, -6.93, 0.4);
 
   const yZero = sy(0);
@@ -213,7 +213,7 @@ export const RecorridoSolLunacion: React.FC<RecorridoSolLunacionProps> = ({
           fontFamily="var(--mono)"
           fontWeight="700"
         >
-          {temporada === 'verano' ? '148h DARKNESS (SUMMER)' : '210h DARKNESS (WINTER)'}
+          {temporada === 'verano' ? '298 h NIGHT, FLAT HORIZON (SUMMER)' : '418 h NIGHT, FLAT HORIZON (WINTER)'}
         </text>
       </svg>
     </div>

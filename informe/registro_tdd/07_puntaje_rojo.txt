@@ -1,0 +1,16 @@
+
+=================================== ERRORS ====================================
+________________ ERROR collecting motor/tests/test_puntaje.py _________________
+ImportError while importing test module 'C:\Users\lol xdd\OneDrive\Desktop\Nasa Final\Terra-X Sistema\motor\tests\test_puntaje.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+motor\tests\test_puntaje.py:18: in <module>
+    from motor.puntaje import compatibilidad, decision, distancias, fichas, robustez
+E   ImportError: cannot import name 'compatibilidad' from 'motor.puntaje' (C:\Users\lol xdd\OneDrive\Desktop\Nasa Final\Terra-X Sistema\motor\puntaje\__init__.py)
+=========================== short test summary info ===========================
+ERROR motor/tests/test_puntaje.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 44.26s

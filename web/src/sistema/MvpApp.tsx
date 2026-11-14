@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { LanguageProvider, useLanguage } from "../i18n/Language";
+import { Ficha, Manifest } from "../datos/contract";
 import {
-  Ficha,
-  Manifest,
-  readJson,
-  validFicha,
-  validManifest,
-} from "../datos/contract";
+  readManifest,
+  readFicha,
+  readIndex,
+  IndexEntry,
+} from "../datos/integration";
+import { ScientificData } from "./ScientificData";
 import { SolProvider, useSol } from "../luz/SolContext";
 import "./mvp.css";
 
@@ -40,6 +41,21 @@ function AppContent() {
   const [page, setPage] = useState<Page>(currentPage);
   const [manifest, setManifest] = useState<Manifest>();
   const [ficha, setFicha] = useState<Ficha>();
+  const [candidateId, setCandidateId] = useState(
+    () => new URLSearchParams(location.search).get("candidate") || "P-07",
+  );
+  const [candidateIndex, setCandidateIndex] = useState<IndexEntry[]>([]);
+  useEffect(() => {
+    let active = true;
+    readIndex()
+      .then((v) => {
+        if (active) setCandidateIndex(v);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
   const [status, setStatus] = useState<"loading" | "ready" | "error">(
     "loading",
   );
@@ -75,10 +91,7 @@ function AppContent() {
   useEffect(() => {
     let active = true;
     setStatus("loading");
-    Promise.all([
-      readJson("/data/manifest.json", validManifest),
-      readJson("/data/fichas/P-07.json", validFicha),
-    ])
+    Promise.all([readManifest(), readFicha(candidateId)])
       .then(([m, f]) => {
         if (active) {
           setManifest(m);
@@ -92,7 +105,7 @@ function AppContent() {
     return () => {
       active = false;
     };
-  }, [attempt]);
+  }, [attempt, candidateId]);
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
     window.addEventListener("online", update);
@@ -167,10 +180,16 @@ function AppContent() {
       "Ensaya en la Tierra. Prepárate para la Luna.",
     ),
     explore: t("Find a place to practice.", "Encuentra un lugar para ensayar."),
-    card: t(
-      "A promising place, with limits.",
-      "Un lugar prometedor, con límites.",
-    ),
+    card:
+      ficha?.etiqueta === "incompatible"
+        ? t(
+            "This candidate does not meet the requirements.",
+            "Esta candidata no cumple los requisitos.",
+          )
+        : t(
+            "A promising place, with limits.",
+            "Un lugar prometedor, con límites.",
+          ),
     compare: t(
       "Two worlds. Different limits.",
       "Dos mundos. Diferentes límites.",
@@ -193,8 +212,12 @@ function AppContent() {
     `${ficha.id} ${ficha.lugar.region} ${ficha.lugar.nombre}`
       .toLocaleLowerCase()
       .includes(query.trim().toLocaleLowerCase());
-  const number = (value: number) =>
-    new Intl.NumberFormat(language, { maximumFractionDigits: 3 }).format(value);
+  const number = (value: number | null) =>
+    value === null
+      ? t("Unknown", "Desconocido")
+      : new Intl.NumberFormat(language, { maximumFractionDigits: 3 }).format(
+          value,
+        );
   const dimensionNames: Record<string, string> = {
     relieve: t("Terrain", "Relieve"),
     iluminacion: t("Light and shadows", "Luz y sombras"),
@@ -219,6 +242,20 @@ function AppContent() {
     incompatible: t("× Incompatible", "× Incompatible"),
   };
   const translations: Record<string, string> = {
+    "Shadow contrast": "Contraste de sombras",
+    Gravity: "Gravedad",
+    Vacuum: "Vacío",
+    Radiation: "Radiación",
+    Dust: "Polvo",
+    "Time scales": "Escalas de tiempo",
+    "Surface material composition; Fine-scale traversability":
+      "Composición del material superficial; transitabilidad a pequeña escala",
+    "This candidate does not meet the requirements.":
+      "Esta candidata no cumple los requisitos.",
+    "The available evidence supports this candidate within the model limits.":
+      "La evidencia disponible respalda esta candidata dentro de los límites del modelo.",
+    "Read the evidence and remaining uncertainties before choosing this candidate.":
+      "Revisa la evidencia y las incertidumbres pendientes antes de elegir esta candidata.",
     "Solar power profile": "Perfil de generación solar",
     "Vacuum & sharp shadow contrast": "Vacío y contraste de sombras",
     "Lunar gravity (1/6 g)": "Gravedad lunar (1/6 g)",
@@ -484,8 +521,8 @@ function AppContent() {
           <>
             <p className="lead">
               {t(
-                "Choose what you want to rehearse. This MVP includes one example candidate; it does not calculate a new ranking.",
-                "Elige qué quieres ensayar. Este MVP incluye una candidata de ejemplo; no calcula una clasificación nueva.",
+                "Choose what you want to rehearse and explore the exported candidates. This interface does not calculate a new ranking.",
+                "Elige qué quieres ensayar y explora las candidatas exportadas. Esta interfaz no calcula una clasificación nueva.",
               )}
             </p>
             <div className="filters">
@@ -522,6 +559,34 @@ function AppContent() {
                 />
               </label>
             </div>
+            {candidateIndex.length > 1 && (
+              <label>
+                {t(
+                  "Available candidates and controls",
+                  "Candidatas y controles disponibles",
+                )}
+                <select
+                  value={candidateId}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setCandidateId(id);
+                    const url = new URL(location.href);
+                    url.searchParams.set("candidate", id);
+                    history.replaceState(null, "", url);
+                  }}
+                >
+                  {candidateIndex.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.id} ·{" "}
+                      {c.nombre.replace(
+                        " (maqueta)",
+                        t(" (mock)", " (maqueta)"),
+                      )}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
             <p className="notice">
               {operation === "materials"
                 ? t(
@@ -553,7 +618,7 @@ function AppContent() {
                   </figure>
                   <section className="panel">
                     <span className="eyebrow">
-                      {t("1 available candidate", "1 candidata disponible")}
+                      {t("Selected candidate", "Candidata seleccionada")}
                     </span>
                     <h2>
                       {ficha.id} · {ficha.lugar.nombre}
@@ -567,8 +632,8 @@ function AppContent() {
                     </span>
                     <p>
                       {t(
-                        "Some conditions match; important information is still missing.",
-                        "Algunas condiciones encajan; todavía falta información importante.",
+                        "Review the verdict and evidence before choosing a rehearsal site.",
+                        "Revisa el veredicto y la evidencia antes de elegir un lugar de ensayo.",
                       )}
                     </p>
                     <button className="btn" onClick={() => go("card")}>
@@ -690,7 +755,7 @@ function AppContent() {
                     onClick={() =>
                       download(
                         `${ficha.id}.json`,
-                        JSON.stringify(ficha, null, 2),
+                        JSON.stringify(ficha.source ?? ficha, null, 2),
                       )
                     }
                   >
@@ -707,8 +772,12 @@ function AppContent() {
             </div>
             <div className="notice">
               {t("Source", "Fuente")}:{" "}
-              <a href="/data/fichas/P-07.json" target="_blank" rel="noreferrer">
-                /data/fichas/P-07.json
+              <a
+                href={`/data/fichas/${candidateId}.json`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                /data/fichas/{candidateId}.json
               </a>{" "}
               ·{" "}
               {t(
@@ -744,18 +813,7 @@ function AppContent() {
                   )}
                 </p>
               </section>
-              <section className="panel">
-                <h2>{t("Scientific tests", "Pruebas científicas")}</h2>
-                <span className="verdict">
-                  {t("? Results not supplied", "? Resultados no suministrados")}
-                </span>
-                <p>
-                  {t(
-                    "No exported test report is available in this version. Physics, field measurements and Python/browser parity remain unverified here.",
-                    "Esta versión no dispone de un informe exportado de pruebas. La física, las mediciones de campo y la paridad entre Python y el navegador quedan sin verificar aquí.",
-                  )}
-                </p>
-              </section>
+              <ScientificData />
             </div>
             <section className="panel sources">
               <h2>
@@ -775,7 +833,10 @@ function AppContent() {
                   <summary>{f.nombre}</summary>
                   <p>{f.licencia}</p>
                   <p>
-                    SHA-256: <code>{f.sha256}</code>
+                    SHA-256:{" "}
+                    <code>
+                      {f.sha256 || t("Not supplied", "No suministrado")}
+                    </code>
                   </p>
                   <p className="muted">
                     {t("Declared, not verified", "Declarado, sin verificar")}
@@ -841,6 +902,26 @@ function AppContent() {
               ))}
             </div>
             <SunLab />
+            <details className="notice">
+              <summary>
+                {t(
+                  "Team scientific workspace (English)",
+                  "Espacio científico del equipo (inglés)",
+                )}
+              </summary>
+              <p>
+                {t(
+                  "The original team interface is preserved separately, including Destination and its lunar maps. Some specialist views still use mock data.",
+                  "La interfaz original del equipo se conserva por separado, incluidos Destination y sus mapas lunares. Algunas vistas especializadas aún usan datos de maqueta.",
+                )}
+              </p>
+              <a href="/team.html" target="_blank" rel="noreferrer">
+                {t(
+                  "Open team workspace in a new tab",
+                  "Abrir el espacio del equipo en otra pestaña",
+                )}
+              </a>
+            </details>
             <button className="btn" onClick={() => go("explore")}>
               {t(
                 "Ready: explore a candidate →",

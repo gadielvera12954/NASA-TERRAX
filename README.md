@@ -15,22 +15,22 @@ Built from scratch during the NASA Space Apps Challenge 2026 (Ciudad del Este lo
 
 The current MVP provides a simplified English/Spanish interface, a candidate search and card loaded from JSON, a source/verification registry, an illustrative Earth/Moon comparison, an optional 90-second tour, JSON download and browser print-to-PDF. It supports keyboard navigation, mobile layouts and offline use after the first complete production visit. English is the default; the language selection is saved locally.
 
-The available candidate and manifest are **mock data**. Scientific tests and declared source hashes have **not** been verified by this frontend. The comparison images are synthetic illustrations, not validated terrain simulations. The capabilities below describe the scientific design and specialist modules; they are not a claim that the integrated MVP has completed scientific validation.
+The bilingual MVP adapts the current physics-engine exports without changing their source files. Earth candidates remain **mock data**; the lunar products include real data, and the verification section reads the exported report with pending tests explicitly shown. The comparison images are synthetic illustrations, not validated terrain simulations. The original main interface is preserved at `/team.html` (specialist workspace, English), reachable from Guide. This is not a claim of complete scientific validation.
 
 See [web/MVP.md](web/MVP.md) for scope, remaining team integration and browser checks. Run `npm run test:e2e` inside `web/` to run the MVP browser suite (Microsoft Edge by default).
 
 ## Target Capabilities & Scientific Design
 
 1. **Grazing Sun Optical Engine (`web/src/luz`)**:
-   At the lunar south pole (e.g., Mons Mouton, 85.5°S), the Sun never rises above 7.0° elevation. TERRA-X models real grazing shadow geometry where shadow length equals:
+   At the lunar south pole (Mons Mouton, 84.60°S, 31.00°E), the Sun never rises above 7.0° elevation. TERRA-X models real grazing shadow geometry where shadow length equals:
    $$\text{Length} = \frac{h}{\tan(\text{elevation})}$$
    Panels cast physical shadows dynamically updated across the entire interface. On the Moon, shadows have razor-sharp vacuum edges (0 px blur); on Earth, atmospheric penumbral diffusion is applied.
 
 2. **Comparative Two Worlds Canvas (`web/src/pantallas/dos-mundos`)**:
-   A unified raycasting engine comparing the Moon (Mons Mouton LOLA 5m DEM) and Earth (Payunia P-07 volcanic field, Mendoza, NASADEM 60m). An interactive yellow curtain splits the screen, showing shadow coverage calculated with the exact same physics code.
+   A unified raycasting engine comparing the Moon (Mons Mouton, LOLA DEM from PGDA 90 on a 60 m grid) and Earth (Payunia, Mendoza; NASADEM at 60 m once `motor/huella` delivers it). An interactive yellow curtain splits the screen, showing shadow coverage calculated with the exact same physics code.
 
 3. **Safe-Haven Duration Mapping (`web/src/pantallas/destination`)**:
-   Identifies safe havens where uninterrupted darkness does not exceed the VIPER 50-hour battery survival envelope during both summer and winter lunar seasons.
+   Identifies safe havens where uninterrupted darkness does not exceed the VIPER 50-hour battery survival envelope during both summer and winter lunar seasons. On a flat horizon the night at Mons Mouton lasts 289–418 h per lunation (2027), 6 to 8 times that limit: only relief can save a parked rover.
 
 4. **90-Second Guided Tour for Judges (`web/src/recorrido`)**:
    An automated, timed, six-stage narrative walking through the scientific challenge, safe havens, candidate scanning, comparative parity, analog card metrics, and open verification tests.
@@ -101,11 +101,31 @@ npm run preview
 
 ---
 
+## Physics Engine (Part 3, `motor/`)
+
+Python engine that computes every number the app shows: horizons with curvature (F2), the Sun with Skyfield/DE421 checked against JPL Horizons, rover power and battery (F3–F7), the safe-haven map (F20) and analog scoring (F10–F12, F18). Details in `PARTE3_JEAN.md`.
+
+```bash
+python -m pip install -r requirements-motor.txt
+python -m pytest
+python -m motor.tests.cierre
+```
+
+Real LOLA relief (temporary bridge until `motor/ingest` and `motor/escala` exist):
+
+```bash
+python -m pip install rasterio
+python -m puente_lola.bajar
+python -m motor.destino real --objetivo datos/grillas/mons_mouton_60m --capas datos/grillas/mons_mouton_margen_60m datos/grillas/mons_mouton_lejano_240m
+python -m puente_lola.exportar_web
+```
+
 ## Scientific Data Sources
 
-- **JPL Horizons Ephemeris v1.2**: DE421 ephemeris calculations for Mons Mouton (`85.5°S, 31.4°E`) and Payunia (`36.4°S, 69.2°W`).
+- **JPL Horizons API v1.2**: Sun position control for Mons Mouton (`84.60°S, 31.00°E`, official IAU center), the IM-2 site and Earth sites (queried Nov 7 and Nov 14, 2026). The engine computes the Sun with Skyfield and the DE421 ephemeris in the MOON_ME_DE421 frame and agrees with Horizons to 0.00001° on the Moon.
 - **NASADEM Global DEM V001**: NASA EOSDIS Land Processes DAAC (1 arc-second reprojected to 60m UTM).
-- **LOLA / Kaguya Merged Polar DEM (pgda78)**: USGS Astrogeology / NASA PDS Geosciences Node (5m polar stereographic).
+- **LOLA south pole DEMs (PGDA 90, Barker et al. 2023)**: `LDEM_80S_20MPP_ADJ` (20 m, averaged to 60 m), `LDEM_60S_60MPP_ADJ` and `LDEM_60S_240MPP_ADJ` for far relief up to ~300 km.
+- **Lunar polar illumination (PGDA 69, Mazarico et al. 2011)**: `AVGVISIB_85S_060M_201608`, average solar-disc visibility over 18.6 years, used to validate the engine (F13).
 
 ---
 

@@ -1,0 +1,201 @@
+{
+ "parte": 3,
+ "dueno": "Jean",
+ "archivos": [
+  {
+   "archivo": "destino/ficha_invierno.json",
+   "bytes": 4298,
+   "sha256": "863665061fe6633584729ec2e2c8939766daeb127ed385e12f6c02045a2ff061",
+   "maqueta": false
+  },
+  {
+   "archivo": "destino/ficha_liso_invierno.json",
+   "bytes": 4170,
+   "sha256": "648d61495f35683adbe1b9cd246f1fdd65636ca0697e303072f3a621500f3cff",
+   "maqueta": false
+  },
+  {
+   "archivo": "destino/ficha_liso_verano.json",
+   "bytes": 4159,
+   "sha256": "f01b35c0154b95187ece50789407bdbed8f0438f9c652acd165e6387d0132ff4",
+   "maqueta": false
+  },
+  {
+   "archivo": "destino/ficha_verano.json",
+   "bytes": 4294,
+   "sha256": "af8bfa9ddc54dea7f46a5bbd441a8350893e0f6dc87ad23cb5b1d26b302a65b5",
+   "maqueta": false
+  },
+  {
+   "archivo": "destino/horizontes.bin",
+   "bytes": 18000032,
+   "sha256": "7c29f7f56d8fd8cd974da32b6b7ac3002265f8db67c826465102b598da575e3d",
+   "maqueta": false
+  },
+  {
+   "archivo": "destino/horizontes.json",
+   "bytes": 768,
+   "sha256": "9640a43edbb9c2710fea3e06813e791d2e858253f0e5ce1654123afeb052fe3e",
+   "maqueta": false
+  },
+  {
+   "archivo": "destino/paridad.json",
+   "bytes": 179670,
+   "sha256": "3c7bc22f6d7abf94100029c4203839d86a283a02a8b302734a171f6b18ec56ce",
+   "maqueta": false
+  },
+  {
+   "archivo": "destino/refugios_invierno.png",
+   "bytes": 211982,
+   "sha256": "9ffec0ec4d9c4889b08c9f180f6366f471d603e80888248c474587abfffd53d8",
+   "maqueta": false
+  },
+  {
+   "archivo": "destino/refugios_verano.png",
+   "bytes": 236008,
+   "sha256": "312093e48cc30e3f3db7cce6b47e2fb4c8be113f84e8865785c1ddab3df7f4db",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/CTRL-MEDANOS.json",
+   "bytes": 8251,
+   "sha256": "e9f1bf139e481b8a1adf5366099599a81cfceeb601aa21fc396aed547f8bdf24",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/CTRL-MM-R1.json",
+   "bytes": 4394,
+   "sha256": "36b98c2cf152b3d61647034b4c2b5b5944e7569cb1546263b05cfcbf722a967c",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/CTRL-MM-R2.json",
+   "bytes": 4392,
+   "sha256": "722a3c0fcbadb932da311d16dadf03ada1578a935ae16da7ed60b12fb866ff5d",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/CTRL-MM-R3.json",
+   "bytes": 4389,
+   "sha256": "f334520774ad179e36ffa006b20ee33a8b0986a09f08e87fe9ae76dee06d7fdb",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/CTRL-MM.json",
+   "bytes": 4325,
+   "sha256": "7068ee359159a3025e18292b0eb68ac54e1a0590956e0c472d30ecf921d790c0",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/indice.json",
+   "bytes": 5887,
+   "sha256": "01ad09eb3ad0b25d1a5d9fd740734b1493c73c1e698c561bb1d15cb0de61feae",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/P-01.json",
+   "bytes": 8880,
+   "sha256": "29e908726f3599faa75ecc84813493b9fe16ab7a57f29d8a15a42695ab2d60de",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/P-03.json",
+   "bytes": 8903,
+   "sha256": "e54ba1b613946c8632599fdce9c16cad601c9f061a1f483f4d22ae11ed925ada",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/P-07.json",
+   "bytes": 8930,
+   "sha256": "e7a74897368bf0e965a504f3c9e3be7360460303b94d7d711ede78cf89da81b8",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/P-09.json",
+   "bytes": 8903,
+   "sha256": "ad9e2b20c3854e1830d7199fe5f36cb0e66fa9f9ca4e04d9204ad172a7949c79",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/P-12.json",
+   "bytes": 8888,
+   "sha256": "780d5f2d6bd07552c68a706aa416c436e84baa5f9e8474c9e58e7b8081b28408",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/P-15.json",
+   "bytes": 8906,
+   "sha256": "288bfcb271c0a05ead3c3754b504df5f2af2d194ec0626d18e061a5ecd5c1c1d",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/P-19.json",
+   "bytes": 8903,
+   "sha256": "4ffb36eba358fef77ad890223da5bac13944fadcfc657accf0fbe6084a58651f",
+   "maqueta": true
+  },
+  {
+   "archivo": "fichas/P-23.json",
+   "bytes": 8905,
+   "sha256": "c8f3afd46d8351e60ea0bbb084b0fd27c4d50b9fba6ed87d9bbe43a67dbf395b",
+   "maqueta": true
+  },
+  {
+   "archivo": "pruebas.json",
+   "bytes": 17283,
+   "sha256": "137936ef532ffacf3b6c33c68f9255ce56368bb1d9740e8f9a006c1103eb5b60",
+   "maqueta": false
+  },
+  {
+   "archivo": "sol/luna_mons_mouton_invierno_2027.json",
+   "bytes": 11244,
+   "sha256": "00baf6579c8dfb333708d9eee0c8707a779ee3c538a88f1eeeed8b3db3e2cb96",
+   "maqueta": false
+  },
+  {
+   "archivo": "sol/luna_mons_mouton_verano_2027.json",
+   "bytes": 11453,
+   "sha256": "452da515f6ba5a33ddf3948f4c170aa1d206e82dbb2e95a5359d9de149b66f48",
+   "maqueta": false
+  },
+  {
+   "archivo": "sol/tierra_ciudad_del_este_2026-11-14.json",
+   "bytes": 2653,
+   "sha256": "ca8ec1bb5106081f24397dd2f247ba28cd20931dbb16ed111c92d813a444ba67",
+   "maqueta": false
+  }
+ ],
+ "kernels": [
+  {
+   "id": "naif_de421.bsp",
+   "sha256": "a20a7139da04cbc462454634918e9a9ca69127044e2cc9d4f9c16e238d2deedc",
+   "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/"
+  },
+  {
+   "id": "naif_moon_080317.tf",
+   "sha256": "78732477b96f9863e7b0d65bcee3c22b8707ca5ed0db56d1173319cb2e8c7993",
+   "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/"
+  },
+  {
+   "id": "naif_pck00008.tpc",
+   "sha256": "ca07df56e9f1bca85a4c6748b618a46c0bf8e081f96f81e324896f2fdc54ea27",
+   "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/"
+  },
+  {
+   "id": "naif_moon_pa_de421_1900-2050.bpc",
+   "sha256": "656f90616403d75a75f0cd6c8830fc5b44f8cb4facb5ccb8915e752b397520cf",
+   "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/"
+  }
+ ],
+ "meta": {
+  "producto": "manifest_parte3",
+  "version_formato": 1,
+  "motor_version": "0.1.0",
+  "parametros_sha256": "346a6cd22cc8cb1c75852fd8310971a78d50b2bf33d4c0710658e79e8556231c",
+  "generado_utc": "2026-11-14T18:39:37Z",
+  "uso_si": "Código del motor físico (Parte 3) redactado con SI (Claude Code, Anthropic) a partir de los documentos 02 y 04, con pruebas de resultado conocido escritas antes del código. Los números los calcula el motor determinista con datos y parámetros publicados; ningún modelo de lenguaje interviene en el cálculo.",
+  "notas": [
+   "motor/exportar copia estos archivos a web/public/data y verifica cada SHA-256."
+  ]
+ }
+}

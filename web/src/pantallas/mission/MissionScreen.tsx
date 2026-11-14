@@ -43,7 +43,7 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ onIniciarRecorrido
               <div className="cifra-label">Highest Sun at Mons Mouton</div>
             </div>
             <div className="panel" style={{ padding: '14px' }}>
-              <div className="cifra-grande">148–210 h</div>
+              <div className="cifra-grande">289–418 h</div>
               <div className="cifra-label">Sun below a flat horizon, each lunation</div>
             </div>
             <div className="panel" style={{ padding: '14px' }}>
@@ -75,11 +75,11 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ onIniciarRecorrido
                 color: 'var(--sol)',
               }}
             >
-              MONS MOUTON PLATEAU · 85.5°S
+              MONS MOUTON · 84.60°S
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 4px 4px', fontSize: '11px', color: 'var(--sec-dark)' }}>
-            <span>LOLA 5m DEM · USGS / NASA</span>
+            <span>LOLA DEM (PGDA 90) · NASA</span>
             <span style={{ color: 'var(--sol)' }}>Dynamic Grazing Shadow Active</span>
           </div>
         </div>

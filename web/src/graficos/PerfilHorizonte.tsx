@@ -10,7 +10,7 @@ export interface PerfilHorizonteProps {
 export const PerfilHorizonte: React.FC<PerfilHorizonteProps> = ({
   ancho = 520,
   alto = 160,
-  sitio = 'Mons Mouton Plateau (85.5°S, 31.4°E)',
+  sitio = 'Mons Mouton (84.60°S, 31.00°E)',
 }) => {
   const { elevacion, azimut } = useSol();
 

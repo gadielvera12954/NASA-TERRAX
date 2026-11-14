@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "destino.schema.json",
+  "title": "Ficha del destino (destino/ficha_<lunacion>.json)",
+  "description": "Salida de motor/destino: qué pone en riesgo la operación (F3 a F7) y dónde están los refugios (F20).",
+  "type": "object",
+  "required": ["sitio", "cuerpo", "lunacion", "punto", "horizonte", "vehiculo", "resultado", "ab", "sensibilidad_consumo", "refugios", "supuestos", "maqueta", "meta"],
+  "properties": {
+    "sitio": { "type": "string" },
+    "cuerpo": { "enum": ["luna", "tierra"] },
+    "lunacion": {
+      "type": "object",
+      "required": ["nombre", "desde", "hasta", "sol_max_deg", "sol_min_deg", "fecha_sol_max"],
+      "properties": {
+        "nombre": { "type": "string" },
+        "desde": { "$ref": "comun.schema.json#/$defs/fecha" },
+        "hasta": { "$ref": "comun.schema.json#/$defs/fecha" },
+        "sol_max_deg": { "type": "number" },
+        "sol_min_deg": { "type": "number" },
+        "fecha_sol_max": { "$ref": "comun.schema.json#/$defs/utc" }
+      }
+    },
+    "punto": {
+      "type": "object",
+      "required": ["lat", "lon"],
+      "properties": {
+        "lat": { "type": "number" },
+        "lon": { "type": "number" },
+        "fila": { "type": ["integer", "null"] },
+        "col": { "type": ["integer", "null"] }
+      }
+    },
+    "horizonte": {
+      "type": "object",
+      "required": ["tipo", "n_az"],
+      "properties": {
+        "tipo": { "enum": ["liso", "relieve"] },
+        "n_az": { "type": "integer" },
+        "altura_observador_m": { "type": "number" }
+      }
+    },
+    "vehiculo": { "type": "object" },
+    "resultado": { "$ref": "#/$defs/resultado" },
+    "ab": {
+      "type": "object",
+      "required": ["plano", "inclinado"],
+      "properties": {
+        "plano": { "$ref": "#/$defs/resultado" },
+        "inclinado": { "$ref": "#/$defs/resultado" },
+        "inclinacion_deg": { "type": "number" },
+        "orientacion_pendiente_deg": { "type": "number" }
+      }
+    },
+    "sensibilidad_consumo": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["consumo_w", "tramo_oscuro_mas_largo_h", "bateria_minima_frac", "en_riesgo"],
+        "properties": {
+          "consumo_w": { "type": "number" },
+          "tramo_oscuro_mas_largo_h": { "type": "number" },
+          "bateria_minima_frac": { "type": "number" },
+          "en_riesgo": { "type": "boolean" }
+        }
+      }
+    },
+    "refugios": {
+      "type": ["object", "null"],
+      "required": ["limite_h", "fraccion_terreno", "refugio_mas_cercano_km", "mapa", "codificacion"],
+      "properties": {
+        "limite_h": { "type": "number" },
+        "fraccion_terreno": { "type": "number", "minimum": 0, "maximum": 1 },
+        "refugio_mas_cercano_km": { "type": ["number", "null"] },
+        "mapa": { "type": "string" },
+        "codificacion": { "type": "string" },
+        "horas_p50": { "type": ["number", "null"] }
+      }
+    },
+    "supuestos": { "type": "array", "items": { "type": "string" } },
+    "maqueta": { "type": "boolean" },
+    "meta": { "$ref": "comun.schema.json#/$defs/meta" }
+  },
+  "$defs": {
+    "resultado": {
+      "type": "object",
+      "required": ["sol_en_paneles_frac", "sobre_p_surv_frac", "potencia_media_w", "tramo_oscuro_mas_largo_h", "noche_geometrica_h", "bateria_minima_wh", "bateria_minima_frac", "condiciones", "en_riesgo"],
+      "properties": {
+        "sol_en_paneles_frac": { "type": "number", "minimum": 0, "maximum": 1 },
+        "sobre_p_surv_frac": { "type": "number", "minimum": 0, "maximum": 1 },
+        "potencia_media_w": { "type": "number", "minimum": 0 },
+        "tramo_oscuro_mas_largo_h": { "type": "number", "minimum": 0 },
+        "noche_geometrica_h": { "type": "number", "minimum": 0 },
+        "bateria_minima_wh": { "type": "number", "minimum": 0 },
+        "bateria_minima_frac": { "type": "number", "minimum": 0, "maximum": 1 },
+        "condiciones": {
+          "type": "object",
+          "required": ["oscuridad", "bateria", "pendiente"],
+          "properties": {
+            "oscuridad": { "type": "boolean" },
+            "bateria": { "type": "boolean" },
+            "pendiente": { "type": "boolean" }
+          }
+        },
+        "en_riesgo": { "type": "boolean" }
+      }
+    }
+  }
+}

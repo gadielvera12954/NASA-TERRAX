@@ -32,3 +32,17 @@ __pycache__/
 env/
 venv/
 .venv/
+
+# Parte 3 (motor físico)
+# Kernels de NAIF: Skyfield los baja solo; sus SHA-256 quedan en salida/manifest_parte3.json
+motor/sol/kernels/*.bsp
+motor/sol/kernels/*.bpc
+motor/sol/kernels/*.tf
+motor/sol/kernels/*.tpc
+# Intermedios de la maqueta y del cálculo de iluminación
+salida/maqueta/
+salida/destino/_iluminacion_*.npy
+# Datos bajados por el puente (grandes; se regeneran con python -m puente_lola.bajar)
+/datos/
+# Salidas intermedias del motor (se copian a web/public/data con puente_lola/exportar_web.py)
+/salida/

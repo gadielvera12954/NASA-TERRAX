@@ -1,33 +1,17 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ShieldCheck } from 'lucide-react';
 
 export const DataScreen: React.FC = () => {
-  const fuentes = [
-    {
-      id: 'JPL Horizons Ephemerides v1.2',
-      entidad: 'NASA Jet Propulsion Laboratory / Solar System Dynamics',
-      coordenadas: 'Mons Mouton (85.5°S, 31.4°E) & Payunia (36.4°S, 69.2°W)',
-      resolucion: '1-minute time step · DE421 ephemeris',
-      licencia: 'NASA Open Data / Public Domain',
-      sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-    },
-    {
-      id: 'NASADEM Global DEM V001',
-      entidad: 'NASA EOSDIS Land Processes DAAC',
-      coordenadas: 'Payunia Volcanic Field, Mendoza, Argentina',
-      resolucion: '1 arc-second (reprojected to 60m UTM)',
-      licencia: 'NASA Open Data / Public Domain',
-      sha256: '7a35c5e882a201c107297e64de06815cf1f39c81b5c4f2bb76fe17188b8e0d37',
-    },
-    {
-      id: 'LOLA / Kaguya Merged DEM (pgda78)',
-      entidad: 'USGS Astrogeology / NASA PDS Geosciences Node',
-      coordenadas: 'Lunar South Pole · Mons Mouton High Plateau',
-      resolucion: '5 meters / pixel polar stereographic',
-      licencia: 'USGS / NASA Open Data',
-      sha256: '1f893e481b490f2307b22a0096f131a9c336b132a488e0f63b468903c72b7a94',
-    },
-  ];
+  // Sources come from manifest.json, written from the real downloads (versions and SHA-256 of every crop).
+  const [fuentes, setFuentes] = useState<
+    { id: string; entidad: string; coordenadas: string; resolucion: string; licencia: string; sha256: string | null }[]
+  >([]);
+  useEffect(() => {
+    fetch('/data/manifest.json')
+      .then((r) => r.json())
+      .then((m) => setFuentes(m.fuentes ?? []))
+      .catch(() => setFuentes([]));
+  }, []);
 
   return (
     <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px 20px 80px' }}>
@@ -79,7 +63,7 @@ export const DataScreen: React.FC = () => {
               <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
                 <span className="et">SHA-256: </span>
                 <code style={{ fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--dato)' }}>
-                  {f.sha256}
+                  {f.sha256 ?? 'live API query (no file hash); saved responses are hashed in manifest_parte3.json'}
                 </code>
               </div>
             </div>

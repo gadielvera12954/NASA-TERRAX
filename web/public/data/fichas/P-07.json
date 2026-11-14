@@ -1,47 +1,478 @@
 {
-  "id": "P-07",
-  "etiqueta": "con_huecos",
-  "etiqueta_en": "With gaps",
-  "lugar": {
-    "lat": -36.41,
-    "lon": -69.20,
-    "region": "Payunia, Mendoza, Argentina",
-    "nombre": "Volcán Malacara / Payenia"
+ "id": "P-07",
+ "nombre": "Payunia P-07 (maqueta)",
+ "region": "payunia",
+ "control": null,
+ "etiqueta": "analogo_sostenido",
+ "orden": 2,
+ "orden_candidatas": 1,
+ "lugar": {
+  "lat": -36.41,
+  "lon": -69.2,
+  "alt_m": 1614.8741643228648
+ },
+ "C": 0.8863,
+ "E": 0.8,
+ "L": 0.709,
+ "U": 0.909,
+ "umbral": 0.7,
+ "requisitos": {
+  "vegetacion": {
+   "estado": "cumple",
+   "valor": 0.07,
+   "limite": 0.2,
+   "unidad": "NDVI percentil 90 anual"
   },
-  "C": 0.82,
-  "E": 0.70,
-  "L": 0.574,
-  "U": 0.874,
-  "requisitos": {
-    "vegetacion": "cumple",
-    "pendiente": "cumple"
+  "pendiente": {
+   "estado": "cumple",
+   "valor": 5.21,
+   "limite": 15.0,
+   "unidad": "grados (mediana a 60 m)"
+  }
+ },
+ "propiedades": {
+  "pendiente": {
+   "estado": "conocida",
+   "peso": 0.3,
+   "distancia": 0.1382,
+   "tolerancia": 3.0,
+   "utilidad": 0.954973,
+   "unidad": "grados (W1)"
   },
-  "dimensiones": {
-    "relieve": "Strong",
-    "iluminacion": "Strong",
-    "materiales": "Not comparable",
-    "temperatura": "Weak",
-    "agua_hielo": "Weak",
-    "polvo_viento": "Unknown",
-    "biologia": "Weak",
-    "operaciones_roboticas": "Strong"
+  "luz_rasante": {
+   "estado": "conocida",
+   "peso": 0.3,
+   "distancia": 0.00753,
+   "tolerancia": 0.05,
+   "utilidad": 0.860134,
+   "unidad": "fracción en sombra (media de |Δf̄| de 1,5° a 10°)"
   },
-  "horario": [
-    {
-      "fecha": "2026-11-14",
-      "desde": "19:41",
-      "hasta": "20:12",
-      "azimut": [252, 248],
-      "sol_elevacion": [7.0, 1.5]
+  "rugosidad": {
+   "estado": "conocida",
+   "peso": 0.2,
+   "distancia": 0.19961,
+   "tolerancia": 1.0,
+   "utilidad": 0.82245,
+   "unidad": "W1/τ, media de las escalas de 200 a 1.600 m",
+   "detalle": {
+    "200": {
+     "w1_m": 0.0352,
+     "tolerancia_m": 0.4521,
+     "utilidad": 0.925031
+    },
+    "400": {
+     "w1_m": 0.2101,
+     "tolerancia_m": 1.0055,
+     "utilidad": 0.811439
+    },
+    "800": {
+     "w1_m": 0.7151,
+     "tolerancia_m": 2.1416,
+     "utilidad": 0.716132
+    },
+    "1600": {
+     "w1_m": 0.7457,
+     "tolerancia_m": 4.1964,
+     "utilidad": 0.837199
     }
+   }
+  },
+  "material": {
+   "estado": "faltante",
+   "peso": 0.1,
+   "distancia": null,
+   "tolerancia": null,
+   "utilidad": null,
+   "unidad": "utilidad declarada por una medición"
+  },
+  "transitabilidad_fina": {
+   "estado": "faltante",
+   "peso": 0.1,
+   "distancia": null,
+   "tolerancia": null,
+   "utilidad": null,
+   "unidad": "utilidad declarada por una medición"
+  }
+ },
+ "dimensiones": {
+  "relieve": {
+   "valor": "fuerte",
+   "fuente": "calculada"
+  },
+  "iluminacion": {
+   "valor": "fuerte",
+   "fuente": "calculada"
+  },
+  "operaciones_roboticas": {
+   "valor": "fuerte",
+   "fuente": "calculada"
+  },
+  "materiales": {
+   "valor": "no_comparable",
+   "fuente": "juicio_equipo"
+  },
+  "temperatura": {
+   "valor": "debil",
+   "fuente": "juicio_equipo"
+  },
+  "agua_hielo": {
+   "valor": "debil",
+   "fuente": "juicio_equipo"
+  },
+  "polvo_viento": {
+   "valor": "desconocido",
+   "fuente": "juicio_equipo"
+  },
+  "biologia": {
+   "valor": "debil",
+   "fuente": "juicio_equipo"
+  }
+ },
+ "luz_rasante": {
+  "e_deg": [
+   1.5,
+   2.0,
+   2.5,
+   3.0,
+   3.5,
+   4.0,
+   4.5,
+   5.0,
+   5.5,
+   6.0,
+   6.5,
+   7.0,
+   7.5,
+   8.0,
+   8.5,
+   9.0,
+   9.5,
+   10.0
   ],
-  "no_transfiere": [
-    "Solar power profile",
-    "Vacuum & sharp shadow contrast",
-    "Lunar gravity (1/6 g)",
-    "Electrostatic regolith dust"
+  "f_parcela": [
+   0.6878,
+   0.6064,
+   0.5323,
+   0.4653,
+   0.4048,
+   0.3505,
+   0.302,
+   0.2589,
+   0.2207,
+   0.1872,
+   0.1578,
+   0.1322,
+   0.1101,
+   0.0911,
+   0.0749,
+   0.0611,
+   0.0496,
+   0.0399
   ],
-  "medir_primero": "Surface material composition, then rock distribution.",
-  "resumen": "Fits what we know. Measuring the surface material could change first place.",
-  "maqueta": true
+  "f_referencia": [
+   0.6906,
+   0.6053,
+   0.5282,
+   0.4588,
+   0.3966,
+   0.3411,
+   0.2918,
+   0.2483,
+   0.21,
+   0.1767,
+   0.1477,
+   0.1227,
+   0.1012,
+   0.083,
+   0.0675,
+   0.0546,
+   0.0437,
+   0.0348
+  ]
+ },
+ "horario": [
+  {
+   "tipo": "amanecer",
+   "fecha": "2026-11-14",
+   "desde": "06:31",
+   "hasta": "07:01",
+   "azimut": [
+    112.0,
+    107.7
+   ],
+   "e_desde": 1.5,
+   "e_hasta": 7.0,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.0
+  },
+  {
+   "tipo": "atardecer",
+   "fecha": "2026-11-14",
+   "desde": "19:41",
+   "hasta": "20:11",
+   "azimut": [
+    252.2,
+    247.9
+   ],
+   "e_desde": 7.0,
+   "e_hasta": 1.5,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.1
+  },
+  {
+   "tipo": "amanecer",
+   "fecha": "2026-11-15",
+   "desde": "06:30",
+   "hasta": "07:00",
+   "azimut": [
+    112.3,
+    108.0
+   ],
+   "e_desde": 1.5,
+   "e_hasta": 7.0,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.1
+  },
+  {
+   "tipo": "atardecer",
+   "fecha": "2026-11-15",
+   "desde": "19:42",
+   "hasta": "20:12",
+   "azimut": [
+    251.9,
+    247.5
+   ],
+   "e_desde": 7.0,
+   "e_hasta": 1.5,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.1
+  },
+  {
+   "tipo": "amanecer",
+   "fecha": "2026-11-16",
+   "desde": "06:30",
+   "hasta": "07:00",
+   "azimut": [
+    112.6,
+    108.3
+   ],
+   "e_desde": 1.5,
+   "e_hasta": 7.0,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.1
+  },
+  {
+   "tipo": "atardecer",
+   "fecha": "2026-11-16",
+   "desde": "19:43",
+   "hasta": "20:13",
+   "azimut": [
+    251.5,
+    247.2
+   ],
+   "e_desde": 7.0,
+   "e_hasta": 1.5,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.2
+  },
+  {
+   "tipo": "amanecer",
+   "fecha": "2026-11-17",
+   "desde": "06:29",
+   "hasta": "06:59",
+   "azimut": [
+    112.9,
+    108.6
+   ],
+   "e_desde": 1.5,
+   "e_hasta": 7.0,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.2
+  },
+  {
+   "tipo": "atardecer",
+   "fecha": "2026-11-17",
+   "desde": "19:44",
+   "hasta": "20:14",
+   "azimut": [
+    251.2,
+    246.9
+   ],
+   "e_desde": 7.0,
+   "e_hasta": 1.5,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.2
+  },
+  {
+   "tipo": "amanecer",
+   "fecha": "2026-11-18",
+   "desde": "06:28",
+   "hasta": "06:59",
+   "azimut": [
+    113.2,
+    108.9
+   ],
+   "e_desde": 1.5,
+   "e_hasta": 7.0,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.2
+  },
+  {
+   "tipo": "atardecer",
+   "fecha": "2026-11-18",
+   "desde": "19:45",
+   "hasta": "20:15",
+   "azimut": [
+    250.9,
+    246.6
+   ],
+   "e_desde": 7.0,
+   "e_hasta": 1.5,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.3
+  },
+  {
+   "tipo": "amanecer",
+   "fecha": "2026-11-19",
+   "desde": "06:28",
+   "hasta": "06:58",
+   "azimut": [
+    113.5,
+    109.2
+   ],
+   "e_desde": 1.5,
+   "e_hasta": 7.0,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.3
+  },
+  {
+   "tipo": "atardecer",
+   "fecha": "2026-11-19",
+   "desde": "19:46",
+   "hasta": "20:16",
+   "azimut": [
+    250.7,
+    246.3
+   ],
+   "e_desde": 7.0,
+   "e_hasta": 1.5,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.4
+  },
+  {
+   "tipo": "amanecer",
+   "fecha": "2026-11-20",
+   "desde": "06:27",
+   "hasta": "06:58",
+   "azimut": [
+    113.8,
+    109.5
+   ],
+   "e_desde": 1.5,
+   "e_hasta": 7.0,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.4
+  },
+  {
+   "tipo": "atardecer",
+   "fecha": "2026-11-20",
+   "desde": "19:47",
+   "hasta": "20:17",
+   "azimut": [
+    250.4,
+    246.0
+   ],
+   "e_desde": 7.0,
+   "e_hasta": 1.5,
+   "zona": "-03:00",
+   "horizonte": "liso",
+   "duracion_min": 30.4
+  }
+ ],
+ "no_transfiere": [
+  "energia",
+  "contraste_sombras",
+  "gravedad",
+  "vacio",
+  "radiacion",
+  "polvo",
+  "tiempo"
+ ],
+ "medir_primero": [
+  "material",
+  "transitabilidad_fina"
+ ],
+ "dato_que_cambia": [
+  {
+   "propiedad": "material",
+   "peor": {
+    "L": 0.709,
+    "U": 0.809,
+    "etiqueta": "analogo_sostenido",
+    "orden": 1
+   },
+   "mejor": {
+    "L": 0.809,
+    "U": 0.909,
+    "etiqueta": "analogo_sostenido",
+    "orden": 1
+   },
+   "cambia_etiqueta": false,
+   "cambia_primer_lugar": false
+  },
+  {
+   "propiedad": "transitabilidad_fina",
+   "peor": {
+    "L": 0.709,
+    "U": 0.809,
+    "etiqueta": "analogo_sostenido",
+    "orden": 1
+   },
+   "mejor": {
+    "L": 0.809,
+    "U": 0.909,
+    "etiqueta": "analogo_sostenido",
+    "orden": 1
+   },
+   "cambia_etiqueta": false,
+   "cambia_primer_lugar": false
+  }
+ ],
+ "robustez": {
+  "primera_frac": 1.0,
+  "n": 1000,
+  "alfa": 100.0
+ },
+ "fuentes": [
+  {
+   "id": "maqueta_terra_x",
+   "sha256": null
+  }
+ ],
+ "maqueta": true,
+ "meta": {
+  "producto": "tarjeta_analogo",
+  "version_formato": 1,
+  "motor_version": "0.1.0",
+  "parametros_sha256": "346a6cd22cc8cb1c75852fd8310971a78d50b2bf33d4c0710658e79e8556231c",
+  "generado_utc": "2026-11-14T16:33:45Z",
+  "uso_si": "Código del motor físico (Parte 3) redactado con SI (Claude Code, Anthropic) a partir de los documentos 02 y 04, con pruebas de resultado conocido escritas antes del código. Los números los calcula el motor determinista con datos y parámetros publicados; ningún modelo de lenguaje interviene en el cálculo.",
+  "notas": [
+   "Compatibilidad y evidencia van separadas: un valor de C no es un porcentaje de parecido.",
+   "L y U son límites algebraicos (utilidad 0 o 1 en lo que falta), no un intervalo de confianza."
+  ]
+ }
 }

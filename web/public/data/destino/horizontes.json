@@ -1,0 +1,23 @@
+{
+  "archivo": "horizontes.bin",
+  "formato": "TXHZ v1",
+  "sha256": "7c29f7f56d8fd8cd974da32b6b7ac3002265f8db67c826465102b598da575e3d",
+  "ancho": 500,
+  "alto": 500,
+  "n_az": 72,
+  "pixel_m": 60.0,
+  "convergencia_deg": 30.993,
+  "cuerpo": "luna",
+  "altura_observador_m": 1.0,
+  "grilla": "mons_mouton_60m",
+  "fuentes": [
+    {
+      "id": "pgda_LDEM_80S_20MPP_ADJ",
+      "sha256": "c19914b1fc45fadd86611819fd10b4165d221b13fe6abdbaa78e6dff3740fa30",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_20MPP_ADJ.TIF",
+      "version": "Fri, 07 Jul 2023 22:28:19 GMT · ETag W/\"a0b2f283-189327867b8\""
+    }
+  ],
+  "parametros_sha256": "346a6cd22cc8cb1c75852fd8310971a78d50b2bf33d4c0710658e79e8556231c",
+  "maqueta": false
+}

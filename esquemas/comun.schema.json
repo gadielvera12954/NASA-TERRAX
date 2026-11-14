@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "comun.schema.json",
+  "title": "Definiciones comunes de TERRA-X",
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "fecha": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "hora": { "type": "string", "pattern": "^\\d{2}:\\d{2}$" },
+    "utc": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$" },
+    "lugar": {
+      "type": "object",
+      "required": ["lat", "lon"],
+      "properties": {
+        "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+        "lon": { "type": "number", "minimum": -180, "maximum": 360 },
+        "alt_m": { "type": "number" },
+        "nombre": { "type": "string" }
+      }
+    },
+    "fuente": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string" },
+        "sha256": { "anyOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
+        "version": { "type": "string" },
+        "url": { "type": "string" }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "required": ["producto", "version_formato", "motor_version", "parametros_sha256", "generado_utc", "uso_si"],
+      "properties": {
+        "producto": { "type": "string" },
+        "version_formato": { "type": "integer", "minimum": 1 },
+        "motor_version": { "type": "string" },
+        "parametros_sha256": { "$ref": "#/$defs/sha256" },
+        "generado_utc": { "$ref": "#/$defs/utc" },
+        "uso_si": { "type": "string", "minLength": 10 },
+        "notas": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

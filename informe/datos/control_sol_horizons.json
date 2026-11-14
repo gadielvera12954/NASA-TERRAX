@@ -1,0 +1,235 @@
+{
+ "meta_deg": 0.1,
+ "kernels": [
+  {
+   "id": "naif_de421.bsp",
+   "sha256": "a20a7139da04cbc462454634918e9a9ca69127044e2cc9d4f9c16e238d2deedc",
+   "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/"
+  },
+  {
+   "id": "naif_moon_080317.tf",
+   "sha256": "78732477b96f9863e7b0d65bcee3c22b8707ca5ed0db56d1173319cb2e8c7993",
+   "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/"
+  },
+  {
+   "id": "naif_pck00008.tpc",
+   "sha256": "ca07df56e9f1bca85a4c6748b618a46c0bf8e081f96f81e324896f2fdc54ea27",
+   "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/"
+  },
+  {
+   "id": "naif_moon_pa_de421_1900-2050.bpc",
+   "sha256": "656f90616403d75a75f0cd6c8830fc5b44f8cb4facb5ccb8915e752b397520cf",
+   "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/"
+  }
+ ],
+ "controles": [
+  {
+   "carpeta": "2026-11-07",
+   "meta_deg": 0.1,
+   "peor_dif_deg": 0.0006307636631532887,
+   "peor_dif_luna_deg": 1.3024890712198811e-05,
+   "pasa": true,
+   "archivos": [
+    {
+     "archivo": "luna_mons_mouton_centro_2027_2028.csv",
+     "consulta": "JPL Horizons API v1.2; consulta 2026-11-07T16:04:36+00:00; centro coord@301; sitio 31.00,-84.60,0; paso 2 h; refraccion=False",
+     "cuerpo": "luna",
+     "refraccion": false,
+     "n": 8773,
+     "max_dif_elevacion_deg": 1.2896269408813055e-05,
+     "max_dif_azimut_deg": 8.953261370913986e-06,
+     "media_dif_elevacion_deg": 6.116382434179212e-06
+    },
+    {
+     "archivo": "luna_im2_athena_2027_2028.csv",
+     "consulta": "JPL Horizons API v1.2; consulta 2026-11-07T16:04:36+00:00; centro coord@301; sitio 29.1957,-84.7906,0; paso 2 h; refraccion=False",
+     "cuerpo": "luna",
+     "refraccion": false,
+     "n": 8773,
+     "max_dif_elevacion_deg": 1.2917998133854525e-05,
+     "max_dif_azimut_deg": 8.912161440607458e-06,
+     "media_dif_elevacion_deg": 6.126506330558847e-06
+    },
+    {
+     "archivo": "luna_mons_mouton_norte_2027_2028.csv",
+     "consulta": "JPL Horizons API v1.2; consulta 2026-11-07T16:04:36+00:00; centro coord@301; sitio 31.00,-83.30,0; paso 2 h; refraccion=False",
+     "cuerpo": "luna",
+     "refraccion": false,
+     "n": 8773,
+     "max_dif_elevacion_deg": 1.278683313632456e-05,
+     "max_dif_azimut_deg": 9.178221247406855e-06,
+     "media_dif_elevacion_deg": 6.064691786641012e-06
+    },
+    {
+     "archivo": "luna_mons_mouton_sur_2027_2028.csv",
+     "consulta": "JPL Horizons API v1.2; consulta 2026-11-07T16:04:36+00:00; centro coord@301; sitio 31.00,-86.22,0; paso 2 h; refraccion=False",
+     "cuerpo": "luna",
+     "refraccion": false,
+     "n": 8773,
+     "max_dif_elevacion_deg": 1.3024890712198811e-05,
+     "max_dif_azimut_deg": 8.66789905930025e-06,
+     "media_dif_elevacion_deg": 6.1783519833813215e-06
+    },
+    {
+     "archivo": "tierra_cde_2026-11-14_geometrica.csv",
+     "consulta": "JPL Horizons API v1.2; consulta 2026-11-07T16:04:36+00:00; centro coord@399; sitio -54.61,-25.51,0.2; paso 1 m; refraccion=False",
+     "cuerpo": "tierra",
+     "refraccion": false,
+     "n": 301,
+     "max_dif_elevacion_deg": 0.0005950447476479326,
+     "max_dif_azimut_deg": 0.00040438438124796466,
+     "media_dif_elevacion_deg": 0.0005591800319360614
+    },
+    {
+     "archivo": "tierra_cde_2026-11-14_refractada.csv",
+     "consulta": "JPL Horizons API v1.2; consulta 2026-11-07T16:04:36+00:00; centro coord@399; sitio -54.61,-25.51,0.2; paso 1 m; refraccion=True",
+     "cuerpo": "tierra",
+     "refraccion": true,
+     "n": 180,
+     "max_dif_elevacion_deg": 0.0006267459959801158,
+     "max_dif_azimut_deg": 0.0002841496866926983,
+     "media_dif_elevacion_deg": 0.0006071001881367296
+    },
+    {
+     "archivo": "tierra_cde_2026-11-15_refractada.csv",
+     "consulta": "JPL Horizons API v1.2; consulta 2026-11-07T16:04:36+00:00; centro coord@399; sitio -54.61,-25.51,0.2; paso 1 m; refraccion=True",
+     "cuerpo": "tierra",
+     "refraccion": true,
+     "n": 181,
+     "max_dif_elevacion_deg": 0.0006307636631532887,
+     "max_dif_azimut_deg": 0.00028637141869447297,
+     "media_dif_elevacion_deg": 0.0006104341907754318
+    },
+    {
+     "archivo": "tierra_payunia_2026-11-14_refractada.csv",
+     "consulta": "JPL Horizons API v1.2; consulta 2026-11-07T16:04:36+00:00; centro coord@399; sitio -69.25,-36.42,1.8; paso 1 m; refraccion=True",
+     "cuerpo": "tierra",
+     "refraccion": true,
+     "n": 199,
+     "max_dif_elevacion_deg": 0.0005546339573001546,
+     "max_dif_azimut_deg": 0.00038576655235607793,
+     "media_dif_elevacion_deg": 0.000537573484531795
+    },
+    {
+     "archivo": "tierra_puna_2026-11-14_refractada.csv",
+     "consulta": "JPL Horizons API v1.2; consulta 2026-11-07T16:04:36+00:00; centro coord@399; sitio -67.40,-26.06,3.4; paso 1 m; refraccion=True",
+     "cuerpo": "tierra",
+     "refraccion": true,
+     "n": 172,
+     "max_dif_elevacion_deg": 0.000615103228881253,
+     "max_dif_azimut_deg": 0.000285580511686402,
+     "media_dif_elevacion_deg": 0.0005953766892687882
+    }
+   ]
+  },
+  {
+   "carpeta": "2026-11-14",
+   "meta_deg": 0.1,
+   "peor_dif_deg": 0.0006369946631537005,
+   "peor_dif_luna_deg": 1.3024890712198811e-05,
+   "pasa": true,
+   "archivos": [
+    {
+     "archivo": "luna_mons_mouton_centro_2027_2028.csv",
+     "consulta": "JPL Horizons API v1.2; consulta 2026-11-14T16:07:35+00:00; centro coord@301; sitio 31.00,-84.60,0; paso 2 h; refraccion=False",
+     "cuerpo": "luna",
+     "refraccion": false,
+     "n": 8773,
+     "max_dif_elevacion_deg": 1.2896269408813055e-05,
+     "max_dif_azimut_deg": 8.953261370913986e-06,
+     "media_dif_elevacion_deg": 6.116382434179212e-06
+    },
+    {
+     "archivo": "luna_im2_athena_2027_2028.csv",
+     "consulta": "JPL Horizons API v1.2; consulta 2026-11-14T16:07:35+00:00; centro coord@301; sitio 29.1957,-84.7906,0; paso 2 h; refraccion=False",
+     "cuerpo": "luna",
+     "refraccion": false,
+     "n": 8773,
+     "max_dif_elevacion_deg": 1.2917998133854525e-05,
+     "max_dif_azimut_deg": 8.912161440607458e-06,
+     "media_dif_elevacion_deg": 6.126506330558847e-06
+    },
+    {
+     "archivo": "luna_mons_mouton_norte_2027_2028.csv",
+     "consulta": "JPL Horizons API v1.2; consulta 2026-11-14T16:07:35+00:00; centro coord@301; sitio 31.00,-83.30,0; paso 2 h; refraccion=False",
+     "cuerpo": "luna",
+     "refraccion": false,
+     "n": 8773,
+     "max_dif_elevacion_deg": 1.278683313632456e-05,
+     "max_dif_azimut_deg": 9.178221247406855e-06,
+     "media_dif_elevacion_deg": 6.064691786641012e-06
+    },
+    {
+     "archivo": "luna_mons_mouton_sur_2027_2028.csv",
+     "consulta": "JPL Horizons API v1.2; consulta 2026-11-14T16:07:35+00:00; centro coord@301; sitio 31.00,-86.22,0; paso 2 h; refraccion=False",
+     "cuerpo": "luna",
+     "refraccion": false,
+     "n": 8773,
+     "max_dif_elevacion_deg": 1.3024890712198811e-05,
+     "max_dif_azimut_deg": 8.66789905930025e-06,
+     "media_dif_elevacion_deg": 6.1783519833813215e-06
+    },
+    {
+     "archivo": "tierra_cde_2026-11-14_geometrica.csv",
+     "consulta": "JPL Horizons API v1.2; consulta 2026-11-14T16:07:35+00:00; centro coord@399; sitio -54.61,-25.51,0.2; paso 1 m; refraccion=False",
+     "cuerpo": "tierra",
+     "refraccion": false,
+     "n": 301,
+     "max_dif_elevacion_deg": 0.0006002037476520172,
+     "max_dif_azimut_deg": 0.00040804118892315234,
+     "media_dif_elevacion_deg": 0.0005641282345938503
+    },
+    {
+     "archivo": "tierra_cde_2026-11-14_refractada.csv",
+     "consulta": "JPL Horizons API v1.2; consulta 2026-11-14T16:07:35+00:00; centro coord@399; sitio -54.61,-25.51,0.2; paso 1 m; refraccion=True",
+     "cuerpo": "tierra",
+     "refraccion": true,
+     "n": 180,
+     "max_dif_elevacion_deg": 0.0006319019959803995,
+     "max_dif_azimut_deg": 0.0002866775618053951,
+     "media_dif_elevacion_deg": 0.0006121475103590328
+    },
+    {
+     "archivo": "tierra_cde_2026-11-15_refractada.csv",
+     "consulta": "JPL Horizons API v1.2; consulta 2026-11-14T16:07:35+00:00; centro coord@399; sitio -54.61,-25.51,0.2; paso 1 m; refraccion=True",
+     "cuerpo": "tierra",
+     "refraccion": true,
+     "n": 181,
+     "max_dif_elevacion_deg": 0.0006369946631537005,
+     "max_dif_azimut_deg": 0.00028941429435248633,
+     "media_dif_elevacion_deg": 0.0006165137156373639
+    },
+    {
+     "archivo": "tierra_payunia_2026-11-14_refractada.csv",
+     "consulta": "JPL Horizons API v1.2; consulta 2026-11-14T16:07:35+00:00; centro coord@399; sitio -69.25,-36.42,1.8; paso 1 m; refraccion=True",
+     "cuerpo": "tierra",
+     "refraccion": true,
+     "n": 199,
+     "max_dif_elevacion_deg": 0.0005592939573020317,
+     "max_dif_azimut_deg": 0.00038928939264666146,
+     "media_dif_elevacion_deg": 0.0005421226403107394
+    },
+    {
+     "archivo": "tierra_puna_2026-11-14_refractada.csv",
+     "consulta": "JPL Horizons API v1.2; consulta 2026-11-14T16:07:35+00:00; centro coord@399; sitio -67.40,-26.06,3.4; paso 1 m; refraccion=True",
+     "cuerpo": "tierra",
+     "refraccion": true,
+     "n": 172,
+     "max_dif_elevacion_deg": 0.0006202522288774048,
+     "max_dif_azimut_deg": 0.0002881643759251067,
+     "media_dif_elevacion_deg": 0.000600409770663961
+    }
+   ]
+  }
+ ],
+ "pasa": true,
+ "meta": {
+  "producto": "control_sol_horizons",
+  "version_formato": 1,
+  "motor_version": "0.1.0",
+  "parametros_sha256": "346a6cd22cc8cb1c75852fd8310971a78d50b2bf33d4c0710658e79e8556231c",
+  "generado_utc": "2026-11-14T16:33:44Z",
+  "uso_si": "Código del motor físico (Parte 3) redactado con SI (Claude Code, Anthropic) a partir de los documentos 02 y 04, con pruebas de resultado conocido escritas antes del código. Los números los calcula el motor determinista con datos y parámetros publicados; ningún modelo de lenguaje interviene en el cálculo.",
+  "notas": []
+ }
+}

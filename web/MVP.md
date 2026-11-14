@@ -1,5 +1,11 @@
 # Bilingual MVP
 
+## Integration with main
+
+The merge keeps Nahum's bilingual shell as the default entry and preserves its CSS, language context, Sun controls, tour and offline behavior. `src/datos/integration.ts` accepts the legacy mock shape and the current engine exports, normalizing copies for presentation. It reads the candidate index, supports each candidate/control including null compatibility, and downloads the original JSON unchanged. Verification reads `pruebas.json` in both languages. The original upstream App is preserved separately in `src/sistema/TeamApp.tsx` with only relative imports adjusted, and built as `/team.html`; its existing specialist features and limitations remain accessible through Guide. All engine modules, schemas, specialist components and scientific exports match upstream main.
+
+The additional integration browser checks open all indexed cards, compare displayed compatibility to the source, verify original downloads and all 31 recorded hashes, and open Destination in the preserved team workspace. The original six MVP scenarios continue to run with their original explicitly mock fixtures. The historical scope notes below describe the initial MVP before integration.
+
 Run `npm install` then `npm run dev`. For offline support use `npm run build` and `npm run preview` (localhost or HTTPS).
 
 The default language is English. English/Spanish selection persists locally. Four main sections lead from an introduction to the available candidate, its limitations and the source registry. Direct hash links and browser back/forward work. The optional six-step tour lasts 90 seconds, supports pause/exit, and starts paused when reduced motion is requested.

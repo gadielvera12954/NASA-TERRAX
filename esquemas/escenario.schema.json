@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "escenario.schema.json",
+  "title": "Escenario de operación (entrada de motor/destino)",
+  "description": "Forma del documento 04. El formulario de Operación o la función SI escriben este objeto; la persona lo confirma antes de correr.",
+  "type": "object",
+  "required": ["vehiculo", "destino"],
+  "properties": {
+    "vehiculo": {
+      "type": "object",
+      "required": ["plantilla", "panel_w", "lados", "bateria_wh", "superv_h", "pend_max_deg", "consumo_w"],
+      "properties": {
+        "plantilla": { "type": "string" },
+        "panel_w": { "type": "number", "exclusiveMinimum": 0, "maximum": 5000 },
+        "lados": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 360 }, "minItems": 1, "maxItems": 8 },
+        "bateria_wh": { "type": "number", "exclusiveMinimum": 0, "maximum": 100000 },
+        "superv_h": { "type": "number", "exclusiveMinimum": 0, "maximum": 1000 },
+        "pend_max_deg": { "type": "number", "minimum": 0, "maximum": 45 },
+        "consumo_w": {
+          "type": "object",
+          "required": ["valor", "supuesto"],
+          "properties": { "valor": { "type": "number", "minimum": 0, "maximum": 5000 }, "supuesto": { "type": "boolean" } }
+        },
+        "reserva_frac": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "destino": {
+      "type": "object",
+      "required": ["cuerpo", "sitio", "desde", "hasta", "rumbo"],
+      "properties": {
+        "cuerpo": { "enum": ["luna", "tierra"] },
+        "sitio": { "type": "string" },
+        "desde": { "$ref": "comun.schema.json#/$defs/fecha" },
+        "hasta": { "$ref": "comun.schema.json#/$defs/fecha" },
+        "rumbo": { "anyOf": [ { "const": "sol-en-esquina" }, { "type": "number", "minimum": 0, "maximum": 360 } ] },
+        "punto": { "$ref": "comun.schema.json#/$defs/lugar" },
+        "inclinacion_deg": { "type": "number", "minimum": 0, "maximum": 45 },
+        "orientacion_pendiente_deg": { "type": "number", "minimum": 0, "maximum": 360 }
+      }
+    },
+    "busqueda": {
+      "type": "object",
+      "properties": { "region": { "type": "string" }, "tarea": { "type": "string" } }
+    },
+    "maqueta": { "type": "boolean" }
+  }
+}

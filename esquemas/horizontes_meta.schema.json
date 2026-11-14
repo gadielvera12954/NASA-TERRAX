@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "horizontes_meta.schema.json",
+  "title": "Metadatos de un archivo horizontes.bin (para manifest.json)",
+  "description": "El formato binario está en esquemas/horizontes_bin.md.",
+  "type": "object",
+  "required": ["archivo", "formato", "sha256", "ancho", "alto", "n_az", "pixel_m", "convergencia_deg", "cuerpo", "altura_observador_m", "parametros_sha256", "maqueta"],
+  "properties": {
+    "archivo": { "type": "string" },
+    "formato": { "const": "TXHZ v1" },
+    "sha256": { "$ref": "comun.schema.json#/$defs/sha256" },
+    "ancho": { "type": "integer", "minimum": 1 },
+    "alto": { "type": "integer", "minimum": 1 },
+    "n_az": { "type": "integer", "minimum": 4, "maximum": 3600 },
+    "pixel_m": { "type": "number", "exclusiveMinimum": 0 },
+    "convergencia_deg": { "type": "number" },
+    "cuerpo": { "enum": ["sintetico", "luna", "tierra"] },
+    "altura_observador_m": { "type": "number", "minimum": 0 },
+    "grilla": { "type": "string" },
+    "fuentes": { "type": "array", "items": { "$ref": "comun.schema.json#/$defs/fuente" } },
+    "parametros_sha256": { "$ref": "comun.schema.json#/$defs/sha256" },
+    "maqueta": { "type": "boolean" }
+  }
+}

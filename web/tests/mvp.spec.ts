@@ -1,5 +1,28 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { readFileSync } from "node:fs";
+const legacyManifest = JSON.parse(
+  readFileSync(
+    new URL("./fixtures/legacy-manifest.json", import.meta.url),
+    "utf8",
+  ),
+);
+const legacyCard = JSON.parse(
+  readFileSync(new URL("./fixtures/legacy-P-07.json", import.meta.url), "utf8"),
+);
+
+// Preserve Nahum's original workflows against the original, explicitly mock contract.
+test.beforeEach(async ({ page }) => {
+  await page.route("**/data/manifest.json", (route) =>
+    route.fulfill({ json: legacyManifest }),
+  );
+  await page.route("**/data/fichas/P-07.json", (route) =>
+    route.fulfill({ json: legacyCard }),
+  );
+  await page.route("**/data/fichas/indice.json", (route) =>
+    route.fulfill({ status: 404 }),
+  );
+});
 
 test("Spanish desktop screens have no automated WCAG A/AA violations", async ({
   page,
@@ -82,7 +105,7 @@ test("bilingual candidate flow, search, sources and language persistence", async
   ).toBeVisible();
   await page.getByRole("link", { name: "Verification", exact: true }).click();
   await expect(
-    page.getByText("? Results not supplied", { exact: true }),
+    page.getByRole("heading", { name: "Scientific tests", exact: true }),
   ).toBeVisible();
   expect(errors).toEqual([]);
 });

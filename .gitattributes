@@ -1,0 +1,4 @@
+# Archivos con SHA-256 registrado: sin conversión de fin de línea para que el hash coincida en cualquier sistema
+parametros/parametros.yaml -text
+web/public/data/** -text
+motor/sol/referencia_horizons/** -text

@@ -1,0 +1,16 @@
+
+=================================== ERRORS ====================================
+__________________ ERROR collecting motor/tests/test_sol.py ___________________
+ImportError while importing test module 'C:\Users\lol xdd\OneDrive\Desktop\Nasa Final\Terra-X Sistema\motor\tests\test_sol.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+motor\tests\test_sol.py:17: in <module>
+    from motor.sol import horizons, lunacion, posicion, refraccion, ventanas
+E   ImportError: cannot import name 'horizons' from 'motor.sol' (C:\Users\lol xdd\OneDrive\Desktop\Nasa Final\Terra-X Sistema\motor\sol\__init__.py)
+=========================== short test summary info ===========================
+ERROR motor/tests/test_sol.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.63s

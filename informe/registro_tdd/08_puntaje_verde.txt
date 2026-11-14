@@ -1,0 +1,26 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\LOLXDD~1\AppData\Local\Temp\claude\65c6e2a7bc6e8a7f\e6b9c63b-2396-4509-a787-883a5b6e6b8e\scratchpad\venv_motor\Scripts\python.exe
+rootdir: C:\Users\lol xdd\OneDrive\Desktop\Nasa Final\Terra-X Sistema
+collecting ... collected 19 items
+
+motor/tests/test_puntaje.py::test_f11_caso_a_mano PASSED                 [  5%]
+motor/tests/test_puntaje.py::test_f18_utilidad PASSED                    [ 10%]
+motor/tests/test_puntaje.py::test_f10_wasserstein_por_cuantiles_coincide_con_scipy PASSED [ 15%]
+motor/tests/test_puntaje.py::test_distancia_de_luz_rasante PASSED        [ 21%]
+motor/tests/test_puntaje.py::test_regla_de_etiquetas[req0-0.8-0.79-0.99-incompatible] PASSED [ 26%]
+motor/tests/test_puntaje.py::test_regla_de_etiquetas[req1-0.8-0.79-0.99-no_podemos_concluir] PASSED [ 31%]
+motor/tests/test_puntaje.py::test_regla_de_etiquetas[req2-0.45-0.4-0.95-no_podemos_concluir] PASSED [ 36%]
+motor/tests/test_puntaje.py::test_regla_de_etiquetas[req3-0.8-0.4-0.6-no_alcanza] PASSED [ 42%]
+motor/tests/test_puntaje.py::test_regla_de_etiquetas[req4-0.8-0.72-0.92-analogo_sostenido] PASSED [ 47%]
+motor/tests/test_puntaje.py::test_regla_de_etiquetas[req5-0.7-0.574-0.874-con_huecos] PASSED [ 52%]
+motor/tests/test_puntaje.py::test_figura_4_del_documento PASSED          [ 57%]
+motor/tests/test_puntaje.py::test_requisitos PASSED                      [ 63%]
+motor/tests/test_puntaje.py::test_evidencia_cuenta_solo_lo_medido PASSED [ 68%]
+motor/tests/test_puntaje.py::test_controles_caen_donde_deben PASSED      [ 73%]
+motor/tests/test_puntaje.py::test_robustez_reproducible_y_normalizada PASSED [ 78%]
+motor/tests/test_puntaje.py::test_dirichlet_alrededor_de_los_pesos PASSED [ 84%]
+motor/tests/test_puntaje.py::test_dato_que_cambia_la_decision PASSED     [ 89%]
+motor/tests/test_puntaje.py::test_fichas_validan_contra_el_esquema PASSED [ 94%]
+motor/tests/test_puntaje.py::test_horario_de_una_candidata_de_payunia PASSED [100%]
+
+============================= 19 passed in 4.08s ==============================

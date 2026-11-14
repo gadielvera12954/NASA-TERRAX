@@ -1,0 +1,20 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\LOLXDD~1\AppData\Local\Temp\claude\65c6e2a7bc6e8a7f\e6b9c63b-2396-4509-a787-883a5b6e6b8e\scratchpad\venv_motor\Scripts\python.exe
+rootdir: C:\Users\lol xdd\OneDrive\Desktop\Nasa Final\Terra-X Sistema
+collecting ... collected 13 items
+
+motor/tests/test_destino.py::test_f3_fraccion_del_disco PASSED           [  7%]
+motor/tests/test_destino.py::test_f4_esquina_de_viper_dentro_del_1_por_ciento PASSED [ 15%]
+motor/tests/test_destino.py::test_f4_frente_y_lado_sin_panel PASSED      [ 23%]
+motor/tests/test_destino.py::test_f4_rumbo_y_disco_tapado PASSED         [ 30%]
+motor/tests/test_destino.py::test_f4_rover_inclinado PASSED              [ 38%]
+motor/tests/test_destino.py::test_f6_cota_de_supervivencia PASSED        [ 46%]
+motor/tests/test_destino.py::test_f5_bateria_se_vacia_en_50_h_con_p_surv PASSED [ 53%]
+motor/tests/test_destino.py::test_f7_tramo_oscuro_y_condiciones PASSED   [ 61%]
+motor/tests/test_destino.py::test_f20_horizonte_liso_da_la_noche_de_la_lunacion PASSED [ 69%]
+motor/tests/test_destino.py::test_png16_ida_y_vuelta PASSED              [ 76%]
+motor/tests/test_destino.py::test_rover_en_horizonte_liso_no_sobrevive_la_noche PASSED [ 84%]
+motor/tests/test_destino.py::test_rover_con_horizonte_bajo_si_sobrevive PASSED [ 92%]
+motor/tests/test_destino.py::test_archivo_de_paridad PASSED              [100%]
+
+============================= 13 passed in 2.50s ==============================

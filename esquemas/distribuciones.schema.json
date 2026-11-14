@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "distribuciones.schema.json",
+  "title": "Distribuciones de huella (entrada de motor/puntaje)",
+  "description": "Las produce motor/huella (Mathias, F8, F9, F16) y las recibe Jean el domingo a las 8:00. Un archivo por región con la referencia lunar y todas las parcelas, incluidos los controles. Cada distribución va como 101 cuantiles (q = 0, 0,01, …, 1) o como valores sueltos; `null` significa que esa propiedad no tiene datos utilizables.",
+  "type": "object",
+  "required": ["region", "referencia", "parcelas", "maqueta", "fuentes"],
+  "properties": {
+    "region": { "type": "string" },
+    "referencia": { "$ref": "#/$defs/terreno" },
+    "parcelas": { "type": "array", "items": { "$ref": "#/$defs/terreno" }, "minItems": 1 },
+    "fuentes": { "type": "array", "items": { "$ref": "comun.schema.json#/$defs/fuente" } },
+    "maqueta": { "type": "boolean" }
+  },
+  "$defs": {
+    "distribucion": {
+      "anyOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["cuantiles"],
+          "properties": { "cuantiles": { "type": "array", "items": { "type": "number" }, "minItems": 101, "maxItems": 101 }, "n": { "type": "integer" } }
+        },
+        {
+          "type": "object",
+          "required": ["valores"],
+          "properties": { "valores": { "type": "array", "items": { "type": "number" }, "minItems": 1 } }
+        }
+      ]
+    },
+    "terreno": {
+      "type": "object",
+      "required": ["id", "nombre", "lugar", "pendiente_deg", "rugosidad_m", "luz_rasante", "ndvi_p90", "pendiente_mediana_deg"],
+      "properties": {
+        "id": { "type": "string" },
+        "nombre": { "type": "string" },
+        "lugar": { "$ref": "comun.schema.json#/$defs/lugar" },
+        "control": { "enum": [null, "positivo", "negativo", "positivo_ruido"] },
+        "ruido_nivel": { "type": "integer", "minimum": 0 },
+        "pendiente_deg": { "$ref": "#/$defs/distribucion" },
+        "rugosidad_m": {
+          "anyOf": [
+            { "type": "null" },
+            { "type": "object", "additionalProperties": { "$ref": "#/$defs/distribucion" } }
+          ]
+        },
+        "luz_rasante": {
+          "anyOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "required": ["e_deg", "f_media"],
+              "properties": {
+                "e_deg": { "type": "array", "items": { "type": "number" } },
+                "f_media": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 } }
+              }
+            }
+          ]
+        },
+        "ndvi_p90": { "type": ["number", "null"] },
+        "pendiente_mediana_deg": { "type": ["number", "null"] },
+        "material": { "anyOf": [ { "type": "null" }, { "type": "object", "required": ["utilidad"], "properties": { "utilidad": { "type": "number", "minimum": 0, "maximum": 1 }, "clase": { "type": "string" } } } ] },
+        "transitabilidad_fina": { "anyOf": [ { "type": "null" }, { "type": "object", "required": ["utilidad"], "properties": { "utilidad": { "type": "number", "minimum": 0, "maximum": 1 } } } ] },
+        "horizonte_liso": { "type": "boolean" },
+        "alt_m": { "type": "number" },
+        "acuerdo_agencias": { "type": ["object", "null"] },
+        "fuentes": { "type": "array", "items": { "$ref": "comun.schema.json#/$defs/fuente" } }
+      }
+    }
+  }
+}

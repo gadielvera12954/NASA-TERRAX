@@ -26,7 +26,7 @@ const PASOS_RECORRIDO: RecorridoStep[] = [
     badge: 'Step 1 of 6 · The Challenge',
     detalles: [
       'Highest Sun at Mons Mouton: 6.96°',
-      'Sun below flat horizon: 148-210 h each lunation',
+      'Sun below a flat horizon: 289-418 h in a row each lunation (2027)',
       'VIPER dark survival capacity: 50 h limit',
     ],
   },
@@ -35,14 +35,14 @@ const PASOS_RECORRIDO: RecorridoStep[] = [
     segundoInicio: 10,
     segundoFin: 25,
     pantalla: 'Destination · Safe Havens',
-    titulo: 'The Sun never climbs above 7°. On flat ground, a rover would be dark for over 148 hours. It survives only here.',
-    texto: 'At Mons Mouton, safe havens are peaks that catch grazing sunlight while craters stay in permanent shadow. The mission survives on only 18% of the plateau.',
+    titulo: 'The Sun never climbs above 7°. On flat ground, a rover would be dark for over 289 hours. It survives only here.',
+    texto: 'With real LOLA relief, no point of the 30 × 30 km area around the center of Mons Mouton stays under 50 h of darkness: the best one still loses the Sun for 219 h in summer. Our shadows match NASA’s illumination map (ρ = 0.985).',
     imagen: '/img/ui_refugios.png',
     badge: 'Step 2 of 6 · Lunar Physics',
     detalles: [
       'Safe haven definition: Darkness stretches ≤ 50 hours',
       'Summer lunation: Oct 27 – Nov 26, 2027',
-      'LOLA DEM 5m topography from NASA / USGS',
+      'LOLA DEM topography from NASA (PGDA 90), 60 m grid',
     ],
   },
   {
@@ -102,8 +102,8 @@ const PASOS_RECORRIDO: RecorridoStep[] = [
     detalles: [
       'Post on plane: Passed (≤ 1 px error)',
       'Sphere curvature: Passed (0 px error)',
-      'JPL Horizons Sun position: Passed (0.03° agreement)',
-      'Sunset shadow field test: Reported transparently (7.1%)',
+      'JPL Horizons Sun position: Passed (0.00001° on the Moon)',
+      'Sunset shadow field test: measured Nov 14, reported passed or failed',
     ],
   },
 ];

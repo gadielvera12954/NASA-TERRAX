@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "fichas_indice.schema.json",
+  "title": "Índice de candidatas (fichas/indice.json) para la pantalla Search",
+  "type": "object",
+  "required": ["region", "candidatas", "controles", "maqueta", "meta"],
+  "properties": {
+    "region": { "type": "string" },
+    "umbral": { "type": "number" },
+    "candidatas": { "type": "array", "items": { "$ref": "#/$defs/fila" } },
+    "controles": {
+      "type": "object",
+      "required": ["recorte_primero", "copias_en_orden", "vegetacion_rechazada", "confiable"],
+      "properties": {
+        "recorte_primero": { "type": ["boolean", "null"] },
+        "copias_en_orden": { "type": ["boolean", "null"] },
+        "vegetacion_rechazada": { "type": ["boolean", "null"] },
+        "confiable": { "type": ["boolean", "null"] },
+        "recorte_primero_frac": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "detalle": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "maqueta": { "type": "boolean" },
+    "meta": { "$ref": "comun.schema.json#/$defs/meta" }
+  },
+  "$defs": {
+    "fila": {
+      "type": "object",
+      "required": ["id", "nombre", "control", "etiqueta", "orden", "lugar", "C", "E", "L", "U", "archivo"],
+      "properties": {
+        "id": { "type": "string" },
+        "nombre": { "type": "string" },
+        "control": { "enum": [null, "positivo", "negativo", "positivo_ruido"] },
+        "etiqueta": { "$ref": "tarjeta.schema.json#/$defs/etiqueta" },
+        "orden": { "type": ["integer", "null"] },
+        "lugar": { "$ref": "comun.schema.json#/$defs/lugar" },
+        "C": { "type": ["number", "null"] },
+        "E": { "type": "number" },
+        "L": { "type": "number" },
+        "U": { "type": "number" },
+        "primera_frac": { "type": ["number", "null"] },
+        "archivo": { "type": "string" }
+      }
+    }
+  }
+}

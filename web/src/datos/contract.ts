@@ -6,11 +6,12 @@ export interface Manifest {
   fuentes: { id: string; nombre: string; licencia: string; sha256: string }[];
 }
 export interface Ficha {
+  source?: unknown;
   id: string;
   etiqueta: string;
   maqueta: boolean;
   lugar: { lat: number; lon: number; region: string; nombre: string };
-  C: number;
+  C: number | null;
   E: number;
   L: number;
   U: number;
