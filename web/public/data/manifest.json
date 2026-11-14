@@ -1,0 +1,36 @@
+{
+  "proyecto": "TERRA-X",
+  "version": "1.0.0-maqueta",
+  "maqueta": true,
+  "fecha": "2026-11-14",
+  "hash_reproducibilidad": "4a7f28c9b19e73d4a21183cf98e7235a",
+  "parametros": {
+    "sol_elevacion_min": 1.5,
+    "sol_elevacion_max": 10.0,
+    "altura_virtual_panel_px": 2.0,
+    "umbral_limites": 0.70,
+    "resolucion_metros": 60,
+    "azimutes_horizonte": 72
+  },
+  "fuentes": [
+    {
+      "id": "jpl_horizons",
+      "nombre": "JPL Horizons On-Line Ephemeris System v1.2",
+      "licencia": "NASA Public Domain",
+      "consulta": "2026-11-07T16:04:36+00:00",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "nasadem",
+      "nombre": "NASADEM Merged DEM Global 1 arc second V001",
+      "licencia": "NASA Public Domain",
+      "sha256": "7a35c5e882a201c107297e64de06815cf1f39c81b5c4f2bb76fe17188b8e0d37"
+    },
+    {
+      "id": "pgda78",
+      "nombre": "Mons Mouton LOLA/Kaguya merged DEM 5m",
+      "licencia": "USGS / NASA Public Domain",
+      "sha256": "1f893e481b490f2307b22a0096f131a9c336b132a488e0f63b468903c72b7a94"
+    }
+  ]
+}
