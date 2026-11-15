@@ -11,7 +11,8 @@ Cómo se calcula, sin inventar datos:
 3. Cada banda (roja B04, infrarroja B08) se lee desde la vista reducida del COG más fina que 60 m
    (40 m) y se lleva a la grilla UTM de 60 m con PROMEDIO.
    Reflectancia = DN · escala + desplazamiento (metadatos `raster:bands` de cada escena; desde la
-   versión de procesamiento 04.00, ESA suma 1.000 al DN y el desplazamiento es −0,1).
+   versión de procesamiento 04.00, ESA suma 1.000 al DN y el desplazamiento es −0,1, salvo que
+   Element 84 ya lo haya quitado: `earthsearch:boa_offset_applied`, ver `_escala`).
 4. NDVI = (NIR − R) / (NIR + R) por mes; percentil 90 a lo largo de los meses.
    Un píxel con menos de `meses_min` meses válidos queda sin dato.
 Las nubes bajan el NDVI, así que el percentil 90 es poco sensible a las que queden.
@@ -27,6 +28,10 @@ import numpy as np
 from .remoto import entorno_gdal, post_json, sha
 
 STAC = "https://earth-search.aws.element84.com/v1/search"
+# En estos COG los bloques de la vista de 40 m no están contiguos en el archivo: con SINGLE_GET, GDAL
+# pedía de una sola vez desde el primer bloque hasta el último (casi el archivo entero). PARALLEL pide
+# solo los rangos de los bloques necesarios.
+GDAL_S2 = {"GDAL_HTTP_MULTIRANGE": "PARALLEL"}
 
 
 def buscar(bbox_lonlat, desde: str, hasta: str, nubes_max: float = 10.0, limite: int = 500) -> list[dict]:
@@ -61,14 +66,23 @@ def elegir_por_mes(items: list[dict]) -> dict[str, list[dict]]:
 
 
 def _escala(item: dict, banda: str) -> tuple[float, float]:
+    """(escala, desplazamiento) para pasar DN a reflectancia.
+
+    `earthsearch:boa_offset_applied = True` quiere decir que Element 84 ya quitó los +1.000 DN de ESA
+    en los píxeles, aunque `raster:bands` siga diciendo −0,1. Comprobado en S2C_20KPC_20260126 (Chaco,
+    enero): el rojo medio es 433 DN y casi todo está por debajo de 1.000, imposible si los +1.000
+    siguieran ahí; restar 0,1 daría reflectancias negativas. En ese caso el desplazamiento es 0.
+    """
     asset = item["assets"][banda]
     rb = (asset.get("raster:bands") or [{}])[0]
-    if "scale" in rb or "offset" in rb:
-        return float(rb.get("scale", 1e-4)), float(rb.get("offset", 0.0))
     p = item["properties"]
+    escala = float(rb.get("scale", 1e-4))
+    if p.get("earthsearch:boa_offset_applied", False):
+        return escala, 0.0
+    if "offset" in rb:
+        return escala, float(rb["offset"])
     base = p.get("s2:processing_baseline")
-    desplazado = base is not None and float(base) >= 4.0 and not p.get("earthsearch:boa_offset_applied", False)
-    return 1e-4, (-0.1 if desplazado else 0.0)
+    return escala, (-0.1 if base is not None and float(base) >= 4.0 else 0.0)
 
 
 def _nivel_vista(href: str, px_objetivo: float) -> int | None:
@@ -90,20 +104,39 @@ def _nivel_vista(href: str, px_objetivo: float) -> int | None:
 
 
 def _leer_en_grilla(href: str, grilla: dict) -> np.ndarray:
+    """Lee SOLO la ventana de la vista reducida que cubre la grilla y la promedia a 60 m.
+
+    Se lee la ventana a mano (una sola lectura de los bloques necesarios) y después se reproyecta en
+    memoria: el reproyector de GDAL sobre /vsicurl/ terminaba pidiendo la banda de 10 m entera.
+    """
     import rasterio
     from rasterio.enums import Resampling
     from rasterio.transform import from_origin
-    from rasterio.vrt import WarpedVRT
+    from rasterio.warp import reproject, transform_bounds
+    from rasterio.windows import from_bounds
 
     px = grilla["pixel_m"]
     t = from_origin(grilla["x0_m"] - px / 2.0, grilla["y0_m"] + px / 2.0, px, px)
+    destino_crs = f"EPSG:{grilla['epsg']}"
+    izq, arr = grilla["x0_m"] - px / 2.0, grilla["y0_m"] + px / 2.0
+    der, aba = izq + grilla["ancho"] * px, arr - grilla["alto"] * px
+    out = np.full((grilla["alto"], grilla["ancho"]), np.nan, dtype=np.float32)
     nivel = _nivel_vista(href, px)
     abrir = {} if nivel is None else {"overview_level": nivel}
     with rasterio.open("/vsicurl/" + href, **abrir) as src:
-        with WarpedVRT(src, crs=f"EPSG:{grilla['epsg']}", transform=t, width=grilla["ancho"], height=grilla["alto"],
-                       resampling=Resampling.average, src_nodata=0, nodata=0) as vrt:
-            a = vrt.read(1, masked=True)
-    return np.ma.filled(a.astype(np.float32), np.nan)
+        b = transform_bounds(destino_crs, src.crs, izq, aba, der, arr, densify_pts=21)
+        w = from_bounds(*b, transform=src.transform)
+        f0, c0 = max(0, int(np.floor(w.row_off)) - 2), max(0, int(np.floor(w.col_off)) - 2)
+        f1 = min(src.height, int(np.ceil(w.row_off + w.height)) + 2)
+        c1 = min(src.width, int(np.ceil(w.col_off + w.width)) + 2)
+        if f1 <= f0 or c1 <= c0:                                  # la escena no toca la grilla
+            return out
+        ventana = rasterio.windows.Window(c0, f0, c1 - c0, f1 - f0)
+        a = src.read(1, window=ventana).astype(np.float32)
+        a[a == 0] = np.nan                                        # 0 = sin dato en Sentinel-2 L2A
+        reproject(a, out, src_transform=src.window_transform(ventana), src_crs=src.crs, src_nodata=np.nan,
+                  dst_transform=t, dst_crs=destino_crs, dst_nodata=np.nan, resampling=Resampling.average)
+    return out
 
 
 def ndvi_p90(grilla: dict, bbox_lonlat, desde: str, hasta: str, nubes_max: float = 10.0, meses_min: int = 4,
@@ -118,7 +151,7 @@ def ndvi_p90(grilla: dict, bbox_lonlat, desde: str, hasta: str, nubes_max: float
     def leer_escena(it):
         """Las dos bandas de una escena en la grilla (o None si no se pudo leer: no se inventa)."""
         try:
-            with entorno_gdal():
+            with entorno_gdal(**GDAL_S2):
                 s, o = _escala(it, "red")
                 r = _leer_en_grilla(it["assets"]["red"]["href"], grilla) * s + o
                 s, o = _escala(it, "nir")

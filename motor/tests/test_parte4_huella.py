@@ -136,3 +136,14 @@ def test_promedio_bloques_con_faltantes():
 def test_promedio_bloques_rechaza_tamano_no_multiplo():
     with pytest.raises(ValueError):
         bloques.promedio(np.zeros((7, 9), dtype=np.float32), 3)
+
+
+def test_escala_sentinel2_respeta_offset_ya_aplicado():
+    from motor.ingest.sentinel2 import _escala
+    rb = {"raster:bands": [{"scale": 0.0001, "offset": -0.1}]}
+    ya = {"properties": {"earthsearch:boa_offset_applied": True, "s2:processing_baseline": "05.11"}, "assets": {"red": rb}}
+    no = {"properties": {"earthsearch:boa_offset_applied": False, "s2:processing_baseline": "05.11"}, "assets": {"red": rb}}
+    vieja = {"properties": {"s2:processing_baseline": "03.01"}, "assets": {"red": {}}}
+    assert _escala(ya, "red") == (0.0001, 0.0)
+    assert _escala(no, "red") == (0.0001, -0.1)
+    assert _escala(vieja, "red") == (0.0001, 0.0)
