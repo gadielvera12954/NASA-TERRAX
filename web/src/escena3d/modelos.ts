@@ -4,7 +4,44 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 const cache = new Map<string, Promise<THREE.Group>>();
 
-export function cargarModelo(nombre: "rover" | "tablita" | "mons_mouton"): Promise<THREE.Group> {
+export type NombreModelo = "rover" | "tablita" | "mons_mouton" | "payunia";
+
+/** One real relief mesh, as registered by modelos/construir_modelos.py under `terrenos`. */
+export interface TerrenoReal {
+  archivo: string;
+  sha256: string;
+  normales: string;
+  grilla: string;
+  cuerpo: "luna" | "tierra";
+  pixel_m: number;
+  pixel_malla_m: number;
+  filas: number;
+  columnas: number;
+  z_min_m: number;
+  z_max_m: number;
+  fuentes: { id: string; sha256: string | null; url?: string }[];
+  candidata?: { id: string; nombre: string; fila: number; col: number; parcela_km: number };
+}
+
+let terrenos: Promise<Record<string, TerrenoReal>> | null = null;
+/** `terrenos` of modelos.json (Moon and Earth relief built from the 60 m grids). */
+export function leerTerrenos(): Promise<Record<string, TerrenoReal>> {
+  if (!terrenos) {
+    terrenos = fetch("/modelos/modelos.json", { cache: "no-cache" })
+      .then((r) => {
+        if (!r.ok) throw new Error("unavailable");
+        return r.json() as Promise<{ terrenos?: Record<string, TerrenoReal> }>;
+      })
+      .then((m) => {
+        if (!m.terrenos?.mons_mouton || !m.terrenos?.payunia) throw new Error("unavailable");
+        return m.terrenos;
+      });
+    terrenos.catch(() => (terrenos = null));
+  }
+  return terrenos;
+}
+
+export function cargarModelo(nombre: NombreModelo): Promise<THREE.Group> {
   let p = cache.get(nombre);
   if (!p) {
     p = new GLTFLoader().loadAsync(`/modelos/${nombre}.glb`).then((g) => g.scene);

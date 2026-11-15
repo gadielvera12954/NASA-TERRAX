@@ -13,6 +13,7 @@ import {
   potenciaPaneles,
   refraccionDeg,
 } from "../../datos/laboratorio";
+import type { EstadoTerreno, ModoTerreno } from "../../escena3d/DosMundos3D";
 
 const DosMundos3D = lazy(() => import("../../escena3d/DosMundos3D"));
 
@@ -45,6 +46,10 @@ export default function DosMundos({
     tierra: number | null;
   } | null>(null);
   const [attempt, retry] = useState(0);
+  // Real relief (Jean): Mons Mouton vs Payunia P-27, 30 × 30 km each.
+  const [terreno, setTerreno] = useState<ModoTerreno>("plano");
+  const [exageracion, setExageracion] = useState(1);
+  const [estadoTerreno, setEstadoTerreno] = useState<EstadoTerreno | null>(null);
   const [failed, setFailed] = useState(false);
   const [idx, setIdx] = useState<IndiceLab>();
   const [horasLuna, setHorasLuna] = useState<number | null>(null);
@@ -394,11 +399,63 @@ export default function DosMundos({
               ? t("Close illustrative 3D view", "Cerrar vista 3D ilustrativa")
               : t("Open illustrative 3D view", "Abrir vista 3D ilustrativa")}
           </button>
+          {scene && (
+            <div
+              className="segmento"
+              role="group"
+              aria-label={t("Ground in the 3D view", "Suelo de la vista 3D")}
+            >
+              <button
+                type="button"
+                aria-pressed={terreno === "plano"}
+                onClick={() => setTerreno("plano")}
+              >
+                {t("Close-up, flat ground", "Primer plano, suelo plano")}
+              </button>
+              <button
+                type="button"
+                aria-pressed={terreno === "real"}
+                onClick={() => setTerreno("real")}
+              >
+                {t("Real relief, 30 × 30 km", "Relieve real, 30 × 30 km")}
+              </button>
+            </div>
+          )}
+          {scene && terreno === "real" && (
+            <div
+              className="segmento"
+              role="group"
+              aria-label={t("Vertical exaggeration", "Exageración vertical")}
+            >
+              {[1, 2, 4].map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  aria-pressed={exageracion === k}
+                  onClick={() => setExageracion(k)}
+                >
+                  {t(`Vertical ×${k}`, `Vertical ×${k}`)}
+                </button>
+              ))}
+            </div>
+          )}
+          {scene && terreno === "real" && estadoTerreno !== "listo" && (
+            <span className="muted" role="status">
+              {estadoTerreno === "sin-datos"
+                ? t(
+                    "Real relief unavailable: showing the close-up.",
+                    "Relieve real no disponible: se muestra el primer plano.",
+                  )
+                : t("Loading the real relief…", "Cargando el relieve real…")}
+            </span>
+          )}
           <button
             className="text-btn"
             onClick={() => {
               sol.resetSol();
               setEsquina(true);
+              setTerreno("plano");
+              setExageracion(1);
               setCorte(50);
               setTiempos(null);
               setCaida(0);
@@ -434,6 +491,9 @@ export default function DosMundos({
                 gTierra={G.tierra}
                 animar={animar}
                 onCaida={setTiempos}
+                terreno={terreno}
+                exageracion={exageracion}
+                onTerrenoEstado={setEstadoTerreno}
                 textoAcercar={t("Zoom in", "Acercar")}
                 textoAlejar={t("Zoom out", "Alejar")}
                 etiqueta={t(
@@ -458,10 +518,15 @@ export default function DosMundos({
             </span>
           </div>
           <p className="muted">
-            {t(
-              "Illustrative flat ground and generic rover geometry. Use the paired readings for numerical comparisons.",
-              "Suelo plano ilustrativo y geometría genérica del rover. Usa las lecturas por mundo para comparar los valores.",
-            )}
+            {terreno === "real"
+              ? t(
+                  "Real relief from the 60 m grids, drawn with a 120 m display mesh. Both worlds share the same local Sun angle; the drawn shadows are the renderer's. Use the paired readings for numerical comparisons.",
+                  "Relieve real de las grillas de 60 m, dibujado con una malla de exhibición de 120 m. Los dos mundos comparten el mismo ángulo local del Sol; las sombras dibujadas son del renderizador. Usa las lecturas por mundo para comparar los valores.",
+                )
+              : t(
+                  "Illustrative flat ground and generic rover geometry. Use the paired readings for numerical comparisons.",
+                  "Suelo plano ilustrativo y geometría genérica del rover. Usa las lecturas por mundo para comparar los valores.",
+                )}
           </p>
           <div>
             <label htmlFor="curtain">
