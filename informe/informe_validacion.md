@@ -62,13 +62,13 @@ Sobre terreno liso un rover estacionado no sobrevive: la noche dura de 6 a 8 vec
 
 ## Controles de la búsqueda
 
-Datos: MAQUETA (distribuciones inventadas para probar el código).
+Datos: reales.
 
 - Recorte de Mons Mouton: puesto 1 (primero en 100.0 % de los pesos de robustez)
-- Copias con ruido: puestos 3, 5, 8
+- Copias con ruido: puestos 2, 6, 18
 - Control negativo: CTRL-MEDANOS → incompatible
 - Confiable: True
-- Redundancia pendiente y luz (H1b): ρ = 0,976 con 8 parcelas (meta ρ < 0,9)
+- Redundancia pendiente y luz (H1b): ρ = 0,756 con 40 parcelas (meta ρ < 0,9)
 
 ## Fuentes de los cálculos
 

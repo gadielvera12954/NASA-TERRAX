@@ -177,8 +177,8 @@ function AppContent() {
       "El objetivo: encontrar condiciones útiles para practicar en la Tierra y reconocer sus diferencias.",
     ),
     t(
-      "Choose a practice goal and discover the available example candidate.",
-      "Elige un objetivo de ensayo y descubre la candidata de ejemplo disponible.",
+      "Choose a practice goal and open a candidate.",
+      "Elige un objetivo de ensayo y abre una candidata.",
     ),
     t(
       "Read compatibility and evidence separately, then check the limits.",
@@ -822,10 +822,15 @@ function AppContent() {
                 <p className="muted">
                   {t("Model bounds (L–U)", "Límites del modelo (L–U)")}:{" "}
                   {number(ficha.L)}–{number(ficha.U)} ·{" "}
-                  {t(
-                    "Example values from the candidate file.",
-                    "Valores de ejemplo del archivo de la candidata.",
-                  )}
+                  {ficha.maqueta
+                    ? t(
+                        "Example values from the candidate file.",
+                        "Valores de ejemplo del archivo de la candidata.",
+                      )
+                    : t(
+                        "Values from the candidate file, computed by the scoring engine.",
+                        "Valores del archivo de la candidata, calculados por el motor de puntaje.",
+                      )}
                 </p>
               </section>
               <section className="panel">
@@ -854,10 +859,15 @@ function AppContent() {
               </section>
               <section className="panel">
                 <h2>
-                  {t(
-                    "Example rehearsal window",
-                    "Ventana de ensayo de ejemplo",
-                  )}
+                  {ficha.maqueta
+                    ? t(
+                        "Example rehearsal window",
+                        "Ventana de ensayo de ejemplo",
+                      )
+                    : t(
+                        "Rehearsal windows (Sun from 7° to 1.5°)",
+                        "Ventanas de ensayo (Sol de 7° a 1,5°)",
+                      )}
                 </h2>
                 {ficha.horario.map((h, i) => (
                   <p key={i}>
@@ -865,10 +875,15 @@ function AppContent() {
                   </p>
                 ))}
                 <p className="muted">
-                  {t(
-                    "Historical mock schedule. It is not a forecast or a recommendation for today.",
-                    "Horario histórico de maqueta. No es un pronóstico ni una recomendación para hoy.",
-                  )}
+                  {ficha.maqueta
+                    ? t(
+                        "Historical mock schedule. It is not a forecast or a recommendation for today.",
+                        "Horario histórico de maqueta. No es un pronóstico ni una recomendación para hoy.",
+                      )
+                    : t(
+                        "Computed by the physics engine from the Sun's position over a flat horizon. Nearby hills can shorten a window. It is not a recommendation for today.",
+                        "Calculado por el motor físico con la posición del Sol sobre un horizonte liso. Los cerros cercanos pueden acortar una ventana. No es una recomendación para hoy.",
+                      )}
                 </p>
                 <div className="actions">
                   <button
@@ -944,10 +959,15 @@ function AppContent() {
                 )}
               </h2>
               <p>
-                {t(
-                  "These are declarations in mock data. Source files and their hashes have not been independently verified.",
-                  "Son declaraciones en datos de maqueta. Los archivos fuente y sus hashes no fueron verificados de forma independiente.",
-                )}
+                {manifest?.maqueta
+                  ? t(
+                      "These are declarations in mock data. Source files and their hashes have not been independently verified.",
+                      "Son declaraciones en datos de maqueta. Los archivos fuente y sus hashes no fueron verificados de forma independiente.",
+                    )
+                  : t(
+                      "Each source is declared in the manifest with its licence and the SHA-256 written when the data was exported. The app shows them as declared; it does not download the sources again to check them.",
+                      "Cada fuente figura en el manifiesto con su licencia y el SHA-256 registrado al exportar los datos. La app las muestra tal como están declaradas; no vuelve a descargar las fuentes para comprobarlas.",
+                    )}
               </p>
               {manifest?.fuentes.map((f) => (
                 <details key={f.id}>
@@ -999,14 +1019,24 @@ function AppContent() {
                   ),
                 ],
                 [
-                  t(
-                    "Can I trust the example numbers?",
-                    "¿Puedo confiar en las cifras de ejemplo?",
-                  ),
-                  t(
-                    "They demonstrate the interface, not a scientific conclusion. The mock banner stays visible until the source files declare real data.",
-                    "Sirven para demostrar la interfaz, no una conclusión científica. El aviso de maqueta permanece mientras los archivos declaren datos de ejemplo.",
-                  ),
+                  mock
+                    ? t(
+                        "Can I trust the example numbers?",
+                        "¿Puedo confiar en las cifras de ejemplo?",
+                      )
+                    : t(
+                        "Where do the numbers come from?",
+                        "¿De dónde salen las cifras?",
+                      ),
+                  mock
+                    ? t(
+                        "They demonstrate the interface, not a scientific conclusion. The mock banner stays visible until the source files declare real data.",
+                        "Sirven para demostrar la interfaz, no una conclusión científica. El aviso de maqueta permanece mientras los archivos declaren datos de ejemplo.",
+                      )
+                    : t(
+                        "From the exported files listed under Verification, each with its source and SHA-256. If a file is ever marked as demonstration data, a mock banner appears at the top of every page.",
+                        "De los archivos exportados que figuran en Verificación, cada uno con su fuente y su SHA-256. Si algún archivo se marca como dato de demostración, aparece un aviso de maqueta arriba en todas las páginas.",
+                      ),
                 ],
                 [
                   t("How do I use it offline?", "¿Cómo lo uso sin internet?"),

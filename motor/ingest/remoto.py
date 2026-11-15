@@ -64,7 +64,9 @@ def sha(a: np.ndarray) -> str:
 
 def entorno_gdal(**extra):
     from rasterio.env import Env
-    return Env(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", CPL_VSIL_CURL_ALLOWED_EXTENSIONS=".tif,.TIF",
-               GDAL_HTTP_USERAGENT=AGENTE, GDAL_HTTP_MAX_RETRY="8", GDAL_HTTP_RETRY_DELAY="3",
-               GDAL_HTTP_MULTIRANGE="SINGLE_GET", GDAL_HTTP_TIMEOUT="300", VSI_CACHE="TRUE",
-               AWS_NO_SIGN_REQUEST="YES", **extra)
+    opciones = dict(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", CPL_VSIL_CURL_ALLOWED_EXTENSIONS=".tif,.TIF",
+                    GDAL_HTTP_USERAGENT=AGENTE, GDAL_HTTP_MAX_RETRY="8", GDAL_HTTP_RETRY_DELAY="3",
+                    GDAL_HTTP_MULTIRANGE="SINGLE_GET", GDAL_HTTP_TIMEOUT="300", VSI_CACHE="TRUE",
+                    AWS_NO_SIGN_REQUEST="YES")
+    opciones.update(extra)                                    # `extra` puede pisar una opción de arriba
+    return Env(**opciones)

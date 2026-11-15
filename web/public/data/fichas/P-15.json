@@ -1,31 +1,31 @@
 {
  "id": "P-15",
- "nombre": "Payunia P-15 (maqueta)",
+ "nombre": "Payunia P-15",
  "region": "payunia",
  "control": null,
  "etiqueta": "no_alcanza",
- "orden": 10,
- "orden_candidatas": 6,
+ "orden": 31,
+ "orden_candidatas": 27,
  "lugar": {
-  "lat": -36.49,
-  "lon": -69.37,
-  "alt_m": 1700.7930834315573
+  "lat": -36.44192,
+  "lon": -69.44944,
+  "alt_m": 2207.3
  },
- "C": 0.1234,
+ "C": 0.1677,
  "E": 0.8,
- "L": 0.0987,
- "U": 0.2987,
+ "L": 0.1342,
+ "U": 0.3342,
  "umbral": 0.7,
  "requisitos": {
   "vegetacion": {
    "estado": "cumple",
-   "valor": 0.09,
+   "valor": 0.1243,
    "limite": 0.2,
    "unidad": "NDVI percentil 90 anual"
   },
   "pendiente": {
    "estado": "cumple",
-   "valor": 9.013,
+   "valor": 2.059,
    "limite": 15.0,
    "unidad": "grados (mediana a 60 m)"
   }
@@ -34,46 +34,46 @@
   "pendiente": {
    "estado": "conocida",
    "peso": 0.3,
-   "distancia": 4.1406,
+   "distancia": 5.1746,
    "tolerancia": 3.0,
-   "utilidad": 0.251531,
+   "utilidad": 0.178194,
    "unidad": "grados (W1)"
   },
   "luz_rasante": {
    "estado": "conocida",
    "peso": 0.3,
-   "distancia": 0.18207,
+   "distancia": 0.1786,
    "tolerancia": 0.05,
-   "utilidad": 0.026217,
+   "utilidad": 0.0281,
    "unidad": "fracción en sombra (media de |Δf̄| de 1,5° a 10°)"
   },
   "rugosidad": {
    "estado": "conocida",
    "peso": 0.2,
-   "distancia": 2.57308,
+   "distancia": 1.31328,
    "tolerancia": 1.0,
-   "utilidad": 0.076966,
+   "utilidad": 0.361357,
    "unidad": "W1/τ, media de las escalas de 200 a 1.600 m",
    "detalle": {
     "200": {
-     "w1_m": 1.1126,
-     "tolerancia_m": 0.4521,
-     "utilidad": 0.085368
+     "w1_m": 0.089,
+     "tolerancia_m": 0.1559,
+     "utilidad": 0.565033
     },
     "400": {
-     "w1_m": 2.5249,
-     "tolerancia_m": 1.0055,
-     "utilidad": 0.08118
+     "w1_m": 0.2547,
+     "tolerancia_m": 0.4941,
+     "utilidad": 0.597162
     },
     "800": {
-     "w1_m": 6.0054,
-     "tolerancia_m": 2.1416,
-     "utilidad": 0.060561
+     "w1_m": 2.0942,
+     "tolerancia_m": 1.3381,
+     "utilidad": 0.209081
     },
     "1600": {
-     "w1_m": 10.5594,
-     "tolerancia_m": 4.1964,
-     "utilidad": 0.080756
+     "w1_m": 9.5251,
+     "tolerancia_m": 3.6612,
+     "utilidad": 0.074152
     }
    }
   },
@@ -150,52 +150,52 @@
    10.0
   ],
   "f_parcela": [
-   0.7896,
-   0.7351,
-   0.6834,
-   0.6343,
-   0.5878,
-   0.5439,
-   0.5023,
-   0.4631,
-   0.4262,
-   0.3915,
-   0.3589,
-   0.3284,
-   0.2999,
-   0.2733,
-   0.2485,
-   0.2254,
-   0.204,
-   0.1842
+   0.6533,
+   0.5205,
+   0.3935,
+   0.2966,
+   0.2182,
+   0.1449,
+   0.0903,
+   0.0567,
+   0.0337,
+   0.0209,
+   0.0141,
+   0.0097,
+   0.0071,
+   0.005,
+   0.0035,
+   0.0023,
+   0.0016,
+   0.0012
   ],
   "f_referencia": [
-   0.6906,
-   0.6053,
-   0.5282,
-   0.4588,
-   0.3966,
-   0.3411,
-   0.2918,
-   0.2483,
-   0.21,
-   0.1767,
-   0.1477,
-   0.1227,
-   0.1012,
-   0.083,
-   0.0675,
-   0.0546,
-   0.0437,
-   0.0348
+   0.6861,
+   0.6365,
+   0.5834,
+   0.5285,
+   0.4746,
+   0.4219,
+   0.3733,
+   0.3281,
+   0.2869,
+   0.2499,
+   0.2175,
+   0.1888,
+   0.1638,
+   0.1423,
+   0.1235,
+   0.1075,
+   0.0935,
+   0.0818
   ]
  },
  "horario": [
   {
    "tipo": "amanecer",
    "fecha": "2026-11-14",
-   "desde": "06:31",
-   "hasta": "07:01",
+   "desde": "06:32",
+   "hasta": "07:02",
    "azimut": [
     112.0,
     107.7
@@ -204,7 +204,7 @@
    "e_hasta": 7.0,
    "zona": "-03:00",
    "horizonte": "liso",
-   "duracion_min": 30.0
+   "duracion_min": 29.9
   },
   {
    "tipo": "atardecer",
@@ -213,13 +213,13 @@
    "hasta": "20:12",
    "azimut": [
     252.2,
-    247.8
+    247.9
    ],
    "e_desde": 7.0,
    "e_hasta": 1.5,
    "zona": "-03:00",
    "horizonte": "liso",
-   "duracion_min": 30.1
+   "duracion_min": 30.0
   },
   {
    "tipo": "amanecer",
@@ -234,7 +234,7 @@
    "e_hasta": 7.0,
    "zona": "-03:00",
    "horizonte": "liso",
-   "duracion_min": 30.1
+   "duracion_min": 30.0
   },
   {
    "tipo": "atardecer",
@@ -242,7 +242,7 @@
    "desde": "19:43",
    "hasta": "20:13",
    "azimut": [
-    251.8,
+    251.9,
     247.5
    ],
    "e_desde": 7.0,
@@ -254,8 +254,8 @@
   {
    "tipo": "amanecer",
    "fecha": "2026-11-16",
-   "desde": "06:30",
-   "hasta": "07:00",
+   "desde": "06:31",
+   "hasta": "07:01",
    "azimut": [
     112.6,
     108.3
@@ -279,12 +279,12 @@
    "e_hasta": 1.5,
    "zona": "-03:00",
    "horizonte": "liso",
-   "duracion_min": 30.2
+   "duracion_min": 30.1
   },
   {
    "tipo": "amanecer",
    "fecha": "2026-11-17",
-   "desde": "06:29",
+   "desde": "06:30",
    "hasta": "07:00",
    "azimut": [
     112.9,
@@ -294,7 +294,7 @@
    "e_hasta": 7.0,
    "zona": "-03:00",
    "horizonte": "liso",
-   "duracion_min": 30.2
+   "duracion_min": 30.1
   },
   {
    "tipo": "atardecer",
@@ -309,13 +309,13 @@
    "e_hasta": 1.5,
    "zona": "-03:00",
    "horizonte": "liso",
-   "duracion_min": 30.3
+   "duracion_min": 30.2
   },
   {
    "tipo": "amanecer",
    "fecha": "2026-11-18",
    "desde": "06:29",
-   "hasta": "06:59",
+   "hasta": "07:00",
    "azimut": [
     113.2,
     108.9
@@ -324,7 +324,7 @@
    "e_hasta": 7.0,
    "zona": "-03:00",
    "horizonte": "liso",
-   "duracion_min": 30.3
+   "duracion_min": 30.2
   },
   {
    "tipo": "atardecer",
@@ -339,12 +339,12 @@
    "e_hasta": 1.5,
    "zona": "-03:00",
    "horizonte": "liso",
-   "duracion_min": 30.3
+   "duracion_min": 30.2
   },
   {
    "tipo": "amanecer",
    "fecha": "2026-11-19",
-   "desde": "06:28",
+   "desde": "06:29",
    "hasta": "06:59",
    "azimut": [
     113.5,
@@ -354,7 +354,7 @@
    "e_hasta": 7.0,
    "zona": "-03:00",
    "horizonte": "liso",
-   "duracion_min": 30.3
+   "duracion_min": 30.2
   },
   {
    "tipo": "atardecer",
@@ -362,20 +362,20 @@
    "desde": "19:47",
    "hasta": "20:17",
    "azimut": [
-    250.6,
+    250.7,
     246.3
    ],
    "e_desde": 7.0,
    "e_hasta": 1.5,
    "zona": "-03:00",
    "horizonte": "liso",
-   "duracion_min": 30.4
+   "duracion_min": 30.3
   },
   {
    "tipo": "amanecer",
    "fecha": "2026-11-20",
    "desde": "06:28",
-   "hasta": "06:58",
+   "hasta": "06:59",
    "azimut": [
     113.8,
     109.5
@@ -384,7 +384,7 @@
    "e_hasta": 7.0,
    "zona": "-03:00",
    "horizonte": "liso",
-   "duracion_min": 30.4
+   "duracion_min": 30.3
   },
   {
    "tipo": "atardecer",
@@ -399,7 +399,7 @@
    "e_hasta": 1.5,
    "zona": "-03:00",
    "horizonte": "liso",
-   "duracion_min": 30.5
+   "duracion_min": 30.4
   }
  ],
  "no_transfiere": [
@@ -419,16 +419,16 @@
   {
    "propiedad": "material",
    "peor": {
-    "L": 0.0987,
-    "U": 0.1987,
+    "L": 0.1342,
+    "U": 0.2342,
     "etiqueta": "no_alcanza",
-    "orden": 6
+    "orden": 27
    },
    "mejor": {
-    "L": 0.1987,
-    "U": 0.2987,
+    "L": 0.2342,
+    "U": 0.3342,
     "etiqueta": "no_alcanza",
-    "orden": 5
+    "orden": 9
    },
    "cambia_etiqueta": false,
    "cambia_primer_lugar": false
@@ -436,16 +436,16 @@
   {
    "propiedad": "transitabilidad_fina",
    "peor": {
-    "L": 0.0987,
-    "U": 0.1987,
+    "L": 0.1342,
+    "U": 0.2342,
     "etiqueta": "no_alcanza",
-    "orden": 6
+    "orden": 27
    },
    "mejor": {
-    "L": 0.1987,
-    "U": 0.2987,
+    "L": 0.2342,
+    "U": 0.3342,
     "etiqueta": "no_alcanza",
-    "orden": 5
+    "orden": 9
    },
    "cambia_etiqueta": false,
    "cambia_primer_lugar": false
@@ -458,17 +458,45 @@
  },
  "fuentes": [
   {
-   "id": "maqueta_terra_x",
+   "id": "copernicus_glo30_Copernicus_DSM_COG_10_S37_00_W070_00_DEM",
+   "sha256": "a886aa9f9eccb2f62d8a60dcabdf97c8090724fcfacee08ea237177430aa81fb"
+  },
+  {
+   "id": "sentinel2_l2a_ndvi_p90",
+   "sha256": "4d16f2b82d2e9597632cb1f534c8ccabbbd0153542ad26940c78accca80738e4"
+  },
+  {
+   "id": "pgda_LDEM_80S_20MPP_ADJ",
+   "sha256": "c19914b1fc45fadd86611819fd10b4165d221b13fe6abdbaa78e6dff3740fa30"
+  },
+  {
+   "id": "pgda_LDEM_60S_60MPP_ADJ",
+   "sha256": "d82aa5426e5c50c166a9f83e2ca0d489dfb76aabea6f153ab056a507ab1903c0"
+  },
+  {
+   "id": "pgda_LDEM_60S_240MPP_ADJ",
+   "sha256": "2be359e79416a00324831c51591dd6e569be511a63a9dfbdd4b56f2725e09efa"
+  },
+  {
+   "id": "luna_sin_vegetacion",
    "sha256": null
+  },
+  {
+   "id": "copernicus_glo30_Copernicus_DSM_COG_10_S21_00_W062_00_DEM",
+   "sha256": "d5ccb8a3f17348011eeb4164c59b983c27110f7a4bea336f8f066b34e240b861"
+  },
+  {
+   "id": "copernicus_glo30_Copernicus_DSM_COG_10_S20_00_W062_00_DEM",
+   "sha256": "5a738c1ec8f910f034f0b18a255931c6410caeea9953b45e71f4e12d31f60824"
   }
  ],
- "maqueta": true,
+ "maqueta": false,
  "meta": {
   "producto": "tarjeta_analogo",
   "version_formato": 1,
   "motor_version": "0.1.0",
   "parametros_sha256": "346a6cd22cc8cb1c75852fd8310971a78d50b2bf33d4c0710658e79e8556231c",
-  "generado_utc": "2026-11-14T16:33:45Z",
+  "generado_utc": "2026-11-15T04:36:25Z",
   "uso_si": "Código del motor físico (Parte 3) redactado con SI (Claude Code, Anthropic) a partir de los documentos 02 y 04, con pruebas de resultado conocido escritas antes del código. Los números los calcula el motor determinista con datos y parámetros publicados; ningún modelo de lenguaje interviene en el cálculo.",
   "notas": [
    "Compatibilidad y evidencia van separadas: un valor de C no es un porcentaje de parecido.",
