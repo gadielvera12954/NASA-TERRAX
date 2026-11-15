@@ -277,10 +277,23 @@ function AppContent() {
       if (event.data === "OFFLINE_READY") setOfflineReady(true);
     };
     navigator.serviceWorker?.addEventListener("message", message);
+    // A new deploy installs a new service worker, which takes over this page (skipWaiting + claim).
+    // When that replaces an older one, reload once so the visitor sees the new version right away.
+    const habiaVersion = Boolean(navigator.serviceWorker?.controller);
+    let recargada = false;
+    const nuevaVersion = () => {
+      if (!habiaVersion || recargada) return;
+      recargada = true;
+      window.location.reload();
+    };
+    navigator.serviceWorker?.addEventListener("controllerchange", nuevaVersion);
     if (import.meta.env.PROD && "serviceWorker" in navigator)
       navigator.serviceWorker
-        .register("/sw.js")
-        .then(() => navigator.serviceWorker.ready)
+        .register("/sw.js", { updateViaCache: "none" })
+        .then((reg) => {
+          reg.update().catch(() => undefined);
+          return navigator.serviceWorker.ready;
+        })
         .then((reg) => {
           reg.active?.postMessage("CHECK_READY");
         })
@@ -289,6 +302,7 @@ function AppContent() {
       window.removeEventListener("online", update);
       window.removeEventListener("offline", update);
       navigator.serviceWorker?.removeEventListener("message", message);
+      navigator.serviceWorker?.removeEventListener("controllerchange", nuevaVersion);
     };
   }, []);
   const go = (next: Page) => {

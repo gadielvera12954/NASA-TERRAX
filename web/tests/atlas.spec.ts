@@ -142,7 +142,8 @@ test("Community, accounts, integrity verification and the SI guide remain reacha
   await page.goto("/#checks");
   const manifest = await (await page.request.get("/data/manifest.json")).json();
   await page.getByRole("button", {name: "Check every file now"}).click();
-  await expect(page.getByText(manifest.archivos.length + " of " + manifest.archivos.length + " files match", {exact: true})).toBeVisible();
+  // The check re-downloads every published file from the network (about 20 MB), not from the offline cache.
+  await expect(page.getByText(manifest.archivos.length + " of " + manifest.archivos.length + " files match", {exact: true})).toBeVisible({timeout: 60000});
   await page.keyboard.press("Control+k");
   await expect(page.getByRole("dialog", {name: "TERRA-X SI assistant"})).toBeVisible();
   await page.keyboard.press("Escape");
