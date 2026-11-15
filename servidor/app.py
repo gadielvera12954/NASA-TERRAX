@@ -19,11 +19,13 @@ Uso de SI: redactado con Claude Code.
 from __future__ import annotations
 
 import datetime as dt
+import hashlib
 import json
 import math
 import pathlib
 import threading
 import time
+from collections import OrderedDict
 from functools import lru_cache
 
 import numpy as np
@@ -60,6 +62,8 @@ RUTAS = [
     {"metodo": "GET", "ruta": "/api/estado", "que": "engine version, frozen-parameter hash, which terrain data is loaded"},
     {"metodo": "GET", "ruta": "/api/sol/ahora", "que": "the Sun right now over Mons Mouton and over the field site (DE421)"},
     {"metodo": "POST", "ruta": "/api/destino/punto", "que": "park the rover at (fila, col): horizon, power, battery, verdict"},
+    {"metodo": "POST", "ruta": "/api/destino/comparar",
+     "que": "2 to 3 /punto requests in one call, each with a reproducible scenario_id, plus a side-by-side summary"},
     {"metodo": "POST", "ruta": "/api/campo/sombra", "que": "predicted board shadow and the error of a measured one"},
     {"metodo": "POST", "ruta": "/api/cuentas/registro | /entrar | /salir · GET /api/cuentas/yo", "que": "accounts (local server only)"},
     {"metodo": "GET", "ruta": "/api/divulgacion", "que": "published outreach articles by verified authors"},
@@ -107,6 +111,69 @@ def grilla_info() -> dict:
                 "x0_m": capas[0].x0, "y0_m": capas[0].y0, "proyeccion": meta["proyeccion"], "fuentes": meta.get("fuentes", [])}
     m = json.loads((WEB_MODELOS / "modelos.json").read_text(encoding="utf-8"))["terreno"]
     return {k: m[k] for k in ("filas", "columnas", "pixel_m", "x0_m", "y0_m", "proyeccion", "fuentes")}
+
+
+# ------------------------------------------------------------------------------------------------
+# Reutilización de cálculos caros (horizonte por raycast y serie solar DE421)
+# ------------------------------------------------------------------------------------------------
+# No es estado de la persona: son resultados puros de (entradas, parámetros congelados, versión del
+# motor), así que repetirlos da exactamente los mismos números. Se guardan como copias y se entregan
+# como copias para que ningún pedido modifique lo que usa otro. Un candado por clave evita calcular
+# dos veces lo mismo cuando llegan pedidos simultáneos.
+CACHE_MAX = 64
+_cache: "OrderedDict[tuple, object]" = OrderedDict()
+_cache_candado = threading.Lock()
+_en_curso: dict[tuple, threading.Lock] = {}
+
+
+def _copia(v):
+    if isinstance(v, np.ndarray):
+        return v.copy()
+    if isinstance(v, tuple):
+        return tuple(_copia(x) for x in v)
+    if isinstance(v, list):
+        return list(v)
+    return v
+
+
+def _reutilizar(clave: tuple, calcular) -> tuple[object, bool]:
+    """(valor, reutilizado). `clave` debe incluir todo lo que cambia el resultado."""
+    with _cache_candado:
+        if clave in _cache:
+            _cache.move_to_end(clave)
+            return _copia(_cache[clave]), True
+        candado = _en_curso.setdefault(clave, threading.Lock())
+    with candado:
+        with _cache_candado:
+            if clave in _cache:
+                return _copia(_cache[clave]), True
+        try:
+            valor = calcular()
+            with _cache_candado:
+                _cache[clave] = _copia(valor)
+                _cache.move_to_end(clave)
+                while len(_cache) > CACHE_MAX:
+                    _cache.popitem(last=False)
+        finally:
+            with _cache_candado:
+                _en_curso.pop(clave, None)
+    return valor, False
+
+
+def vaciar_cache() -> None:
+    with _cache_candado:
+        _cache.clear()
+
+
+def scenario_id(entradas: dict, fuente_horizonte: str) -> str:
+    """SHA-256 de las entradas normalizadas + parámetros congelados + versión del motor + datos usados.
+
+    No incluye la hora ni el tiempo de cálculo: el mismo pedido sobre los mismos datos da el mismo id.
+    """
+    base = {"entradas": entradas, "parametros_sha256": parametros.huella(), "motor_version": MOTOR_VERSION,
+            "fuente_horizonte": fuente_horizonte,
+            "grilla_sha256": [f.get("sha256") for f in grilla_info().get("fuentes", [])]}
+    return hashlib.sha256(json.dumps(base, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
 
 
 # ------------------------------------------------------------------------------------------------
@@ -167,14 +234,19 @@ def punto(fila: int, col: int, prm: dict, modo: str) -> dict:
         p = energia.pendiente_horn_deg(capas[0].z, fila, col, capas[0].pixel_m)
         salida["pendiente_deg"] = None if math.isnan(p) else round(p, 2)
 
+    reutilizado = False
     if modo == "liso":
         h360, tipo, detalle = None, "liso", "Smooth horizon: no relief (observer 1 m above a sphere)."
+        fuente = "liso"
     elif t is not None and modo in ("relieve", "auto"):
         capas, _ = t
-        h360 = calcular_horizontes_puntos(capas, [(fila, col)], n_az=hz["azimutes_rover"], altura_obs_m=hz["altura_observador_m"],
-                                          radio_m=radio, k=0.0, d_max_m=prm["grilla"]["margen_luna_km"] * 1000.0,
-                                          paso_rel=hz["paso_relativo"])[0]
+        h360, reutilizado = _reutilizar(
+            ("horizonte", fila, col, parametros.huella(), MOTOR_VERSION),
+            lambda: np.asarray(calcular_horizontes_puntos(
+                capas, [(fila, col)], n_az=hz["azimutes_rover"], altura_obs_m=hz["altura_observador_m"], radio_m=radio,
+                k=0.0, d_max_m=prm["grilla"]["margen_luna_km"] * 1000.0, paso_rel=hz["paso_relativo"])[0]))
         tipo = "relieve"
+        fuente = "grillas"
         detalle = (f"Ray-cast now over LOLA relief out to {prm['grilla']['margen_luna_km']} km "
                    f"({hz['azimutes_rover']} azimuths, {len(capas)} layers).")
     else:
@@ -184,10 +256,11 @@ def punto(fila: int, col: int, prm: dict, modo: str) -> dict:
         h360 = h[0].grados()[:, fila, col]
         tipo = "relieve"
         detalle = f"Lookup in horizontes.bin ({h[0].n_az} azimuths): the real grids are not on this machine."
+        fuente = "horizontes.bin"
     salida["horizonte"] = {"tipo": tipo, "n_az": 0 if h360 is None else int(len(h360)), "detalle": detalle,
                            "altura_observador_m": float(hz["altura_observador_m"])}
     return {"info": salida, "lat": lat, "lon": lon, "conv": conv, "h360": h360,
-            "pendiente": salida["pendiente_deg"] or 0.0}
+            "pendiente": salida["pendiente_deg"] or 0.0, "fuente": fuente, "reutilizado": reutilizado}
 
 
 def simular(cuerpo: dict) -> dict:
@@ -222,7 +295,12 @@ def simular(cuerpo: dict) -> dict:
 
     t0 = time.perf_counter()
     pt = punto(fila, col, prm, modo)
-    serie = simulacion.serie_sol(pt["lat"], pt["lon"], desde, hasta, prm)
+    serie, serie_reutilizada = _reutilizar(
+        ("serie", round(pt["lat"], 9), round(pt["lon"], 9), desde.isoformat(), hasta.isoformat(), parametros.huella(), MOTOR_VERSION),
+        lambda: simulacion.serie_sol(pt["lat"], pt["lon"], desde, hasta, prm))
+    entradas = {"fila": fila, "col": col, "horizonte": modo, "lunacion": lunacion or None,
+                "desde": desde.date().isoformat(), "hasta": hasta.date().isoformat(),
+                "panel_w": float(v["panel_w"]), "bateria_wh": float(v["bateria_wh"]), "consumo_w": float(v["consumo_w"])}
     resultado = simulacion.simular_punto(pt["lat"], pt["lon"], desde, hasta, pt["h360"], d["rumbo"], pt["conv"],
                                          pendiente_local_deg=pt["pendiente"], prm=prm, serie=serie)
 
@@ -245,6 +323,9 @@ def simular(cuerpo: dict) -> dict:
 
     return {
         "origen": "motor-en-vivo",
+        "scenario_id": scenario_id(entradas, pt["fuente"]),
+        "entradas": entradas,
+        "reutilizado": {"horizonte": bool(pt["reutilizado"]), "serie_sol": bool(serie_reutilizada)},
         "punto": pt["info"],
         "periodo": {"lunacion": lunacion or None, "desde": desde.date().isoformat(), "hasta": hasta.date().isoformat(),
                     "margen_dias": float(d["margen_noches_dias"])},
@@ -341,6 +422,66 @@ def ruta_sol_ahora():
 @app.post("/api/destino/punto")
 def ruta_punto():
     return jsonify(simular(request.get_json(silent=True) or {}))
+
+
+COMPARAR_MIN, COMPARAR_MAX = 2, 3
+# Lo que se pone lado a lado: todo sale tal cual de `resultado` (motor/destino/simulacion.py).
+COMPARAR_METRICAS = ("tramo_oscuro_mas_largo_h", "noche_geometrica_h", "bateria_minima_wh", "bateria_minima_frac",
+                     "sobre_p_surv_frac", "sol_en_paneles_frac", "potencia_media_w", "en_riesgo")
+
+
+@app.post("/api/destino/comparar")
+def ruta_comparar():
+    """De 2 a 3 escenarios en un pedido, cada uno con el MISMO cálculo que /api/destino/punto.
+
+    Cuerpo: {"escenarios": [{"id": "A", "fila": ..., "col": ..., "lunacion": ...}, ...], "series": true}
+    Un escenario inválido no tumba a los demás: vuelve con ok=false y su error.
+    """
+    cuerpo = request.get_json(silent=True) or {}
+    lista = cuerpo.get("escenarios")
+    if not isinstance(lista, list) or not (COMPARAR_MIN <= len(lista) <= COMPARAR_MAX):
+        raise Pedido(f"'escenarios' must be a list of {COMPARAR_MIN} to {COMPARAR_MAX} requests")
+    con_series = cuerpo.get("series", True) is not False
+    t0 = time.perf_counter()
+    ids, salida, resumen = [], [], []
+    for k, pedido in enumerate(lista):
+        eid = str((pedido.get("id") if isinstance(pedido, dict) else None) or "ABC"[k])[:24]
+        if eid in ids:
+            raise Pedido(f"duplicate scenario id '{eid}'")
+        ids.append(eid)
+        if not isinstance(pedido, dict):
+            salida.append({"id": eid, "ok": False, "error": "each scenario must be an object"})
+            continue
+        try:
+            esc = simular({c: v for c, v in pedido.items() if c != "id"})
+        except Pedido as e:
+            salida.append({"id": eid, "ok": False, "error": str(e)})
+            continue
+        if not con_series:
+            esc.pop("serie", None)
+            esc.pop("horizonte_grilla_deg", None)
+        salida.append({"id": eid, "ok": True, "scenario_id": esc["scenario_id"], "escenario": esc})
+        r = esc["resultado"]
+        resumen.append({"id": eid, "scenario_id": esc["scenario_id"], "punto": {c: esc["punto"][c] for c in ("fila", "col", "lat", "lon")},
+                        "periodo": esc["periodo"], "consumo_w": esc["vehiculo"]["consumo_w"],
+                        **{m: r[m] for m in COMPARAR_METRICAS},
+                        "supera_limite_refugio": bool(r["tramo_oscuro_mas_largo_h"] > esc["limite_refugio_h"])})
+    mejor = {}
+    if len(resumen) >= 2:
+        mejor = {"tramo_oscuro_mas_largo_h": min(resumen, key=lambda x: x["tramo_oscuro_mas_largo_h"])["id"],
+                 "bateria_minima_frac": max(resumen, key=lambda x: x["bateria_minima_frac"])["id"],
+                 "sobre_p_surv_frac": max(resumen, key=lambda x: x["sobre_p_surv_frac"])["id"]}
+    prm = parametros.cargar()
+    return jsonify({
+        "origen": "motor-en-vivo",
+        "escenarios": salida,
+        "resumen": resumen,
+        "mejor": mejor,
+        "criterio_mejor": "shortest longest-dark stretch; highest minimum battery; largest share above survival power",
+        "limite_refugio_h": float(prm["destino"]["limite_refugio_h"]),
+        "calculo_ms": round((time.perf_counter() - t0) * 1000.0),
+        "meta": parametros.bloque_meta("comparacion_en_vivo", MOTOR_VERSION),
+    })
 
 
 @app.post("/api/campo/sombra")

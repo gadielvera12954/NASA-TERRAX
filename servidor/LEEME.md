@@ -38,12 +38,30 @@ Vite reenvía `/api` al servidor (`web/vite.config.ts`). La barra superior de la
 | `GET /api/estado` | Versión, huella de `parametros.yaml`, si están las grillas reales | `parametros` |
 | `GET /api/sol/ahora` | El Sol en este instante en Mons Mouton y en el sitio de campo | `motor.sol.posicion` (DE421, F15) |
 | `POST /api/destino/punto` | Rover estacionado en un píxel: horizonte, potencia, batería hora por hora y veredicto | `motor.horizonte.calcular_horizontes_puntos` (F2), `motor.destino.simulacion.simular_punto` (F3 a F7) |
+| `POST /api/destino/comparar` | De 2 a 3 escenarios de `/punto` en un pedido, cada uno con su `scenario_id`, más un resumen lado a lado | las mismas que `/punto` |
 | `POST /api/campo/sombra` | Predicción de la sombra de la tablita y error de una medición | `motor.tests.campo.comparar` (F14, F15, F19) |
 
 `POST /api/destino/punto` recibe `fila`, `col` y una `lunacion` (`verano` o `invierno`) o un par
 `desde`/`hasta` (hasta 62 días, de 1901 a 2049 por la cobertura del marco lunar DE421). Opcionales:
 `consumo_w`, `panel_w`, `bateria_wh`. Lo que la persona cambia respecto de las cifras públicas
 vuelve en `vehiculo.cambios`, y `p_surv_w` se recalcula con F6.
+
+Cada respuesta de `/punto` trae ahora `scenario_id` (SHA-256 de las entradas normalizadas, la huella
+de `parametros.yaml`, la versión del motor y los datos de relieve usados; no incluye la hora), las
+`entradas` normalizadas y `reutilizado`, que dice si el horizonte o la serie solar salieron de la
+caché del proceso.
+
+`POST /api/destino/comparar` recibe `{"escenarios": [{"id": "A", ...pedido de /punto}, ...], "series": true}`
+con 2 o 3 escenarios. Cada uno es exactamente el cálculo de `/punto` (lo prueba
+`servidor/tests/test_escenarios.py`). Un escenario inválido vuelve con `ok: false` y su error, y los
+demás siguen. `resumen` pone lado a lado las métricas de `resultado` y `mejor` dice qué escenario
+gana en cada una (tramo oscuro más corto, batería mínima más alta, más tiempo sobre la potencia de
+supervivencia). Con `"series": false` no manda las series hora por hora, para el asistente SI.
+
+**Caché.** El horizonte por raycast y la serie solar DE421 son resultados puros de (entradas,
+parámetros congelados, versión del motor). Se guardan en memoria del proceso (64 como máximo) y se
+entregan como copias; un candado por clave evita calcular dos veces lo mismo cuando llegan pedidos
+juntos. No es estado de la persona: repetir un pedido da los mismos números con o sin caché.
 
 Límites: cuerpos de hasta 64 KB (413 si se pasan), errores siempre en JSON (400 con el motivo,
 404 con la lista de rutas, 405, 500 sin detalles internos), CORS abierto solo a orígenes

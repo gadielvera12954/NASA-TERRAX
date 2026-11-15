@@ -17,6 +17,9 @@ Probado con Blender 5.3. Necesita `datos/grillas/mons_mouton_60m.{npy,json}` (se
 | `../web/public/modelos/tablita.glb` | Tablita de calibración de sombras |
 | `../web/public/modelos/mons_mouton.glb` | Relieve real de Mons Mouton |
 | `../web/public/modelos/mons_mouton_normales.png` | Normales de la grilla completa de 60 m |
+| `../web/public/modelos/payunia.glb` | Relieve real de Payunia alrededor de P-27 (Tierra) |
+| `../web/public/modelos/payunia_normales.png` | Normales de la grilla completa de 60 m de Payunia |
+| `vista_previa_payunia.png` | Render de control del relieve terrestre |
 | `../web/public/modelos/modelos.json` | Medidas, procedencia y SHA-256 de cada archivo |
 
 ## De dónde sale cada medida
@@ -38,9 +41,31 @@ el archivo pese 2,7 MB. Es solo la superficie donde se dibuja:
 - las sombras son la consulta de `horizontes.bin` píxel por píxel de 60 m;
 - ningún número de la app sale de esta malla (la altura que se ve al pasar el cursor lleva "≈").
 
+## Terreno de la Tierra (Payunia, alrededor de P-27)
+
+```bash
+.venv/Scripts/python -m modelos.grilla_tierra
+```
+
+```bash
+blender --background --factory-startup --python modelos/construir_modelos.py -- --solo-tierra
+```
+
+El primero arma `datos/grillas/payunia_p27_60m.{npy,json}` con la cadena de la Parte 4 sin cambios
+(`motor.ingest.copernicus` → `motor.escala.reproyectar`): Copernicus GLO-30, tesela `S37_W070`,
+llevada a UTM 19S a 60 m con remuestreo por **promedio**. Tiene la misma extensión y el mismo píxel
+que Mons Mouton (500 × 500 a 60 m, 30 × 30 km), centrada en la primera candidata real del ranking
+publicado (`web/public/data/fichas/indice.json`, hoy P-27). Necesita rasterio y pyproj, y conexión la
+primera vez (unos 39 MB). El segundo genera solo `payunia.glb` y sus normales y los suma a
+`modelos.json` bajo `terrenos`, sin volver a exportar los otros modelos.
+
+"Dos mundos" muestra los dos relieves lado a lado con el mismo ángulo local del Sol (modo
+geométrico) y la misma cámara. La exageración vertical es solo de presentación y siempre está
+rotulada. Ningún número sale de estas mallas.
+
 ## Qué NO hay
 
-No hay terreno 3D de la Tierra: las grillas NASADEM de las candidatas todavía no llegaron
-(`motor/huella`, Mathias). Por eso "Dos mundos" usa un suelo plano y lo dice en pantalla.
+No hay relieve de Marte ni del resto de las candidatas: solo el recorte de 30 × 30 km alrededor de
+P-27. El contorno de 3 × 3 km que se ve es la parcela de la ficha.
 
 Uso de SI: script y modelos redactados con Claude Code.

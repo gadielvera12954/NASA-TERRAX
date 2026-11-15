@@ -16,6 +16,12 @@ TERRA-X incorporates and references open scientific datasets and open-source sof
 - **License**: Public Domain
 - **Usage**: Topographic elevation model of Payunia, Mendoza, Argentina.
 
+### Copernicus DEM GLO-30 (European Space Agency / European Union)
+- **Dataset**: Copernicus DEM GLO-30 Public, tile `Copernicus_DSM_COG_10_S37_00_W070_00_DEM`, from the AWS Open Data registry (`copernicus-dem-30m`)
+- **Attribution**: © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.
+- **License**: Copernicus DEM licence (free use with the attribution above).
+- **Usage**: Payunia elevation grids (`motor/ingest/copernicus.py`) and the Earth relief mesh `web/public/modelos/payunia.glb` shown in "Earth and Moon".
+
 ### USGS Astrogeology Science Center / NASA PDS
 - **Dataset**: LOLA / Kaguya Merged DEM 5m (pgda78)
 - **License**: Public Domain

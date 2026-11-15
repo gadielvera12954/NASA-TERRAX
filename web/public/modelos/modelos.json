@@ -57,7 +57,85 @@
   },
   "vistas_previas": {
     "rover": true,
-    "terreno": true
+    "terreno": true,
+    "payunia": true
   },
-  "maqueta": false
+  "maqueta": false,
+  "terrenos": {
+    "mons_mouton": {
+      "archivo": "mons_mouton.glb",
+      "sha256": "4a6538d2e3dad549755b4bd6a10924e4fbe8964c726d77b477cd0624b116ce56",
+      "normales": "mons_mouton_normales.png",
+      "normales_sha256": "14d77490958e157d7c736ab238e21f7052a0d03967c790188466ddc99254b60b",
+      "grilla": "mons_mouton_60m",
+      "pixel_m": 60.0,
+      "pixel_malla_m": 120.0,
+      "filas": 500,
+      "columnas": 500,
+      "z_min_m": 3861.62548828125,
+      "z_max_m": 6652.9853515625,
+      "x0_m": 69450.0,
+      "y0_m": 155430.0,
+      "proyeccion": {
+        "tipo": "polar_estereografica_sur",
+        "radio_m": 1737400.0,
+        "lon0_deg": 0.0
+      },
+      "unidad_malla": "km",
+      "exageracion_vertical": 1.0,
+      "vertices": 62500,
+      "fuentes": [
+        {
+          "id": "pgda_LDEM_80S_20MPP_ADJ",
+          "sha256": "c19914b1fc45fadd86611819fd10b4165d221b13fe6abdbaa78e6dff3740fa30",
+          "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_20MPP_ADJ.TIF",
+          "version": "Fri, 07 Jul 2023 22:28:19 GMT · ETag W/\"a0b2f283-189327867b8\""
+        }
+      ]
+    },
+    "payunia": {
+      "archivo": "payunia.glb",
+      "sha256": "81b65ea299e086a6f80e66cc04051682c0eb9483f39b7440947a6d5b11d415c2",
+      "normales": "payunia_normales.png",
+      "normales_sha256": "08dd3ddbfc4b84b0f343ff320442741e2361d4738f88221d97a306570defa4ef",
+      "grilla": "payunia_p27_60m",
+      "pixel_m": 60.0,
+      "pixel_malla_m": 120.0,
+      "filas": 500,
+      "columnas": 500,
+      "z_min_m": 1217.1790771484375,
+      "z_max_m": 3815.5556640625,
+      "x0_m": 447750.0,
+      "y0_m": 5966850.0,
+      "proyeccion": {
+        "tipo": "utm",
+        "zona": 19,
+        "hemisferio": "S",
+        "lat_centro_deg": -36.57727,
+        "lon_centro_deg": -69.41669
+      },
+      "unidad_malla": "km",
+      "exageracion_vertical": 1.0,
+      "vertices": 62500,
+      "fuentes": [
+        {
+          "id": "copernicus_glo30_Copernicus_DSM_COG_10_S37_00_W070_00_DEM",
+          "sha256": "a886aa9f9eccb2f62d8a60dcabdf97c8090724fcfacee08ea237177430aa81fb",
+          "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_S37_00_W070_00_DEM/Copernicus_DSM_COG_10_S37_00_W070_00_DEM.tif",
+          "version": "Mon, 09 May 2022 15:04:59 GMT · ETag \"f413e06fc73743ea0bd78748173859b2\""
+        }
+      ],
+      "cuerpo": "tierra",
+      "candidata": {
+        "id": "P-27",
+        "nombre": "Payunia P-27",
+        "lat_deg": -36.57727,
+        "lon_deg": -69.41669,
+        "fila": 248.5,
+        "col": 249.5,
+        "parcela_km": 3.0,
+        "fuente": "web/public/data/fichas/indice.json"
+      }
+    }
+  }
 }
