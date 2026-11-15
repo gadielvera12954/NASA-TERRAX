@@ -1,0 +1,150 @@
+/* Home: a full-width band of space with the Earth/Moon globe, then the usual atlas content. */
+.mvp-main.inicio { max-width: none; padding: 0 0 64px; }
+.inicio-cuerpo { max-width: calc(1280px + 2 * var(--gutter)); margin: auto; padding: 0 var(--gutter); }
+
+/* The band is always dark (space), whatever the page theme: it carries the dark tokens itself. */
+.espacio {
+  color-scheme: dark;
+  --paper: #101c22; --surface: #18272e; --ink: #e4edf1; --muted: #a7b9c3;
+  --action: #80cbd1; --action-hover: #a2e0e3; --on-action: #10252b; --tint: #223b40;
+  --line: #31464f; --input-line: #6e858f;
+  --tono-tierra: #6fb2ff; --tono-luna: #d8dcdf;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--ink);
+  background-color: #060b10;
+  background-image: radial-gradient(110% 85% at 72% 46%, #0e2130 0%, #08111a 48%, #04070b 100%);
+  border-bottom: 1px solid #1d3038;
+}
+.espacio-fondo { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+/* A few static stars until (or instead of) the WebGL sky. */
+.espacio-fondo::before {
+  content: ""; position: absolute; inset: 0; opacity: .7; transition: opacity 1.2s ease;
+  background-image:
+    radial-gradient(1.2px 1.2px at 8% 18%, #fff 50%, transparent), radial-gradient(1px 1px at 22% 72%, #cfe3ff 50%, transparent),
+    radial-gradient(1.4px 1.4px at 41% 12%, #fff 50%, transparent), radial-gradient(1px 1px at 57% 86%, #ffe9cc 50%, transparent),
+    radial-gradient(1.2px 1.2px at 66% 9%, #fff 50%, transparent), radial-gradient(1px 1px at 83% 27%, #cfe3ff 50%, transparent),
+    radial-gradient(1.5px 1.5px at 94% 64%, #fff 50%, transparent), radial-gradient(1px 1px at 31% 41%, #fff 50%, transparent),
+    radial-gradient(1px 1px at 13% 92%, #fff 50%, transparent), radial-gradient(1.2px 1.2px at 76% 93%, #fff 50%, transparent);
+}
+.espacio.listo .espacio-fondo::before { opacity: 0; }
+/* Keeps the headline readable where it overlaps the sky. */
+.espacio-fondo::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, #04080cf0 0%, #04080cb3 30%, #04080c00 56%);
+}
+.espacio-lienzo { position: absolute; inset: 0; display: block; width: 100%; height: 100%; opacity: 0; transition: opacity 1s ease; }
+.espacio.listo .espacio-lienzo { opacity: 1; }
+
+.espacio .atlas-hero {
+  max-width: calc(1280px + 2 * var(--gutter));
+  min-height: clamp(560px, calc(100svh - 150px), 860px);
+  margin: 0 auto;
+  padding: clamp(24px, 3.4vw, 52px) var(--gutter) 8px;
+  grid-template-columns: minmax(0, .86fr) minmax(0, 1.14fr);
+  align-items: stretch;
+}
+.espacio .hero-copy { position: relative; z-index: 1; align-self: center; }
+.espacio .hero-copy h1 { text-shadow: 0 2px 30px #000a; }
+
+.planeta-ancla { position: relative; min-height: 470px; }
+.planeta-disco { position: absolute; inset: 0; container-type: size; touch-action: pan-y; }
+
+/* Flat stand-in while three.js loads, and the whole picture when WebGL is unavailable. */
+.disco-estatico {
+  position: absolute; left: 50%; top: 50%; width: 86cqmin; aspect-ratio: 1; translate: -50% -50%;
+  border-radius: 50%; overflow: hidden; transition: opacity 1s ease;
+  box-shadow: -10px -4px 50px #4d96ff40;
+}
+.planeta-disco.listo .disco-estatico { opacity: 0; }
+.disco-estatico span { position: absolute; inset: 0; }
+.disco-estatico .mitad { background-size: 200% 100%; background-repeat: no-repeat; }
+.disco-estatico .tierra { background-image: url("/img/inicio/tierra_dia.webp"); background-position: 34% 50%; clip-path: inset(0 calc((1 - var(--costura)) * 50%) 0 0); }
+.disco-estatico .luna { background-image: url("/img/inicio/luna_color.webp"); background-position: 50% 50%; clip-path: inset(0 0 0 calc((1 + var(--costura)) * 50%)); }
+.disco-estatico .sombra { background: radial-gradient(circle at 32% 36%, #0000 0 34%, #00000059 60%, #000000e0 100%); }
+.disco-estatico .sombra::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: calc((1 + var(--costura)) * 50%); width: 2px; translate: -50% 0;
+  background: #b9f3f7; box-shadow: 0 0 12px 3px #80cbd1aa;
+}
+
+.costura-mando {
+  position: absolute; z-index: 2;
+  left: calc(50% + var(--costura) * 43cqmin);
+  top: calc(50% + 43cqmin + 16px);
+  translate: -50% 0;
+  display: grid; place-items: center;
+  width: 46px; height: 46px;
+  border: 1px solid var(--action); border-radius: 50%;
+  background: #0a161ccc; color: var(--action-hover);
+  box-shadow: 0 0 0 5px #80cbd11f, 0 0 26px #80cbd170;
+  backdrop-filter: blur(6px);
+  cursor: ew-resize; touch-action: none;
+  animation: costura-pulso 2.8s ease-in-out infinite;
+}
+.costura-mando::before { content: ""; position: absolute; left: 50%; bottom: 100%; width: 1px; height: 16px; background: linear-gradient(to top, var(--action), #80cbd100); }
+.costura-mando:hover { background: #0e2229e6; }
+.costura-mando:focus-visible { outline: 3px solid var(--action-hover); outline-offset: 4px; animation: none; }
+@keyframes costura-pulso {
+  0%, 100% { box-shadow: 0 0 0 5px #80cbd11f, 0 0 26px #80cbd170; }
+  50% { box-shadow: 0 0 0 11px #80cbd10d, 0 0 40px #80cbd1a0; }
+}
+
+.dato-mundo {
+  position: absolute; z-index: 1; width: 204px; padding: 10px 12px 8px;
+  font-size: 12.5px; line-height: 1.3;
+  background: #08141bc4; border: 1px solid #ffffff1f; border-left: 3px solid; border-radius: 10px;
+  backdrop-filter: blur(10px) saturate(1.2);
+  box-shadow: 0 10px 30px #0008;
+}
+.dato-mundo.tierra { left: -12px; top: 0; border-left-color: var(--tono-tierra); }
+.dato-mundo.luna { right: -12px; bottom: 0; border-left-color: var(--tono-luna); }
+.mvp-main .dato-mundo .nombre { display: grid; margin: 0 0 6px; }
+.dato-mundo .nombre strong { font-size: 16px; font-weight: 600; letter-spacing: .02em; }
+.dato-mundo.tierra .nombre strong { color: var(--tono-tierra); }
+.dato-mundo.luna .nombre strong { color: var(--tono-luna); }
+.dato-mundo .nombre span { color: var(--muted); font-size: 12px; }
+.dato-mundo dl div { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; border-top: 1px solid #ffffff14; }
+.dato-mundo dt { color: var(--muted); }
+.dato-mundo dd { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+.dato-mundo small { margin-left: 3px; color: var(--action); font-size: 11px; }
+
+.mvp-main .espacio-creditos {
+  display: flex; flex-direction: column; gap: 2px;
+  max-width: calc(1280px + 2 * var(--gutter)); margin: 0 auto; padding: 6px var(--gutter) 16px;
+  color: var(--muted); font-size: 12px;
+}
+.espacio-creditos a { color: var(--action); }
+
+.atlas-referencia {
+  display: grid; grid-template-columns: minmax(0, .86fr) minmax(0, 1.14fr); align-items: center;
+  gap: clamp(28px, 4vw, 68px); margin-top: clamp(35px, 4vw, 66px);
+}
+.atlas-referencia h2 { max-width: 20ch; }
+
+/* Narrower screens: the two fact cards sit side by side under the globe instead of over its edges. */
+@media (max-width: 1180px) {
+  .planeta-ancla { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr) auto; gap: 10px; }
+  .planeta-disco { position: relative; inset: auto; grid-column: 1 / -1; min-height: 320px; margin-bottom: 40px; }
+  .dato-mundo { position: static; width: auto; }
+}
+/* Phones and small tablets: globe, then the headline, then the two fact cards. */
+@media (max-width: 900px) {
+  .espacio .atlas-hero { grid-template-columns: repeat(2, minmax(0, 1fr)); min-height: 0; gap: 0 10px; padding-top: 10px; padding-bottom: 18px; }
+  .espacio .hero-copy { grid-column: 1 / -1; padding-block: 0 8px; }
+  .espacio-fondo::after { background: linear-gradient(180deg, #04080c00 0, #04080c00 30%, #04080cb3 60%); }
+  .planeta-ancla { display: contents; }
+  .planeta-disco { order: -1; grid-column: 1 / -1; height: min(80vw, 480px); min-height: 0; margin-bottom: 44px; }
+  .atlas-referencia { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 420px) {
+  .dato-mundo { padding: 10px; font-size: 11.5px; }
+  .dato-mundo dl div { flex-direction: column; gap: 0; }
+  .dato-mundo dd { text-align: left; }
+}
+@media print {
+  .espacio { background: none; color: black; border: 0; }
+  .espacio-fondo, .planeta-ancla, .espacio-creditos { display: none; }
+  .espacio .atlas-hero { min-height: 0; grid-template-columns: 1fr; }
+  .espacio .hero-copy h1 { text-shadow: none; }
+}

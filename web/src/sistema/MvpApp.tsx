@@ -23,6 +23,7 @@ import DosMundos from "../pantallas/operacion/DosMundos";
 import Comparador from "../pantallas/operacion/Comparador";
 import SombraCampo from "../pantallas/field/SombraCampo";
 import ReferencePlate from "./ReferencePlate";
+import HeroEspacio from "./HeroEspacio";
 import ThemeToggle from "./ThemeToggle";
 import {
   Goal,
@@ -638,7 +639,10 @@ function AppContent() {
           </div>
         </aside>
       )}
-      <main id="main-content" className="mvp-main">
+      <main
+        id="main-content"
+        className={page === "home" ? "mvp-main inicio" : "mvp-main"}
+      >
         {page !== "home" && (
           <div className="page-title">
             <a href="#home">{t("Field atlas", "Atlas de campo")}</a>
@@ -739,7 +743,7 @@ function AppContent() {
         )}
         {page === "home" && (
           <>
-            <section className="atlas-hero">
+            <HeroEspacio>
               <div className="hero-copy">
                 <div className="atlas-label">
                   <Compass size={18} />
@@ -792,6 +796,33 @@ function AppContent() {
                     "Para estudiantes, docentes y equipos de campo",
                   )}
                 </p>
+              </div>
+            </HeroEspacio>
+            <div className="inicio-cuerpo">
+            <section
+              className="atlas-referencia"
+              aria-labelledby="referencia-lunar"
+            >
+              <div>
+                <h2 id="referencia-lunar">
+                  {t(
+                    "The lunar terrain every site is compared with",
+                    "El terreno lunar con el que se compara cada sitio",
+                  )}
+                </h2>
+                <p className="lead">
+                  {t(
+                    "Mons Mouton, near the lunar south pole, from NASA LOLA relief. Every Earth site is read on the same 60 m grid and with the same code.",
+                    "Mons Mouton, cerca del polo sur lunar, con el relieve NASA LOLA. Cada sitio terrestre se lee en la misma grilla de 60 m y con el mismo código.",
+                  )}
+                </p>
+                <a className="text-btn" href="#lab">
+                  {t(
+                    "Test a rover on Mons Mouton",
+                    "Prueba un rover en Mons Mouton",
+                  )}{" "}
+                  <ArrowRight size={16} aria-hidden="true" />
+                </a>
               </div>
               <ReferencePlate motor={motor} openLab={() => go("lab")} />
             </section>
@@ -858,6 +889,7 @@ function AppContent() {
                   <ArrowRight aria-hidden="true" />
                 </a>
               </aside>
+            </div>
             </div>
           </>
         )}
