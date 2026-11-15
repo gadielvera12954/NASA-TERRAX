@@ -47,3 +47,11 @@
 - **Control:** known-answer tests (tilted plane, plane plus white noise, constant horizon, constant and planar fields through reprojection) were written before the code and run red first. One failure exposed a real bug (a cell with no elevation received a slope) and was fixed in the code, not in the test.
 - **Metadata:** every Part 4 module states SI use in its header; commits carry a co-author trailer.
 - **Pending per the team method:** review by Codex and by a team member.
+
+## 6. 3D lab, Blender models and live engine server
+
+- **Tool:** Claude Code (Anthropic), on Saturday 2026-11-14.
+- **Scope:** wrote `modelos/construir_modelos.py` (Blender models), `servidor/` (HTTP wrapper around `motor/`), `web/src/escena3d`, `web/src/pantallas/operacion`, `web/src/pantallas/field/SombraCampo.tsx`, `web/src/datos/laboratorio.ts`, `web/src/sistema/lab.css`, and wired them into `web/src/sistema/MvpApp.tsx`.
+- **Control:** the server answer for the centre of Mons Mouton must equal the exported destination card (`servidor/tests`); the browser calculation must stay within 5 % of it (`web/tests/lab.spec.ts`); the existing browser suite, including the automated accessibility scan, still passes.
+- **No model computes results:** the server only calls the deterministic engine; the browser repeats formulas F3–F7 over the exported files. Illustrative elements (ground and sky colours of the Two Worlds stage, the generic rover shape) are labelled as such on screen.
+- **Pending:** the Codex and human review that the team method requires.

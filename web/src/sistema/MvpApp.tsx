@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { LanguageProvider, useLanguage } from "../i18n/Language";
 import { Ficha, Manifest } from "../datos/contract";
 import {
@@ -9,10 +9,34 @@ import {
 } from "../datos/integration";
 import { ScientificData } from "./ScientificData";
 import { SolProvider, useSol } from "../luz/SolContext";
+import { EstadoMotor, estadoMotor } from "../datos/laboratorio";
+import DosMundos from "../pantallas/operacion/DosMundos";
+import Comparador from "../pantallas/operacion/Comparador";
+import SombraCampo from "../pantallas/field/SombraCampo";
 import "./mvp.css";
+import "./lab.css";
 
-type Page = "home" | "explore" | "card" | "compare" | "checks" | "guide";
-const pages: Page[] = ["home", "explore", "card", "compare", "checks", "guide"];
+// The 3D screens (three.js + Blender models) load only when they are opened.
+const Laboratorio = lazy(() => import("../pantallas/operacion/Laboratorio"));
+const HeroTerreno = lazy(() => import("../pantallas/operacion/HeroTerreno"));
+
+type Page =
+  | "home"
+  | "explore"
+  | "card"
+  | "compare"
+  | "lab"
+  | "checks"
+  | "guide";
+const pages: Page[] = [
+  "home",
+  "explore",
+  "card",
+  "compare",
+  "lab",
+  "checks",
+  "guide",
+];
 const tourPages: Page[] = [
   "home",
   "explore",
@@ -62,6 +86,21 @@ function AppContent() {
   const [attempt, setAttempt] = useState(0);
   const [online, setOnline] = useState(navigator.onLine);
   const [offlineReady, setOfflineReady] = useState(false);
+  // Live physics engine (servidor/). null = not reachable: the app uses the exported files.
+  const [motor, setMotor] = useState<EstadoMotor | null>(null);
+  useEffect(() => {
+    let active = true;
+    const check = () =>
+      estadoMotor().then((e) => {
+        if (active) setMotor(e);
+      });
+    check();
+    const timer = window.setInterval(check, 30000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, []);
   const [query, setQuery] = useState("");
   const [operation, setOperation] = useState("shadow");
   const [tour, setTour] = useState<number | null>(null);
@@ -194,6 +233,10 @@ function AppContent() {
       "Two worlds. Different limits.",
       "Dos mundos. Diferentes límites.",
     ),
+    lab: t(
+      "Park the rover. Survive the night.",
+      "Estaciona el rover. Sobrevive la noche.",
+    ),
     checks: t("See what is verified.", "Conoce qué está verificado."),
     guide: t(
       "Start here. No expertise needed.",
@@ -203,10 +246,20 @@ function AppContent() {
   const nav = [
     { page: "home" as Page, label: t("Home", "Inicio") },
     { page: "explore" as Page, label: t("Explore", "Explorar") },
+    { page: "lab" as Page, label: t("3D lab", "Laboratorio 3D") },
     { page: "checks" as Page, label: t("Verification", "Verificación") },
     { page: "guide" as Page, label: t("Guide", "Guía") },
   ];
   const mock = manifest?.maqueta || ficha?.maqueta;
+  // Minutes of the Earth rehearsal window (Sun from 7° to 1.5°), from the open card.
+  const earthWindowMinutes = (() => {
+    const w = ficha?.horario[0];
+    if (!w) return null;
+    const [h1, m1] = w.desde.split(":").map(Number);
+    const [h2, m2] = w.hasta.split(":").map(Number);
+    const minutes = h2 * 60 + m2 - (h1 * 60 + m1);
+    return Number.isFinite(minutes) && minutes > 0 ? minutes : null;
+  })();
   const matches =
     ficha &&
     `${ficha.id} ${ficha.lugar.region} ${ficha.lugar.nombre}`
@@ -336,6 +389,13 @@ function AppContent() {
               "Offline copy not ready yet",
               "Copia sin conexión aún no preparada",
             )}
+        <span className={motor ? "luz vivo" : "luz"} aria-hidden="true" />
+        {motor
+          ? t("Live engine connected", "Motor en vivo conectado")
+          : t(
+              "Live engine off · using exported data",
+              "Motor en vivo apagado · se usan los datos exportados",
+            )}
       </div>
       {mock && (
         <aside className="mock-notice">
@@ -443,7 +503,50 @@ function AppContent() {
             </a>
           </div>
         )}
-        {page === "compare" && <Comparison />}
+        {page === "compare" && (
+          <>
+            <DosMundos minutosTierra={earthWindowMinutes} />
+            <div className="two-grid">
+              <section className="panel">
+                <h2>
+                  {t(
+                    "What a rehearsal can teach",
+                    "Qué permite aprender un ensayo",
+                  )}
+                </h2>
+                <p>
+                  {t(
+                    "How to move through uneven terrain, place instruments and work with low-angle light.",
+                    "Cómo desplazarse en terreno irregular, colocar instrumentos y trabajar con luz rasante.",
+                  )}
+                </p>
+              </section>
+              <section className="panel">
+                <h2>
+                  {t("What remains different", "Qué sigue siendo diferente")}
+                </h2>
+                <p>
+                  {t(
+                    "Atmosphere, gravity, dust and energy conditions. A successful Earth test does not certify a lunar operation.",
+                    "Atmósfera, gravedad, polvo y condiciones energéticas. Una prueba exitosa en la Tierra no certifica una operación lunar.",
+                  )}
+                </p>
+              </section>
+            </div>
+            <Comparador indice={candidateIndex} actual={candidateId} />
+          </>
+        )}
+        {page === "lab" && (
+          <Suspense
+            fallback={
+              <p role="status">
+                {t("Loading the 3D lab…", "Cargando el laboratorio 3D…")}
+              </p>
+            }
+          >
+            <Laboratorio motor={motor} onMotorCaido={() => setMotor(null)} />
+          </Suspense>
+        )}
         {page === "home" && (
           <>
             <div className="hero-grid">
@@ -469,52 +572,70 @@ function AppContent() {
                   )}
                 </p>
               </div>
-              <figure>
-                <img
-                  src="/img/ui_luna_top.png"
-                  alt={t(
-                    "Illustrative rendering of lunar terrain",
-                    "Representación ilustrativa de terreno lunar",
-                  )}
-                />
-                <figcaption>
-                  {t(
-                    "Synthetic illustration · Not a verified terrain measurement",
-                    "Ilustración sintética · No es una medición verificada del terreno",
-                  )}
-                </figcaption>
-              </figure>
+              <Suspense
+                fallback={
+                  <div className="escena cargando">
+                    {t("Loading the 3D terrain…", "Cargando el terreno 3D…")}
+                  </div>
+                }
+              >
+                <HeroTerreno motor={motor} onAbrir={() => go("lab")} />
+              </Suspense>
             </div>
-            <div className="three-grid steps">
+            <nav
+              className="puertas"
+              aria-label={t("What you can do here", "Qué puedes hacer aquí")}
+            >
               {[
                 [
-                  t("1. Choose", "1. Elige"),
+                  "lab",
+                  t("Park a rover", "Estaciona un rover"),
                   t(
-                    "Start with the available Payunia candidate.",
-                    "Empieza por la candidata disponible en Payunia.",
+                    "Click the real lunar relief, pick a season and watch the battery through the night.",
+                    "Haz clic en el relieve lunar real, elige una estación y mira la batería durante la noche.",
                   ),
+                  t("3D lab →", "Laboratorio 3D →"),
                 ],
                 [
-                  t("2. Understand", "2. Comprende"),
+                  "compare",
+                  t("Compare two worlds", "Compara dos mundos"),
                   t(
-                    "Read compatibility and evidence separately.",
-                    "Lee la compatibilidad y la evidencia por separado.",
+                    "The same rover under the same Sun on the Moon and on Earth: shadows, power, gravity, time.",
+                    "El mismo rover bajo el mismo Sol en la Luna y en la Tierra: sombras, energía, gravedad, tiempo.",
                   ),
+                  t("Earth / Moon in 3D →", "Tierra / Luna en 3D →"),
                 ],
                 [
-                  t("3. Verify", "3. Verifica"),
+                  "explore",
+                  t("Choose a rehearsal site", "Elige un sitio de ensayo"),
                   t(
-                    "Check limits and missing measurements before deciding.",
-                    "Revisa los límites y las mediciones pendientes antes de decidir.",
+                    "Open a candidate, read compatibility and evidence separately, then put candidates side by side.",
+                    "Abre una candidata, lee compatibilidad y evidencia por separado y pon candidatas lado a lado.",
                   ),
+                  t("Candidates →", "Candidatas →"),
                 ],
-              ].map(([h, p]) => (
-                <section className="panel" key={h}>
-                  <h2>{h}</h2>
-                  <p>{p}</p>
-                </section>
+                [
+                  "guide",
+                  t("Measure a real shadow", "Mide una sombra real"),
+                  t(
+                    "A 0.50 m board at sunset is enough to test the Sun model on real ground.",
+                    "Una tablita de 0,50 m al atardecer alcanza para probar el modelo del Sol en terreno real.",
+                  ),
+                  t("Field kit →", "Kit de campo →"),
+                ],
+              ].map(([to, h, p, cta]) => (
+                <a
+                  className="puerta"
+                  key={to}
+                  href={`#${to}`}
+                  onClick={() => setTour(null)}
+                >
+                  <strong>{h}</strong>
+                  <span>{p}</span>
+                  <em>{cta}</em>
+                </a>
               ))}
-            </div>
+            </nav>
           </>
         )}
         {page === "explore" && (
@@ -902,6 +1023,7 @@ function AppContent() {
               ))}
             </div>
             <SunLab />
+            <SombraCampo motor={motor} />
             <details className="notice">
               <summary>
                 {t(
@@ -991,79 +1113,6 @@ function SunLab() {
         )}
       </p>
     </section>
-  );
-}
-function Comparison() {
-  const { t } = useLanguage();
-  const [split, setSplit] = useState(50);
-  return (
-    <>
-      <a href="#card">← {t("Back to candidate card", "Volver a la ficha")}</a>
-      <p className="lead">
-        {t(
-          "Both scenes illustrate terrain. They are not synchronized physical simulations, and no measured shadow coverage is available yet.",
-          "Ambas escenas ilustran el relieve. No son simulaciones físicas sincronizadas y aún no hay mediciones de cobertura de sombra disponibles.",
-        )}
-      </p>
-      <div className="comparison">
-        <img
-          src="/img/ui_tierra_top.png"
-          alt={t("Illustrative Earth terrain", "Relieve terrestre ilustrativo")}
-        />
-        <img
-          className="moon-layer"
-          style={{ clipPath: `inset(0 ${100 - split}% 0 0)` }}
-          src="/img/ui_luna_top.png"
-          alt={t("Illustrative lunar terrain", "Relieve lunar ilustrativo")}
-        />
-        <div
-          className="curtain"
-          style={{ left: `${split}%` }}
-          aria-hidden="true"
-        />
-        <span className="world-label moon-label">{t("Moon", "Luna")}</span>
-        <span className="world-label earth-label">{t("Earth", "Tierra")}</span>
-      </div>
-      <p className="muted">
-        {t(
-          "Synthetic illustrations · No scientific measurement",
-          "Ilustraciones sintéticas · Sin medición científica",
-        )}
-      </p>
-      <label htmlFor="curtain">
-        {t("Comparison divider", "Divisor de comparación")}
-      </label>
-      <input
-        id="curtain"
-        type="range"
-        min="5"
-        max="95"
-        value={split}
-        onChange={(e) => setSplit(Number(e.target.value))}
-      />
-      <div className="two-grid">
-        <section className="panel">
-          <h2>
-            {t("What a rehearsal can teach", "Qué permite aprender un ensayo")}
-          </h2>
-          <p>
-            {t(
-              "How to move through uneven terrain, place instruments and work with low-angle light.",
-              "Cómo desplazarse en terreno irregular, colocar instrumentos y trabajar con luz rasante.",
-            )}
-          </p>
-        </section>
-        <section className="panel">
-          <h2>{t("What remains different", "Qué sigue siendo diferente")}</h2>
-          <p>
-            {t(
-              "Atmosphere, gravity, dust and energy conditions. A successful Earth test does not certify a lunar operation.",
-              "Atmósfera, gravedad, polvo y condiciones energéticas. Una prueba exitosa en la Tierra no certifica una operación lunar.",
-            )}
-          </p>
-        </section>
-      </div>
-    </>
   );
 }
 function Horizon() {
