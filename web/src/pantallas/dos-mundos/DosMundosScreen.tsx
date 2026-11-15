@@ -1,11 +1,25 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, lazy, Suspense } from 'react';
 import { useSol } from '../../luz/SolContext';
+import { LanguageProvider } from '../../i18n/Language';
+import { CONSTANTES, NOMBRES, PARES, type Mundo, type Par } from '../../escena3d/mundos';
+
+/** What each world's corner badge says (gravity: NASA NSSDCA fact sheets). */
+const ESPEC: Record<Mundo, { titulo: string; color: string; linea: [string, string]; g: string }> = {
+  luna: { titulo: 'VACUUM OPTICS', color: 'var(--luna)', linea: ['Atmospheric blur', '0.0 px (Hard edge)'], g: `${CONSTANTES.luna.gravedad} m/s² (1/6 g)` },
+  tierra: { titulo: 'ATMOSPHERIC OPTICS', color: 'var(--tierra)', linea: ['Atmospheric diffusion', 'Penumbra gradient'], g: '9.81 m/s² (1 g)' },
+  marte: { titulo: 'THIN DUSTY AIR', color: '#E0875A', linea: ['Surface pressure', `${CONSTANTES.marte.presionHpa} hPa (0.6 % of Earth)`], g: `${CONSTANTES.marte.gravedad} m/s² (0.38 g)` },
+};
 import { TerrainShadowCanvas } from '../../luz/TerrainShadowCanvas';
 import { Split, ArrowLeftRight, CheckCircle2, ShieldAlert } from 'lucide-react';
+
+// Real relief, built in Blender from the 60 m grids (modelos/construir_modelos.py), under the same Sun.
+const DosMundos3D = lazy(() => import('../../escena3d/DosMundos3D'));
 
 export const DosMundosScreen: React.FC = () => {
   const { elevacion, azimut } = useSol();
   const [cortinaPos, setCortinaPos] = useState<number>(50); // percentage [0, 100]
+  const [par, setPar] = useState<Par>('luna-tierra');
+  const [izq, der] = PARES[par];
   const [lunaStats, setLunaStats] = useState({ shadowPercent: 47, sunLitPercent: 53 });
   const [tierraStats, setTierraStats] = useState({ shadowPercent: 41, sunLitPercent: 59 });
 
@@ -46,8 +60,15 @@ export const DosMundosScreen: React.FC = () => {
           Same Sun height. Same shadows. <span style={{ color: 'var(--sol)' }}>Two worlds.</span>
         </h1>
         <p style={{ color: 'var(--texto-sec)', fontSize: '14px', marginTop: '4px' }}>
-          Sun: <b style={{ color: 'var(--sol)' }}>{elevacion.toFixed(2)}°</b> @ <b style={{ color: 'var(--dato)' }}>{azimut.toFixed(0)}°</b>. Drag the yellow curtain to compare the lunar surface at Mons Mouton with Candidate P-07 in Payunia, Argentina.
+          Sun: <b style={{ color: 'var(--sol)' }}>{elevacion.toFixed(2)}°</b> @ <b style={{ color: 'var(--dato)' }}>{azimut.toFixed(0)}°</b>. Drag the yellow curtain to compare real relief, 30 × 30 km each: Mons Mouton (NASA LOLA, 60 m), Payunia around candidate P-27 (Copernicus GLO-30, 60 m) and Jezero crater on Mars (USGS HRSC + MOLA, 200 m). Drag the scene to turn the camera; the wheel zooms.
         </p>
+        <div role="group" aria-label="Worlds compared" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
+          {(Object.keys(PARES) as Par[]).map((k) => (
+            <button key={k} type="button" className={par === k ? 'btn' : 'btn sec'} aria-pressed={par === k} onClick={() => setPar(k)}>
+              {PARES[k].map((m) => NOMBRES[m].en).join(' | ')}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Flagship Split Screen Viewport */}
@@ -63,6 +84,32 @@ export const DosMundosScreen: React.FC = () => {
           userSelect: 'none',
         }}
       >
+        {/* Real 3D relief: Moon left of the curtain, Earth right, same camera and same Sun */}
+        <LanguageProvider>
+          <Suspense fallback={null}>
+            <DosMundos3D
+              key={par}
+              par={par}
+              incrustado
+              terreno="real"
+              elevacion={elevacion}
+              azimut={azimut}
+              rumbo={0}
+              corte={cortinaPos}
+              potencia={{}}
+              panelW={320}
+              caida={0}
+              alturaCaida={2.5}
+              gLuna={1.62}
+              gTierra={9.81}
+              animar={false}
+              etiqueta={`Real relief in 3D: ${NOMBRES[izq].en} (${NOMBRES[izq].sitioEn}) left of the curtain, ${NOMBRES[der].en} (${NOMBRES[der].sitioEn}) right of it, under the same Sun`}
+              textoAcercar="Zoom in"
+              textoAlejar="Zoom out"
+            />
+          </Suspense>
+        </LanguageProvider>
+
         {/* Left Side: Moon (Mons Mouton) */}
         <div
           style={{
@@ -74,16 +121,9 @@ export const DosMundosScreen: React.FC = () => {
             overflow: 'hidden',
             borderRight: '2px solid var(--sol)',
             zIndex: 10,
+            pointerEvents: 'none',
           }}
         >
-          {/* Full-width container pinned to the left */}
-          <div style={{ position: 'absolute', top: 0, left: 0, width: '1200px', height: '100%' }}>
-            <img
-              src="/img/ui_luna3d.png"
-              alt="Moon Mons Mouton 3D terrain"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          </div>
 
           {/* Moon Badge */}
           <div
@@ -104,7 +144,7 @@ export const DosMundosScreen: React.FC = () => {
             }}
           >
             <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#F4F6FB' }} />
-            <b>Mons Mouton, Moon</b> · {lunaStats.shadowPercent}% in shadow
+            <b>{NOMBRES[izq].sitioEn}, {NOMBRES[izq].en}</b> · {NOMBRES[izq].dem}
           </div>
 
           {/* Moon Physics Specs Badge */}
@@ -121,9 +161,9 @@ export const DosMundosScreen: React.FC = () => {
               color: 'var(--texto-sec)',
             }}
           >
-            <div style={{ color: 'var(--luna)', fontWeight: 700 }}>VACUUM OPTICS</div>
-            <div>Atmospheric blur: <b>0.0 px (Hard edge)</b></div>
-            <div>Gravity: <b>1.62 m/s² (1/6 g)</b></div>
+            <div style={{ color: ESPEC[izq].color, fontWeight: 700 }}>{ESPEC[izq].titulo}</div>
+            <div>{ESPEC[izq].linea[0]}: <b>{ESPEC[izq].linea[1]}</b></div>
+            <div>Gravity: <b>{ESPEC[izq].g}</b></div>
           </div>
         </div>
 
@@ -136,24 +176,9 @@ export const DosMundosScreen: React.FC = () => {
             bottom: 0,
             width: `${100 - cortinaPos}%`,
             overflow: 'hidden',
+            pointerEvents: 'none',
           }}
         >
-          {/* Full-width container pinned to the right */}
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              width: '1200px',
-              height: '100%',
-            }}
-          >
-            <img
-              src="/img/ui_tierra3d.png"
-              alt="Earth Payunia P-07 volcanic terrain"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          </div>
 
           {/* Earth Badge */}
           <div
@@ -174,7 +199,7 @@ export const DosMundosScreen: React.FC = () => {
             }}
           >
             <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--tierra)' }} />
-            <b>Payunia P-07, Earth</b> · {tierraStats.shadowPercent}% in shadow
+            <b>{NOMBRES[der].sitioEn}, {NOMBRES[der].en}</b> · {NOMBRES[der].dem}
           </div>
 
           {/* Earth Physics Specs Badge */}
@@ -192,9 +217,9 @@ export const DosMundosScreen: React.FC = () => {
               textAlign: 'right',
             }}
           >
-            <div style={{ color: 'var(--tierra)', fontWeight: 700 }}>ATMOSPHERIC OPTICS</div>
-            <div>Atmospheric diffusion: <b>Penumbra gradient</b></div>
-            <div>Gravity: <b>9.81 m/s² (1 g)</b></div>
+            <div style={{ color: ESPEC[der].color, fontWeight: 700 }}>{ESPEC[der].titulo}</div>
+            <div>{ESPEC[der].linea[0]}: <b>{ESPEC[der].linea[1]}</b></div>
+            <div>Gravity: <b>{ESPEC[der].g}</b></div>
           </div>
         </div>
 

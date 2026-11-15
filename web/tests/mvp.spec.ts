@@ -135,7 +135,7 @@ test("mobile layout, keyboard focus, comparison and reduced-motion tour", async 
   ).toBeVisible();
   await page.getByRole("button", { name: "Exit tour", exact: true }).click();
   await page.getByRole("link", { name: "Earth and Moon", exact: true }).click();
-  await page.getByRole("button", { name: "Open illustrative 3D view" }).click();
+  // The 3D view is open from the start.
   await page.getByLabel("Comparison divider").fill("75");
   await expect(page.locator(".moon-layer")).toHaveAttribute("style", /25%/);
   for (const route of [

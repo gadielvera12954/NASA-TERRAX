@@ -63,9 +63,61 @@ primera vez (unos 39 MB). El segundo genera solo `payunia.glb` y sus normales y 
 geométrico) y la misma cámara. La exageración vertical es solo de presentación y siempre está
 rotulada. Ningún número sale de estas mallas.
 
+## Renders del relieve real (reemplazan las ilustraciones inventadas)
+
+```bash
+blender --background --factory-startup --python modelos/renders.py
+```
+
+Escribe en `web/public/img/` los mismos nombres y tamaños que usaban las ilustraciones procedurales
+(`ui_luna3d.png`, `ui_tierra3d.png`, `ui_luna3d_b.png`, `ui_luna_top.png`, `ui_tierra_top.png`), así
+que ninguna pantalla cambia de código. Ahora son las grillas reales, sin exageración, con el mismo Sol
+en los dos cuerpos (elevación 3°, azimut de grilla 250°, disco de 0,53°) y la curvatura de cada uno
+(el horizonte lunar queda mucho más cerca). En la Luna el cielo es negro y las sombras también; en la
+Tierra el cielo es el modelo de dispersión múltiple de Blender a 2000 m de altitud, que ilumina las
+sombras. `ui_luna3d_b.png` es la misma vista partida: Luna a la izquierda, Tierra a la derecha. El
+horizonte sale de las grillas amplias (`mons_mouton_margen_60m` recortada a 72 km y
+`payunia_p27_amplio_60m`, 70 km, que arma `python -m modelos.grilla_tierra` y el motor no lee). El
+color del suelo es uniforme (no hay datos de albedo) y la exposición es de presentación.
+
+En la web, las dos maquetas 3D llevan un zócalo (paredes hasta una base plana 0,6 km debajo del punto
+más bajo, armadas en el navegador con el borde real de la malla) y, en Payunia, el contorno de P-27 y,
+más tenues, los de las otras 14 parcelas del ranking que entran en el recorte (`terrenos.payunia.parcelas`
+de `modelos.json`). La pantalla "Two Worlds" del espacio del equipo (`team.html`) usa ahora este 3D
+real en lugar de dos imágenes fijas.
+
+## Marte (Jezero, sitio de aterrizaje de Perseverance)
+
+```bash
+.venv/Scripts/python -m modelos.grilla_marte
+```
+
+```bash
+blender --background --factory-startup --python modelos/construir_modelos.py -- --solo-marte
+```
+
+```bash
+blender --background --factory-startup --python modelos/renders.py -- --marte
+```
+
+Fuente: USGS Astrogeology, "Mars MGS MOLA - MEX HRSC Blended DEM Global 200m v2". El archivo
+global pesa 11,4 GB y está guardado por filas sin comprimir, así que se leen por HTTP Range solo las
+filas alrededor de Jezero (unos 85 MB, quedan en `datos/crudos/marte/` con URL, versión y SHA-256).
+Se reproyecta a una grilla azimutal equidistante local sobre la esfera de Marte (radio 3396,19 km),
+por promedio, a **200 m, su resolución nativa**: no se interpola a 60 m. Cubre los mismos 30 × 30 km
+que Mons Mouton y Payunia (150 × 150) y una versión de 70 km para el horizonte de los renders. El
+motor físico no lee estas grillas: Marte es solo para el relieve 3D, los renders y la tabla de
+constantes (fichas NSSDCA de la NASA, `web/src/escena3d/mundos.ts`).
+
+En la web, "Earth and Moon" compara Luna | Tierra, Marte | Tierra y Luna | Marte con el mismo Sol.
+Cada escena trae el cielo de su mundo (ilustración), el disco solar a su tamaño aparente real
+(0,53° desde la Luna y la Tierra, 0,35° desde Marte), la luz en proporción a la irradiancia
+(Marte recibe 586/1361), una regla de 5 km, la flecha al norte de la grilla y los sitios rotulados.
+`ui_marte3d.png` y `mundos_luna_tierra_marte.png` son los renders con la misma cámara y el mismo Sol.
+
 ## Qué NO hay
 
-No hay relieve de Marte ni del resto de las candidatas: solo el recorte de 30 × 30 km alrededor de
+No hay relieve del resto de la región de las candidatas: solo el recorte de 30 × 30 km alrededor de
 P-27. El contorno de 3 × 3 km que se ve es la parcela de la ficha.
 
 Uso de SI: script y modelos redactados con Claude Code.

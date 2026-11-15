@@ -4,7 +4,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 const cache = new Map<string, Promise<THREE.Group>>();
 
-export type NombreModelo = "rover" | "tablita" | "mons_mouton" | "payunia";
+export type NombreModelo = "rover" | "tablita" | "mons_mouton" | "payunia" | "marte_jezero";
 
 /** One real relief mesh, as registered by modelos/construir_modelos.py under `terrenos`. */
 export interface TerrenoReal {
@@ -12,7 +12,7 @@ export interface TerrenoReal {
   sha256: string;
   normales: string;
   grilla: string;
-  cuerpo: "luna" | "tierra";
+  cuerpo: "luna" | "tierra" | "marte";
   pixel_m: number;
   pixel_malla_m: number;
   filas: number;
@@ -21,6 +21,55 @@ export interface TerrenoReal {
   z_max_m: number;
   fuentes: { id: string; sha256: string | null; url?: string }[];
   candidata?: { id: string; nombre: string; fila: number; col: number; parcela_km: number };
+  /** Every ranked parcel whose 3 × 3 km square fits inside this crop (grid row/col of its centre). */
+  parcelas?: { id: string; fila: number; col: number; etiqueta?: string | null; orden?: number | null }[];
+  /** Named site at the centre of the crop (Mars: Perseverance landing site). */
+  sitio?: { id: string; nombre: string; lat_deg: number; lon_deg: number; fuente: string };
+}
+
+/**
+ * Side walls of a relief mesh down to a flat base, like a tabletop terrain model.
+ * Built from the mesh's own border vertices, so it follows the real edge profile. Display only.
+ */
+export function zocalo(malla: THREE.Mesh, profundidad: number, material: THREE.Material): THREE.Mesh | null {
+  const pos = malla.geometry.getAttribute("position") as THREE.BufferAttribute | undefined;
+  if (!pos) return null;
+  malla.geometry.computeBoundingBox();
+  const caja = malla.geometry.boundingBox!;
+  const eps = 1e-3 * Math.max(caja.max.x - caja.min.x, caja.max.z - caja.min.z);
+  const fondo = caja.min.y - profundidad;
+  const bordes: { fijo: "x" | "z"; valor: number }[] = [
+    { fijo: "x", valor: caja.min.x },
+    { fijo: "x", valor: caja.max.x },
+    { fijo: "z", valor: caja.min.z },
+    { fijo: "z", valor: caja.max.z },
+  ];
+  const v: number[] = [];
+  const porBorde: THREE.Vector3[][] = bordes.map(() => []);
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i);
+    const z = pos.getZ(i);
+    bordes.forEach((b, k) => {
+      if (Math.abs((b.fijo === "x" ? x : z) - b.valor) < eps) porBorde[k].push(new THREE.Vector3(x, pos.getY(i), z));
+    });
+  }
+  for (const [k, b] of bordes.entries()) {
+    const pts = porBorde[k];
+    pts.sort((a, c) => (b.fijo === "x" ? a.z - c.z : a.x - c.x));
+    for (let k = 0; k + 1 < pts.length; k++) {
+      const a = pts[k];
+      const c = pts[k + 1];
+      v.push(a.x, a.y, a.z, c.x, c.y, c.z, c.x, fondo, c.z);
+      v.push(a.x, a.y, a.z, c.x, fondo, c.z, a.x, fondo, a.z);
+    }
+  }
+  if (!v.length) return null;
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
+  geo.computeVertexNormals();
+  const m = new THREE.Mesh(geo, material);
+  m.name = "zocalo";
+  return m;
 }
 
 let terrenos: Promise<Record<string, TerrenoReal>> | null = null;
@@ -33,7 +82,7 @@ export function leerTerrenos(): Promise<Record<string, TerrenoReal>> {
         return r.json() as Promise<{ terrenos?: Record<string, TerrenoReal> }>;
       })
       .then((m) => {
-        if (!m.terrenos?.mons_mouton || !m.terrenos?.payunia) throw new Error("unavailable");
+        if (!m.terrenos) throw new Error("unavailable");
         return m.terrenos;
       });
     terrenos.catch(() => (terrenos = null));

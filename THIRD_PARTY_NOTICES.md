@@ -22,6 +22,12 @@ TERRA-X incorporates and references open scientific datasets and open-source sof
 - **License**: Copernicus DEM licence (free use with the attribution above).
 - **Usage**: Payunia elevation grids (`motor/ingest/copernicus.py`) and the Earth relief mesh `web/public/modelos/payunia.glb` shown in "Earth and Moon".
 
+### USGS Astrogeology Science Center: Mars HRSC + MOLA blended DEM
+- **Dataset**: Mars MGS MOLA - MEX HRSC Blended DEM Global 200m v2 (`Mars_HRSC_MOLA_BlendDEM_Global_200mp_v2.tif`, https://planetarymaps.usgs.gov/mosaic/Mars/HRSC_MOLA_Blend/); only the rows around Jezero crater are read, by HTTP range
+- **Credit**: USGS Astrogeology Science Center; MOLA (NASA Mars Global Surveyor) and HRSC (ESA/DLR/FU Berlin, Mars Express) science teams
+- **License**: Public domain (U.S. Government work); credit requested
+- **Usage**: Jezero relief mesh `web/public/modelos/marte_jezero.glb` and the Mars renders (`modelos/grilla_marte.py`, `modelos/renders.py`)
+
 ### USGS Astrogeology Science Center / NASA PDS
 - **Dataset**: LOLA / Kaguya Merged DEM 5m (pgda78)
 - **License**: Public Domain

@@ -135,6 +135,154 @@
         "col": 249.5,
         "parcela_km": 3.0,
         "fuente": "web/public/data/fichas/indice.json"
+      },
+      "parcelas": [
+        {
+          "id": "P-27",
+          "fila": 248.5,
+          "col": 249.5,
+          "etiqueta": "con_huecos",
+          "orden": 3
+        },
+        {
+          "id": "P-37",
+          "fila": 398.5,
+          "col": 199.49,
+          "etiqueta": "no_alcanza",
+          "orden": 7
+        },
+        {
+          "id": "P-26",
+          "fila": 248.51,
+          "col": 149.51,
+          "etiqueta": "no_alcanza",
+          "orden": 12
+        },
+        {
+          "id": "P-31",
+          "fila": 298.49,
+          "col": 249.5,
+          "etiqueta": "no_alcanza",
+          "orden": 14
+        },
+        {
+          "id": "P-22",
+          "fila": 148.5,
+          "col": 249.5,
+          "etiqueta": "no_alcanza",
+          "orden": 21
+        },
+        {
+          "id": "P-19",
+          "fila": 98.49,
+          "col": 99.49,
+          "etiqueta": "no_alcanza",
+          "orden": 22
+        },
+        {
+          "id": "P-34",
+          "fila": 348.5,
+          "col": 249.51,
+          "etiqueta": "no_alcanza",
+          "orden": 28
+        },
+        {
+          "id": "P-21",
+          "fila": 148.5,
+          "col": 199.5,
+          "etiqueta": "no_alcanza",
+          "orden": 30
+        },
+        {
+          "id": "P-32",
+          "fila": 298.51,
+          "col": 299.51,
+          "etiqueta": "no_alcanza",
+          "orden": 33
+        },
+        {
+          "id": "P-24",
+          "fila": 198.49,
+          "col": 199.5,
+          "etiqueta": "no_alcanza",
+          "orden": 36
+        },
+        {
+          "id": "P-28",
+          "fila": 248.5,
+          "col": 299.5,
+          "etiqueta": "no_alcanza",
+          "orden": 38
+        },
+        {
+          "id": "P-38",
+          "fila": 398.51,
+          "col": 299.5,
+          "etiqueta": "no_alcanza",
+          "orden": 40
+        },
+        {
+          "id": "P-40",
+          "fila": 448.51,
+          "col": 249.49,
+          "etiqueta": "no_alcanza",
+          "orden": 41
+        },
+        {
+          "id": "P-20",
+          "fila": 98.49,
+          "col": 199.51,
+          "etiqueta": "no_alcanza",
+          "orden": 42
+        },
+        {
+          "id": "P-30",
+          "fila": 298.5,
+          "col": 49.5,
+          "etiqueta": "no_alcanza",
+          "orden": 43
+        }
+      ]
+    },
+    "marte_jezero": {
+      "archivo": "marte_jezero.glb",
+      "sha256": "b658667ac2b4b8a5bc6a181f5a36fff689c63d0aa44bd1fbc3eef33294381044",
+      "normales": "marte_jezero_normales.png",
+      "normales_sha256": "3928b3b0c1a62c85071c0a50db3de160bc725a5634737b06e8e3d913894a05fc",
+      "grilla": "marte_jezero_200m",
+      "pixel_m": 200.0,
+      "pixel_malla_m": 200.0,
+      "filas": 150,
+      "columnas": 150,
+      "z_min_m": -2732.64404296875,
+      "z_max_m": -1523.4752197265625,
+      "x0_m": -14900.0,
+      "y0_m": 14900.0,
+      "proyeccion": {
+        "tipo": "azimutal_equidistante_local",
+        "lat_centro_deg": 18.4447,
+        "lon_centro_deg": 77.4508,
+        "radio_m": 3396190.0,
+        "proj": "+proj=aeqd +lat_0=18.4447 +lon_0=77.4508 +x_0=0 +y_0=0 +R=3396190.0 +units=m +no_defs"
+      },
+      "unidad_malla": "km",
+      "exageracion_vertical": 1.0,
+      "vertices": 22500,
+      "fuentes": [
+        {
+          "id": "usgs_mars_hrsc_mola_blend_200m_v2",
+          "sha256": "8eca48ddbac40db13b913e2fa8e7bde4b2e3e8094cd7487f853a7fa969a42503",
+          "url": "https://planetarymaps.usgs.gov/mosaic/Mars/HRSC_MOLA_Blend/Mars_HRSC_MOLA_BlendDEM_Global_200mp_v2.tif",
+          "version": "Wed, 09 Nov 2022 14:59:19 GMT · ETag \"94ec792407f5a3da2f8b87aba42613eb-1358\""
+        }
+      ],
+      "cuerpo": "marte",
+      "sitio": {
+        "id": "jezero_perseverance",
+        "nombre": "Jezero crater, Perseverance landing site (Octavia E. Butler)",
+        "lat_deg": 18.4447,
+        "lon_deg": 77.4508,
+        "fuente": "NASA/JPL, Mars 2020 landing site coordinates"
       }
     }
   }

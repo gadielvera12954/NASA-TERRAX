@@ -14,6 +14,8 @@ import {
   refraccionDeg,
 } from "../../datos/laboratorio";
 import type { EstadoTerreno, ModoTerreno } from "../../escena3d/DosMundos3D";
+import FichaMundos from "../../escena3d/FichaMundos";
+import { NOMBRES, PARES, type Par } from "../../escena3d/mundos";
 
 const DosMundos3D = lazy(() => import("../../escena3d/DosMundos3D"));
 
@@ -34,7 +36,8 @@ export default function DosMundos({
   const { t, language } = useLanguage();
   const sol = useSol();
   const [topic, setTopic] = useState("shadow");
-  const [scene, setScene] = useState(false);
+  // The 3D stage is open from the start: every option is on screen (Jean, real relief).
+  const [scene, setScene] = useState(true);
   const [minutes, setMinutes] = useState(false);
   const [sceneKey, setSceneKey] = useState(0);
   const [corte, setCorte] = useState(50);
@@ -47,7 +50,8 @@ export default function DosMundos({
   } | null>(null);
   const [attempt, retry] = useState(0);
   // Real relief (Jean): Mons Mouton vs Payunia P-27, 30 × 30 km each.
-  const [terreno, setTerreno] = useState<ModoTerreno>("plano");
+  const [terreno, setTerreno] = useState<ModoTerreno>("real");
+  const [par, setPar] = useState<Par>("luna-tierra");
   const [exageracion, setExageracion] = useState(1);
   const [estadoTerreno, setEstadoTerreno] = useState<EstadoTerreno | null>(null);
   const [failed, setFailed] = useState(false);
@@ -312,6 +316,8 @@ export default function DosMundos({
               className="btn"
               onClick={() => {
                 setScene(true);
+                setPar("luna-tierra");
+                setTerreno("plano");
                 setCaida((c) => c + 1);
               }}
             >
@@ -388,7 +394,7 @@ export default function DosMundos({
           </section>
         )}
       </div>
-      {topic !== "time" && (
+      {(
         <div className="scene-tools">
           <button
             className="btn sec"
@@ -396,9 +402,27 @@ export default function DosMundos({
             onClick={() => setScene((v) => !v)}
           >
             {scene
-              ? t("Close illustrative 3D view", "Cerrar vista 3D ilustrativa")
-              : t("Open illustrative 3D view", "Abrir vista 3D ilustrativa")}
+              ? t("Hide the 3D view", "Ocultar la vista 3D")
+              : t("Show the 3D view", "Mostrar la vista 3D")}
           </button>
+          {scene && (
+            <div
+              className="segmento"
+              role="group"
+              aria-label={t("Worlds compared", "Mundos comparados")}
+            >
+              {(Object.keys(PARES) as Par[]).map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  aria-pressed={par === k}
+                  onClick={() => setPar(k)}
+                >
+                  {PARES[k].map((m) => t(NOMBRES[m].en, NOMBRES[m].es)).join(" | ")}
+                </button>
+              ))}
+            </div>
+          )}
           {scene && (
             <div
               className="segmento"
@@ -407,21 +431,23 @@ export default function DosMundos({
             >
               <button
                 type="button"
-                aria-pressed={terreno === "plano"}
+                aria-pressed={terreno === "plano" && par === "luna-tierra"}
+                disabled={par !== "luna-tierra"}
+                title={par !== "luna-tierra" ? t("The close-up stage and its readouts are Moon | Earth", "El primer plano y sus lecturas son Luna | Tierra") : undefined}
                 onClick={() => setTerreno("plano")}
               >
                 {t("Close-up, flat ground", "Primer plano, suelo plano")}
               </button>
               <button
                 type="button"
-                aria-pressed={terreno === "real"}
+                aria-pressed={terreno === "real" || par !== "luna-tierra"}
                 onClick={() => setTerreno("real")}
               >
                 {t("Real relief, 30 × 30 km", "Relieve real, 30 × 30 km")}
               </button>
             </div>
           )}
-          {scene && terreno === "real" && (
+          {scene && (
             <div
               className="segmento"
               role="group"
@@ -432,6 +458,7 @@ export default function DosMundos({
                   key={k}
                   type="button"
                   aria-pressed={exageracion === k}
+                  disabled={terreno === "plano" && par === "luna-tierra"}
                   onClick={() => setExageracion(k)}
                 >
                   {t(`Vertical ×${k}`, `Vertical ×${k}`)}
@@ -439,7 +466,7 @@ export default function DosMundos({
               ))}
             </div>
           )}
-          {scene && terreno === "real" && estadoTerreno !== "listo" && (
+          {scene && (terreno === "real" || par !== "luna-tierra") && estadoTerreno !== "listo" && (
             <span className="muted" role="status">
               {estadoTerreno === "sin-datos"
                 ? t(
@@ -454,7 +481,8 @@ export default function DosMundos({
             onClick={() => {
               sol.resetSol();
               setEsquina(true);
-              setTerreno("plano");
+              setTerreno("real");
+              setPar("luna-tierra");
               setExageracion(1);
               setCorte(50);
               setTiempos(null);
@@ -466,7 +494,7 @@ export default function DosMundos({
           </button>
         </div>
       )}
-      {scene && idx && topic !== "time" && (
+      {scene && idx && (
         <>
           {" "}
           <div className="comparison mundos">
@@ -478,7 +506,8 @@ export default function DosMundos({
               }
             >
               <DosMundos3D
-                key={sceneKey}
+                key={`${sceneKey}-${par}`}
+                par={par}
                 elevacion={e}
                 azimut={sol.azimut}
                 rumbo={rumboReal}
@@ -512,16 +541,18 @@ export default function DosMundos({
               style={{ left: `${corte}%` }}
               aria-hidden="true"
             />
-            <span className="world-label moon-label">{t("Moon", "Luna")}</span>
+            <span className="world-label moon-label">
+              {t(NOMBRES[PARES[par][0]].en, NOMBRES[PARES[par][0]].es)}
+            </span>
             <span className="world-label earth-label">
-              {t("Earth", "Tierra")}
+              {t(NOMBRES[PARES[par][1]].en, NOMBRES[PARES[par][1]].es)}
             </span>
           </div>
           <p className="muted">
-            {terreno === "real"
+            {terreno === "real" || par !== "luna-tierra"
               ? t(
-                  "Real relief from the 60 m grids, drawn with a 120 m display mesh. Both worlds share the same local Sun angle; the drawn shadows are the renderer's. Use the paired readings for numerical comparisons.",
-                  "Relieve real de las grillas de 60 m, dibujado con una malla de exhibición de 120 m. Los dos mundos comparten el mismo ángulo local del Sol; las sombras dibujadas son del renderizador. Usa las lecturas por mundo para comparar los valores.",
+                  "Real relief from the source grids (Moon and Earth 60 m, Mars 200 m native), drawn with display meshes. Both worlds share the same local Sun angle; the drawn shadows are the renderer's, the Sun disc has its true size for each world, and the sky colours are illustration. Use the readings and the table below for numbers.",
+                  "Relieve real de las grillas de origen (Luna y Tierra 60 m, Marte 200 m nativos), dibujado con mallas de exhibición. Los dos mundos comparten el mismo ángulo local del Sol; las sombras dibujadas son del renderizador, el disco solar tiene su tamaño real en cada mundo y los colores del cielo son ilustración. Usa las lecturas y la tabla de abajo para los números.",
                 )
               : t(
                   "Illustrative flat ground and generic rover geometry. Use the paired readings for numerical comparisons.",
@@ -543,6 +574,7 @@ export default function DosMundos({
           </div>
         </>
       )}
+      <FichaMundos elevacion={e} />
       <a className="text-link" href="#card">
         {t("Return to site record", "Volver a la ficha")} · {site}
       </a>

@@ -11,7 +11,9 @@ import { useLanguage } from "../i18n/Language";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Horizontes, indiceAzimut, leerHorizontes } from "../datos/laboratorio";
-import { cargarModelo, direccionSol, hayWebgl, liberar } from "./modelos";
+import { cargarModelo, direccionSol, hayWebgl, liberar, zocalo } from "./modelos";
+
+const matZocalo = new THREE.MeshStandardMaterial({ color: 0x3a3a3a, roughness: 1, side: THREE.DoubleSide });
 
 export interface PuntoGrilla {
   fila: number;
@@ -273,6 +275,11 @@ function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: Props
           malla = m;
         }
       });
+      // Tabletop model look (display only): walls down to a base 0.6 km under the lowest point.
+      if (malla) {
+        const pared = zocalo(malla, 0.6, matZocalo);
+        if (pared) (malla as THREE.Mesh).add(pared);
+      }
       escena.add(g);
       g.updateMatrixWorld(true);
       pintar();

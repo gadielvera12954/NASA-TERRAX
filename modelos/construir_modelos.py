@@ -2,6 +2,7 @@
 
     blender --background --factory-startup --python modelos/construir_modelos.py
     blender --background --factory-startup --python modelos/construir_modelos.py -- --solo-tierra
+    blender --background --factory-startup --python modelos/construir_modelos.py -- --solo-marte
 
 (El segundo arma solo el terreno terrestre `payunia.glb` y lo suma a modelos.json sin tocar lo demás.)
 
@@ -52,6 +53,8 @@ GRILLA = RAIZ / "datos" / "grillas" / "mons_mouton_60m"
 # Terreno terrestre de "Dos mundos": Copernicus GLO-30 -> UTM 19S a 60 m alrededor de P-27, la misma
 # extensión que Mons Mouton (500 × 500). Se arma con `python -m modelos.grilla_tierra`.
 GRILLA_TIERRA = RAIZ / "datos" / "grillas" / "payunia_p27_60m"
+# Marte, Jezero (sitio de Perseverance): HRSC+MOLA a 200 m NATIVOS, 30 x 30 km. `python -m modelos.grilla_marte`.
+GRILLA_MARTE = RAIZ / "datos" / "grillas" / "marte_jezero_200m"
 
 # Medidas con fuente (ver el encabezado)
 ROVER_LADO_M = 1.5
@@ -268,7 +271,7 @@ def construir_tablita(col, M):
 # ------------------------------------------------------------------------------------------------
 # Terreno real de Mons Mouton
 # ------------------------------------------------------------------------------------------------
-def construir_terreno(col, M, grilla=GRILLA, nombre="mons_mouton", mat="regolito"):
+def construir_terreno(col, M, grilla=GRILLA, nombre="mons_mouton", mat="regolito", bloque=BLOQUE):
     z = np.load(str(grilla) + ".npy").astype(np.float64)
     meta = json.loads(pathlib.Path(str(grilla) + ".json").read_text(encoding="utf-8"))
     if not np.isfinite(z).all():
@@ -286,11 +289,11 @@ def construir_terreno(col, M, grilla=GRILLA, nombre="mons_mouton", mat="regolito
     png_rgb(SALIDA / f"{nombre}_normales.png", np.clip(np.rint((gl * 0.5 + 0.5) * 255.0), 0, 255).astype(np.uint8))
 
     # Malla de exhibición: promedio de bloques de 2 × 2 (120 m). Cada vértice queda en el centro de su bloque.
-    H, W = alto // BLOQUE, ancho // BLOQUE
-    zb = z[:H * BLOQUE, :W * BLOQUE].reshape(H, BLOQUE, W, BLOQUE).mean(axis=(1, 3))
+    H, W = alto // bloque, ancho // bloque
+    zb = z[:H * bloque, :W * bloque].reshape(H, bloque, W, bloque).mean(axis=(1, 3))
     filas, cols = np.mgrid[0:H, 0:W]
-    pf = filas * BLOQUE + (BLOQUE - 1) / 2.0        # coordenada de píxel de 60 m (centro del bloque)
-    pc = cols * BLOQUE + (BLOQUE - 1) / 2.0
+    pf = filas * bloque + (bloque - 1) / 2.0        # coordenada de píxel de la grilla (centro del bloque)
+    pc = cols * bloque + (bloque - 1) / 2.0
     x_km = (pc - (ancho - 1) / 2.0) * px / 1000.0
     y_km = ((alto - 1) / 2.0 - pf) * px / 1000.0
     z_km = (zb - z_min) / 1000.0
@@ -317,7 +320,7 @@ def construir_terreno(col, M, grilla=GRILLA, nombre="mons_mouton", mat="regolito
     fuente = meta["fuentes"][0]
     ob["grilla"] = meta["nombre"]
     ob["pixel_m"] = px
-    ob["pixel_malla_m"] = px * BLOQUE
+    ob["pixel_malla_m"] = px * bloque
     ob["filas"] = alto
     ob["columnas"] = ancho
     ob["z_min_m"] = z_min
@@ -327,13 +330,18 @@ def construir_terreno(col, M, grilla=GRILLA, nombre="mons_mouton", mat="regolito
     ob["unidad"] = "km"
     ob["fuente"] = fuente["id"]
     ob["fuente_sha256"] = fuente["sha256"]
-    ob["nota"] = "Malla de exhibición a 120 m (promedio de 2 × 2 píxeles de 60 m). Los números salen de la grilla de 60 m."
-    info = {"grilla": meta["nombre"], "pixel_m": px, "pixel_malla_m": px * BLOQUE, "filas": alto, "columnas": ancho,
+    ob["nota"] = (f"Malla de exhibición a {px * bloque:g} m (promedio de {bloque} × {bloque} píxeles de {px:g} m). "
+                  "Los números salen de la grilla, nunca de esta malla.")
+    info = {"grilla": meta["nombre"], "pixel_m": px, "pixel_malla_m": px * bloque, "filas": alto, "columnas": ancho,
             "z_min_m": z_min, "z_max_m": float(np.nanmax(z)), "x0_m": float(meta["x0_m"]), "y0_m": float(meta["y0_m"]),
             "proyeccion": meta["proyeccion"], "unidad_malla": "km", "exageracion_vertical": 1.0,
             "vertices": int(len(verts)), "fuentes": meta["fuentes"], "cuerpo": meta["cuerpo"]}
     if "candidata" in meta:
         info["candidata"] = meta["candidata"]
+    if "parcelas" in meta:
+        info["parcelas"] = meta["parcelas"]
+    if "sitio" in meta:
+        info["sitio"] = meta["sitio"]
     return ob, info
 
 
@@ -344,8 +352,27 @@ def registro_terreno(nombre: str, info: dict) -> dict:
 
 def materiales_terreno():
     return {"regolito": material("regolito", (0.46, 0.46, 0.47), rugosidad=1.0),
-            # Color de exhibición (basalto); la web pinta su propio material: no es una medición.
-            "basalto": material("basalto", (0.30, 0.26, 0.23), rugosidad=1.0)}
+            # Colores de exhibición; la web pinta su propio material: no son mediciones de albedo.
+            "basalto": material("basalto", (0.30, 0.26, 0.23), rugosidad=1.0),
+            "marte": material("suelo_marte", (0.45, 0.25, 0.15), rugosidad=1.0)}
+
+
+def principal_marte():
+    """Solo el relieve de Marte (Jezero), a su resolución nativa de 200 m (bloque 1: sin promediar más)."""
+    SALIDA.mkdir(parents=True, exist_ok=True)
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    bpy.context.scene.unit_settings.system = "METRIC"
+    M = materiales_terreno()
+    terreno, info = construir_terreno(coleccion("TerrenoMarte"), M, GRILLA_MARTE, "marte_jezero", "marte", bloque=1)
+    bpy.context.view_layer.update()
+    exportar([terreno], SALIDA / "marte_jezero.glb")
+    ruta = SALIDA / "modelos.json"
+    registro = json.loads(ruta.read_text(encoding="utf-8"))
+    terrenos = registro.get("terrenos") or {"mons_mouton": dict(registro["terreno"])}
+    terrenos["marte_jezero"] = registro_terreno("marte_jezero", info)
+    registro["terrenos"] = terrenos
+    ruta.write_text(json.dumps(registro, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print("TERRENO MARTE LISTO:", terrenos["marte_jezero"]["sha256"][:12])
 
 
 def principal_tierra():
@@ -524,7 +551,12 @@ def principal():
 if __name__ == "__main__":
     try:
         extra = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-        principal_tierra() if "--solo-tierra" in extra else principal()
+        if "--solo-tierra" in extra:
+            principal_tierra()
+        elif "--solo-marte" in extra:
+            principal_marte()
+        else:
+            principal()
     except Exception:
         import traceback
         traceback.print_exc()

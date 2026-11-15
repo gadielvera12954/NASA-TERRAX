@@ -118,7 +118,8 @@ test("offline atlas opens a new deep link, charts and lunar lab without WebGL", 
   await page.locator(".technical summary").first().click();
   await expect(page.locator(".carril")).toHaveCount(2);
   await page.goto("/#worlds");
-  await page.getByRole("button", { name: "Open illustrative 3D view" }).click();
+  // The 3D view is open from the start (no WebGL here: static illustrations).
+  await expect(page.getByRole("button", { name: "Hide the 3D view" })).toBeVisible();
   await expect(page.getByText(/Static illustrations/)).toBeVisible();
   await page.getByRole("button", { name: "Energy", exact: true }).click();
   await expect(

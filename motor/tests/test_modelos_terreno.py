@@ -35,7 +35,7 @@ def test_hay_luna_y_tierra(terrenos):
     assert terrenos["payunia"]["cuerpo"] == "tierra" and terrenos["payunia"]["grilla"] == "payunia_p27_60m"
 
 
-@pytest.mark.parametrize("nombre", ["mons_mouton", "payunia"])
+@pytest.mark.parametrize("nombre", ["mons_mouton", "payunia", "marte_jezero"])
 def test_huellas_de_los_archivos(terrenos, nombre):
     t = terrenos[nombre]
     assert _sha(MODELOS / t["archivo"]) == t["sha256"]
@@ -60,11 +60,17 @@ def test_la_candidata_esta_en_la_grilla_y_en_el_ranking(terrenos):
     indice = json.loads(INDICE.read_text(encoding="utf-8"))
     entrada = next(x for x in indice["candidatas"] if x["id"] == c["id"])
     assert entrada["lugar"]["lat"] == pytest.approx(c["lat_deg"]) and entrada["lugar"]["lon"] == pytest.approx(c["lon_deg"])
+    parcelas = t["parcelas"]
+    assert c["id"] in {p["id"] for p in parcelas}
+    ids_ranking = {x["id"] for x in indice["candidatas"] if not x.get("control")}
+    for p in parcelas:
+        assert p["id"] in ids_ranking
+        assert medio <= p["fila"] <= t["filas"] - 1 - medio and medio <= p["col"] <= t["columnas"] - 1 - medio
     assert t["proyeccion"]["lat_centro_deg"] == pytest.approx(entrada["lugar"]["lat"])
     assert t["proyeccion"]["lon_centro_deg"] == pytest.approx(entrada["lugar"]["lon"])
 
 
-@pytest.mark.parametrize("nombre", ["mons_mouton", "payunia"])
+@pytest.mark.parametrize("nombre", ["mons_mouton", "payunia", "marte_jezero"])
 def test_la_malla_sale_de_su_grilla(terrenos, nombre):
     t = terrenos[nombre]
     base = GRILLAS / t["grilla"]
@@ -75,3 +81,13 @@ def test_la_malla_sale_de_su_grilla(terrenos, nombre):
     assert z.shape == (t["filas"], t["columnas"]) and np.isfinite(z).all()
     assert float(np.min(z)) == pytest.approx(t["z_min_m"]) and float(np.max(z)) == pytest.approx(t["z_max_m"])
     assert [f["sha256"] for f in meta["fuentes"]] == [f["sha256"] for f in t["fuentes"]]
+
+
+def test_marte_a_su_resolucion_nativa_y_misma_extension(terrenos):
+    """Marte va a 200 m nativos (sin interpolar) pero cubre los mismos 30 km que la Luna y la Tierra."""
+    marte, luna = terrenos["marte_jezero"], terrenos["mons_mouton"]
+    assert marte["cuerpo"] == "marte" and marte["pixel_m"] == 200.0 and marte["pixel_malla_m"] == 200.0
+    lado = lambda t: t["columnas"] * t["pixel_m"]
+    assert lado(marte) == lado(luna) == 30000.0
+    assert marte["sitio"]["id"] == "jezero_perseverance"
+    assert -3000.0 < marte["z_min_m"] < marte["z_max_m"] < -1000.0          # Jezero: piso cerca de −2600 m
