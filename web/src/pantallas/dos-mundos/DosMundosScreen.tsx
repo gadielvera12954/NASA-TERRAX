@@ -42,7 +42,7 @@ export const DosMundosScreen: React.FC = () => {
         <div className="et" style={{ marginBottom: '4px' }}>
           Comparative Engine · Same Code on Two Worlds
         </div>
-        <h1 style={{ fontSize: '32px', fontWeight: 900 }}>
+        <h1 style={{ fontSize: '32px', fontWeight: 600 }}>
           Same Sun height. Same shadows. <span style={{ color: 'var(--sol)' }}>Two worlds.</span>
         </h1>
         <p style={{ color: 'var(--texto-sec)', fontSize: '14px', marginTop: '4px' }}>
@@ -271,8 +271,8 @@ export const DosMundosScreen: React.FC = () => {
           <Split size={16} color="var(--sol)" /> What Transfers & What Does Not Transfer
         </h4>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-          <div style={{ background: '#081738', padding: '12px', borderRadius: '2px', borderLeft: '3px solid #10B981' }}>
-            <div style={{ color: '#34D399', fontWeight: 700, fontSize: '12px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div style={{ background: 'var(--paper)', padding: '12px', borderRadius: '2px', borderLeft: '3px solid var(--success)' }}>
+            <div style={{ color: 'var(--success)', fontWeight: 700, fontSize: '12px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <CheckCircle2 size={13} /> TRANSFERS
             </div>
             <div style={{ fontSize: '13px', fontWeight: 600 }}>Low Grazing Shadow Geometry</div>
@@ -281,8 +281,8 @@ export const DosMundosScreen: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ background: '#081738', padding: '12px', borderRadius: '2px', borderLeft: '3px solid #10B981' }}>
-            <div style={{ color: '#34D399', fontWeight: 700, fontSize: '12px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div style={{ background: 'var(--paper)', padding: '12px', borderRadius: '2px', borderLeft: '3px solid var(--success)' }}>
+            <div style={{ color: 'var(--success)', fontWeight: 700, fontSize: '12px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <CheckCircle2 size={13} /> TRANSFERS
             </div>
             <div style={{ fontSize: '13px', fontWeight: 600 }}>Rover Mobility on Slopes</div>
@@ -291,8 +291,8 @@ export const DosMundosScreen: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ background: '#081738', padding: '12px', borderRadius: '2px', borderLeft: '3px solid #EF4444' }}>
-            <div style={{ color: '#F87171', fontWeight: 700, fontSize: '12px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div style={{ background: 'var(--paper)', padding: '12px', borderRadius: '2px', borderLeft: '3px solid var(--error)' }}>
+            <div style={{ color: 'var(--error)', fontWeight: 700, fontSize: '12px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <ShieldAlert size={13} /> DOES NOT TRANSFER
             </div>
             <div style={{ fontSize: '13px', fontWeight: 600 }}>Solar Power Generation</div>
@@ -301,8 +301,8 @@ export const DosMundosScreen: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ background: '#081738', padding: '12px', borderRadius: '2px', borderLeft: '3px solid #EF4444' }}>
-            <div style={{ color: '#F87171', fontWeight: 700, fontSize: '12px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div style={{ background: 'var(--paper)', padding: '12px', borderRadius: '2px', borderLeft: '3px solid var(--error)' }}>
+            <div style={{ color: 'var(--error)', fontWeight: 700, fontSize: '12px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <ShieldAlert size={13} /> DOES NOT TRANSFER
             </div>
             <div style={{ fontSize: '13px', fontWeight: 600 }}>Vacuum & Thermal Extreme</div>

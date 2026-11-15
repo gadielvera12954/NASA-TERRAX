@@ -15,7 +15,7 @@ export const MissionScreen: React.FC<MissionScreenProps> = ({ onIniciarRecorrido
           <div className="et" style={{ marginBottom: '8px', color: 'var(--sol)' }}>
             NASA SPACE APPS CHALLENGE 2026 · TERRA-X
           </div>
-          <h1 style={{ fontSize: '38px', lineHeight: 1.12, marginBottom: '16px', fontWeight: 900 }}>
+          <h1 style={{ fontSize: '38px', lineHeight: 1.12, marginBottom: '16px', fontWeight: 600 }}>
             Find where on Earth to rehearse a Moon-base operation.
           </h1>
           <p style={{ fontSize: '15px', color: 'var(--texto-sec)', lineHeight: 1.55, marginBottom: '24px' }}>

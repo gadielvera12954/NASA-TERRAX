@@ -19,7 +19,7 @@ export const DataScreen: React.FC = () => {
         <div className="et" style={{ marginBottom: '4px' }}>
           Open Data Registry & Reproducibility
         </div>
-        <h1 style={{ fontSize: '30px', fontWeight: 900 }}>
+        <h1 style={{ fontSize: '30px', fontWeight: 600 }}>
           Data Sources, Integrity Hashes & Licenses
         </h1>
         <p style={{ color: 'var(--texto-sec)', fontSize: '14px', marginTop: '4px' }}>
@@ -33,7 +33,7 @@ export const DataScreen: React.FC = () => {
             <div
               key={i}
               style={{
-                background: '#07173F',
+                background: 'var(--paper)',
                 border: '1px solid var(--borde-dark)',
                 borderRadius: '2px',
                 padding: '16px',

@@ -99,7 +99,6 @@ export function adaptFicha(v: unknown): Ficha {
   const supported = v.etiqueta === "analogo_sostenido";
   const normalized = {
     ...v,
-    C: v.C === null ? 0 : v.C,
     etiqueta: supported
       ? "sostenido"
       : v.etiqueta === "no_podemos_concluir"
@@ -117,18 +116,24 @@ export function adaptFicha(v: unknown): Ficha {
           : "Read the evidence and remaining uncertainties before choosing this candidate.",
   };
   if (!validFicha(normalized)) throw new Error("invalid normalized card");
-  return { ...normalized, C: v.C === null ? null : normalized.C, source: v };
+  return { ...normalized, source: v };
 }
 export async function readManifest() {
   return adaptManifest(await json("/data/manifest.json"));
 }
 export async function readFicha(id = "P-07") {
   if (!/^[\w-]+$/.test(id)) throw new Error("invalid id");
-  return adaptFicha(await json(`/data/fichas/${id}.json`));
+  const card = adaptFicha(await json(`/data/fichas/${id}.json`));
+  if (card.id !== id) throw new Error("mismatched card");
+  return card;
 }
 export interface IndexEntry {
   id: string;
   nombre: string;
+  control?: string | null;
+  maqueta?: boolean;
+  etiqueta?: string;
+  lugar?: { lat: number; lon: number };
 }
 export async function readIndex(): Promise<IndexEntry[]> {
   const v = await json("/data/fichas/indice.json");
@@ -144,5 +149,7 @@ export async function readIndex(): Promise<IndexEntry[]> {
     )
   )
     throw new Error("invalid index");
-  return v.candidatas as IndexEntry[];
+  return (v.candidatas as IndexEntry[]).map(c => ({
+    ...c, maqueta: typeof c.maqueta === "boolean" ? c.maqueta : v.maqueta === true,
+  }));
 }

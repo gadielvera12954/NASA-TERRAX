@@ -11,21 +11,21 @@ Built from scratch during the NASA Space Apps Challenge 2026 (Ciudad del Este lo
 
 ---
 
-## Current frontend MVP
+## Bilingual field atlas
 
-The current MVP provides a simplified English/Spanish interface, a candidate search and card loaded from JSON, a source/verification registry, an illustrative Earth/Moon comparison, an optional 90-second tour, JSON download and browser print-to-PDF. It supports keyboard navigation, mobile layouts and offline use after the first complete production visit. English is the default; the language selection is saved locally.
+The English/Spanish atlas leads from terrestrial site search to an individual record, comparison and field measurement priorities. Each record displays the exported verdict, evidence coverage and model bounds. The terrestrial demonstration data, scientific controls, lunar reference products and illustrative Earth/Moon experiments are identified in context.
 
-The bilingual MVP adapts the current physics-engine exports without changing their source files. Earth candidates remain **mock data**; the lunar products include real data, and the verification section reads the exported report with pending tests explicitly shown. The comparison images are synthetic illustrations, not validated terrain simulations. The original main interface is preserved at `/team.html` (specialist workspace, English), reachable from Guide. This is not a claim of complete scientific validation.
+Choose **Compare** for a side-by-side reading of records. Choose **Earth and Moon** for interactive shadow, energy, gravity and time experiments. Sources and verification are accessible from the footer. An optional tour, original JSON downloads, print layouts and offline access are available. The English specialist workspace remains accessible from How it works.
 
-See [web/MVP.md](web/MVP.md) for scope, remaining team integration and browser checks. Run `npm run test:e2e` inside `web/` to run the MVP browser suite (Microsoft Edge by default).
+See [the atlas guide](web/MVP.md) for navigation, design, local setup and browser checks.
 
 ## Interactive 3D lab and live engine
 
 The main interface is no longer a set of static pages:
 
-- **Home**: the real relief of Mons Mouton in 3D (LOLA, 60 m) with the shadows of a real lunation moving over it.
+- **Home**: a contour map of Mons Mouton from LOLA, with an optional 3D view and a local solar clock.
 - **3D lab** (`/#lab`): click anywhere on the relief to park a solar rover, choose the season and the power it needs, and follow Sun, panel power and battery hour by hour. Hovering the charts moves the Sun in the 3D view; every attempt is kept in a list so that places can be compared.
-- **Two worlds** (`/#compare`): the same rover and the same 0.50 m board under the same Sun angle on the Moon and on Earth, with live readouts for shadow length (F14, F15, F19), panel power (F4), a gravity drop test and the time a grazing Sun lasts.
+- **Two worlds** (`/#worlds`): the same rover and the same 0.50 m board under the same Sun angle on the Moon and on Earth, with live readouts for shadow length (F14, F15, F19), panel power (F4), a gravity drop test and the time a grazing Sun lasts.
 - **Candidate comparator** (`/#compare`): up to three exported candidates or controls side by side, property by property.
 - **Field kit** (`/#guide`): type a measured shadow and check it against the Sun model.
 
@@ -36,7 +36,7 @@ The lab has two calculation paths and always says which one answered:
 | | Live engine (`servidor/`, optional) | Browser (always available, offline too) |
 |---|---|---|
 | What runs | the Python code of `motor/` at that moment | the same formulas F3–F7 in TypeScript over the exported files |
-| Horizon of the point | 360 azimuths, ray-cast over LOLA relief out to 300 km | 72 azimuths from `horizontes.bin` |
+| Horizon of the point | 360 azimuths with the source grids, otherwise the exported horizon table | 72 azimuths from `horizontes.bin` |
 | Dates | any date from 1901 to 2049 | the two exported lunations of 2027 |
 
 ```bash
@@ -51,10 +51,10 @@ Then start the web as usual; Vite forwards `/api` to the engine. Details and end
 1. **Grazing Sun Optical Engine (`web/src/luz`)**:
    At the lunar south pole (Mons Mouton, 84.60°S, 31.00°E), the Sun never rises above 7.0° elevation. TERRA-X models real grazing shadow geometry where shadow length equals:
    $$\text{Length} = \frac{h}{\tan(\text{elevation})}$$
-   Panels cast physical shadows dynamically updated across the entire interface. On the Moon, shadows have razor-sharp vacuum edges (0 px blur); on Earth, atmospheric penumbral diffusion is applied.
+   Solar controls are local to the scientific views. The atlas pairs the visual experiment with a numerical reading in physical units.
 
 2. **Comparative Two Worlds Canvas (`web/src/pantallas/dos-mundos`)**:
-   A unified raycasting engine comparing the Moon (Mons Mouton, LOLA DEM from PGDA 90 on a 60 m grid) and Earth (Payunia, Mendoza; NASADEM at 60 m once `motor/huella` delivers it). An interactive yellow curtain splits the screen, showing shadow coverage calculated with the exact same physics code.
+   A unified raycasting engine comparing the Moon (Mons Mouton, LOLA DEM from PGDA 90 on a 60 m grid) and Earth (Payunia, Mendoza; NASADEM at 60 m once `motor/huella` delivers it). An interactive divider splits the screen, showing shadow coverage calculated with the exact same physics code.
 
 3. **Safe-Haven Duration Mapping (`web/src/pantallas/destination`)**:
    Identifies safe havens where uninterrupted darkness does not exceed the VIPER 50-hour battery survival envelope during both summer and winter lunar seasons. On a flat horizon the night at Mons Mouton lasts 289–418 h per lunation (2027), 6 to 8 times that limit: only relief can save a parked rover.
@@ -93,7 +93,7 @@ terra-x/
 │  │  │  ├─ learn/            # Yvy ha Jasy (Spanish & Jopara)
 │  │  │  ├─ tests/            # Open verification test report
 │  │  │  └─ data/             # Sources, hashes & licenses registry
-│  │  └─ sistema/             # tokens.css (Instrument design tokens, 2px radius, 1px lines)
+│  │  └─ sistema/             # tokens.css (field atlas colors, type, spacing and states)
 │  └─ public/
 │     ├─ data/                # Precomputed contract data, ephemerides, candidate cards
 │     └─ img/                 # High-fidelity relief and mission visuals

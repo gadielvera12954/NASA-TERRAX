@@ -8,23 +8,45 @@ import {
   IndexEntry,
 } from "../datos/integration";
 import { ScientificData } from "./ScientificData";
-import { SolProvider, useSol } from "../luz/SolContext";
+import { SolProvider } from "../luz/SolContext";
 import { EstadoMotor, estadoMotor } from "../datos/laboratorio";
 import DosMundos from "../pantallas/operacion/DosMundos";
 import Comparador from "../pantallas/operacion/Comparador";
 import SombraCampo from "../pantallas/field/SombraCampo";
+import ReferencePlate from "./ReferencePlate";
+import ThemeToggle from "./ThemeToggle";
+import {
+  Goal,
+  GoalPicker,
+  goals,
+  siteName,
+  SiteList,
+  Verdict,
+} from "./Catalogue";
+import {
+  ArrowRight,
+  BookOpen,
+  Box,
+  Compass,
+  Globe2,
+  Layers,
+  MapPin,
+  PlayCircle,
+  SlidersHorizontal,
+} from "lucide-react";
+import "./tokens.css";
 import "./mvp.css";
 import "./lab.css";
 
 // The 3D screens (three.js + Blender models) load only when they are opened.
 const Laboratorio = lazy(() => import("../pantallas/operacion/Laboratorio"));
-const HeroTerreno = lazy(() => import("../pantallas/operacion/HeroTerreno"));
 
 type Page =
   | "home"
   | "explore"
   | "card"
   | "compare"
+  | "worlds"
   | "lab"
   | "checks"
   | "guide";
@@ -33,6 +55,7 @@ const pages: Page[] = [
   "explore",
   "card",
   "compare",
+  "worlds",
   "lab",
   "checks",
   "guide",
@@ -48,6 +71,10 @@ const tourPages: Page[] = [
 function currentPage(): Page {
   const p = location.hash.slice(1) as Page;
   return pages.includes(p) ? p : "home";
+}
+function readGoal(): Goal {
+  const value = new URLSearchParams(location.search).get("goal");
+  return value === "materials" || value === "robot" ? value : "shadow";
 }
 function download(name: string, content: string) {
   const url = URL.createObjectURL(
@@ -69,20 +96,29 @@ function AppContent() {
     () => new URLSearchParams(location.search).get("candidate") || "P-07",
   );
   const [candidateIndex, setCandidateIndex] = useState<IndexEntry[]>([]);
+  const [indexAttempt, setIndexAttempt] = useState(0);
+  const [indexStatus, setIndexStatus] = useState("loading");
   useEffect(() => {
+    setIndexStatus("loading");
     let active = true;
     readIndex()
       .then((v) => {
-        if (active) setCandidateIndex(v);
+        if (active) {
+          setCandidateIndex(v);
+          setIndexStatus("ready");
+        }
       })
-      .catch(() => {});
+      .catch(() => {
+        if (active) setIndexStatus("error");
+      });
     return () => {
       active = false;
     };
-  }, []);
+  }, [indexAttempt]);
   const [status, setStatus] = useState<"loading" | "ready" | "error">(
     "loading",
   );
+  const [manifestFailed, setManifestFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [online, setOnline] = useState(navigator.onLine);
   const [offlineReady, setOfflineReady] = useState(false);
@@ -102,7 +138,13 @@ function AppContent() {
     };
   }, []);
   const [query, setQuery] = useState("");
-  const [operation, setOperation] = useState("shadow");
+  const [operation, setOperation] = useState<Goal>(readGoal);
+  const changeGoal = (goal: Goal) => {
+    setOperation(goal);
+    const url = new URL(location.href);
+    url.searchParams.set("goal", goal);
+    history.replaceState(null, "", url);
+  };
   const [tour, setTour] = useState<number | null>(null);
   const [paused, setPaused] = useState(false);
   const [remaining, setRemaining] = useState(15);
@@ -112,12 +154,20 @@ function AppContent() {
     const change = () => {
       const next = currentPage();
       setPage(next);
+      setCandidateId(
+        new URLSearchParams(location.search).get("candidate") || "P-07",
+      );
+      setOperation(readGoal());
       setTour((step) =>
         step !== null && tourPages[step] !== next ? null : step,
       );
     };
     window.addEventListener("hashchange", change);
-    return () => window.removeEventListener("hashchange", change);
+    window.addEventListener("popstate", change);
+    return () => {
+      window.removeEventListener("hashchange", change);
+      window.removeEventListener("popstate", change);
+    };
   }, []);
   useEffect(() => {
     if (firstPage.current) {
@@ -130,10 +180,9 @@ function AppContent() {
   useEffect(() => {
     let active = true;
     setStatus("loading");
-    Promise.all([readManifest(), readFicha(candidateId)])
-      .then(([m, f]) => {
+    readFicha(candidateId)
+      .then((f) => {
         if (active) {
-          setManifest(m);
           setFicha(f);
           setStatus("ready");
         }
@@ -145,6 +194,20 @@ function AppContent() {
       active = false;
     };
   }, [attempt, candidateId]);
+  useEffect(() => {
+    let active = true;
+    setManifestFailed(false);
+    readManifest()
+      .then((m) => {
+        if (active) setManifest(m);
+      })
+      .catch(() => {
+        if (active) setManifestFailed(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [attempt]);
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
     window.addEventListener("online", update);
@@ -171,22 +234,48 @@ function AppContent() {
     setTour(null);
     location.hash = next;
   };
+  const openSite = (id: string) => {
+    const url = new URL(location.href);
+    url.searchParams.set("candidate", id);
+    url.hash = "card";
+    history.pushState(null, "", url);
+    setTour(null);
+    setPage("card");
+    setCandidateId(id);
+  };
+  const compareWithSite = () => {
+    const url = new URL(location.href);
+    if (url.searchParams.has("sites")) {
+      const ids = (url.searchParams.get("sites") || "")
+        .split(",")
+        .filter(Boolean);
+      if (!ids.includes(candidateId))
+        url.searchParams.set(
+          "sites",
+          [candidateId, ...ids].slice(0, 3).join(","),
+        );
+    }
+    url.hash = "compare";
+    history.pushState(null, "", url);
+    setTour(null);
+    setPage("compare");
+  };
   const tourNotes = [
     t(
       "The goal: find useful practice conditions on Earth, while acknowledging the differences.",
       "El objetivo: encontrar condiciones útiles para practicar en la Tierra y reconocer sus diferencias.",
     ),
     t(
-      "Choose a practice goal and discover the available example candidate.",
-      "Elige un objetivo de ensayo y descubre la candidata de ejemplo disponible.",
+      "Search the catalogue and open a site record.",
+      "Busca en el catálogo y abre la ficha de un sitio.",
     ),
     t(
       "Read compatibility and evidence separately, then check the limits.",
       "Lee compatibilidad y evidencia por separado; después revisa los límites.",
     ),
     t(
-      "Compare the two environments. Move the Sun to see how panel shadows change.",
-      "Compara los dos entornos. Mueve el Sol para ver cómo cambian las sombras de los paneles.",
+      "Read the site verdicts together and check which measurements are missing.",
+      "Lee juntos los veredictos de los sitios y revisa qué mediciones faltan.",
     ),
     t(
       "Verify what supports each claim. Missing results are explicitly marked.",
@@ -213,58 +302,102 @@ function AppContent() {
     setRemaining(15);
     location.hash = tourPages[next];
   }, [remaining, tour]);
-  const titles = {
+  const titles: Record<Page, string> = {
     home: t(
-      "Practice on Earth. Prepare for the Moon.",
-      "Ensaya en la Tierra. Prepárate para la Luna.",
+      "Earth sites for lunar rehearsals",
+      "Sitios terrestres para ensayos lunares",
     ),
-    explore: t("Find a place to practice.", "Encuentra un lugar para ensayar."),
+    explore: t("Explore sites", "Explorar sitios"),
     card:
-      ficha?.etiqueta === "incompatible"
+      ficha && status === "ready"
+        ? siteName(ficha.lugar.nombre, t)
+        : t("Site record", "Ficha del sitio"),
+    compare: t("Compare sites", "Comparar sitios"),
+    worlds: t("Earth and Moon", "Tierra y Luna"),
+    lab: t("Lunar terrain laboratory", "Laboratorio de terreno lunar"),
+    checks: t("Sources and verification", "Fuentes y verificaciones"),
+    guide: t("How it works", "Cómo funciona"),
+  };
+  useEffect(() => {
+    document.title = titles[page] + " | TERRA-X";
+  }, [page, titles[page]]);
+  const nav = [
+    { page: "home", label: t("Home", "Inicio") },
+    { page: "explore", label: titles.explore },
+    { page: "compare", label: t("Compare", "Comparar") },
+    { page: "guide", label: titles.guide },
+  ];
+  const entries: IndexEntry[] =
+    candidateIndex.length ||
+    indexStatus !== "error" ||
+    status !== "ready" ||
+    !ficha
+      ? candidateIndex
+      : [
+          {
+            id: ficha.id,
+            nombre: ficha.lugar.nombre,
+            etiqueta: ficha.etiqueta,
+            lugar: ficha.lugar,
+            maqueta: ficha.maqueta,
+            control: ficha.control,
+          },
+        ];
+  const sites = entries.filter((c) => !c.control);
+  const references = entries.filter((c) => c.control);
+  const matches = (c: IndexEntry) =>
+    (siteName(c.nombre, t) + " " + c.id)
+      .toLocaleLowerCase()
+      .includes(query.trim().toLocaleLowerCase());
+  const goalNote =
+    operation === "materials"
+      ? t(
+          "Read the materials dimension and check which surface samples are missing.",
+          "Consulta la dimensión de materiales y comprueba qué muestras de superficie faltan.",
+        )
+      : operation === "robot"
         ? t(
-            "This candidate does not meet the requirements.",
-            "Esta candidata no cumple los requisitos.",
+            "Review terrain and robotic operations before planning a traverse.",
+            "Revisa el relieve y las operaciones robóticas antes de planificar un recorrido.",
           )
         : t(
-            "A promising place, with limits.",
-            "Un lugar prometedor, con límites.",
-          ),
-    compare: t(
-      "Two worlds. Different limits.",
-      "Dos mundos. Diferentes límites.",
-    ),
-    lab: t(
-      "Park the rover. Survive the night.",
-      "Estaciona el rover. Sobrevive la noche.",
-    ),
-    checks: t("See what is verified.", "Conoce qué está verificado."),
-    guide: t(
-      "Start here. No expertise needed.",
-      "Empieza aquí. No necesitas ser especialista.",
-    ),
-  };
-  const nav = [
-    { page: "home" as Page, label: t("Home", "Inicio") },
-    { page: "explore" as Page, label: t("Explore", "Explorar") },
-    { page: "lab" as Page, label: t("3D lab", "Laboratorio 3D") },
-    { page: "checks" as Page, label: t("Verification", "Verificación") },
-    { page: "guide" as Page, label: t("Guide", "Guía") },
-  ];
-  const mock = manifest?.maqueta || ficha?.maqueta;
+            "Review illumination and the exported windows for low-angle sunlight.",
+            "Revisa la iluminación y las ventanas exportadas de luz rasante.",
+          );
+  const indexMessage =
+    indexStatus === "loading" ? (
+      <p role="status">
+        {t("Loading site catalogue…", "Cargando el catálogo…")}
+      </p>
+    ) : indexStatus === "error" ? (
+      <div className="notice" role="status">
+        {t(
+          "The catalogue could not be loaded. Available records can still be opened.",
+          "No se pudo cargar el catálogo. Puedes abrir las fichas disponibles.",
+        )}{" "}
+        <button
+          className="text-btn"
+          onClick={() => setIndexAttempt((a) => a + 1)}
+        >
+          {t("Retry catalogue", "Reintentar catálogo")}
+        </button>
+      </div>
+    ) : null;
   // Minutes of the Earth rehearsal window (Sun from 7° to 1.5°), from the open card.
   const earthWindowMinutes = (() => {
     const w = ficha?.horario[0];
-    if (!w) return null;
+    if (!w || ficha?.control) return null;
+    if (
+      typeof w.duracion_min === "number" &&
+      Number.isFinite(w.duracion_min) &&
+      w.duracion_min > 0
+    )
+      return w.duracion_min;
     const [h1, m1] = w.desde.split(":").map(Number);
     const [h2, m2] = w.hasta.split(":").map(Number);
     const minutes = h2 * 60 + m2 - (h1 * 60 + m1);
     return Number.isFinite(minutes) && minutes > 0 ? minutes : null;
   })();
-  const matches =
-    ficha &&
-    `${ficha.id} ${ficha.lugar.region} ${ficha.lugar.nombre}`
-      .toLocaleLowerCase()
-      .includes(query.trim().toLocaleLowerCase());
   const number = (value: number | null) =>
     value === null
       ? t("Unknown", "Desconocido")
@@ -287,14 +420,9 @@ function AppContent() {
     Unknown: t("Unknown", "Desconocido"),
     "Not comparable": t("Not comparable", "No comparable"),
   };
-  const verdicts: Record<string, string> = {
-    con_huecos: t("◐ With gaps", "◐ Con vacíos de información"),
-    sostenido: t("● Supported", "● Respaldado"),
-    no_alcanza: t("○ Insufficient", "○ Insuficiente"),
-    no_puede: t("? Unknown", "? Desconocido"),
-    incompatible: t("× Incompatible", "× Incompatible"),
-  };
   const translations: Record<string, string> = {
+    "Surface material composition": "Composición del material superficial",
+    "Fine-scale traversability": "Transitabilidad a pequeña escala",
     "Shadow contrast": "Contraste de sombras",
     Gravity: "Gravedad",
     Vacuum: "Vacío",
@@ -339,7 +467,7 @@ function AppContent() {
           onClick={() => setTour(null)}
           aria-label={t("TERRA-X home", "Inicio de TERRA-X")}
         >
-          <span className="brand-mark" aria-hidden="true" />
+          <img src="/terra-x.svg" width="36" height="36" alt="" />
           TERRA-X
         </a>
         <nav aria-label={t("Main navigation", "Navegación principal")}>
@@ -350,8 +478,8 @@ function AppContent() {
               onClick={() => setTour(null)}
               aria-current={
                 page === n.page ||
-                ((page === "card" || page === "compare") &&
-                  n.page === "explore")
+                (page === "card" && n.page === "explore") ||
+                (page === "worlds" && n.page === "compare")
                   ? "page"
                   : undefined
               }
@@ -360,56 +488,33 @@ function AppContent() {
             </a>
           ))}
         </nav>
-        <div
-          className="language"
-          role="group"
-          aria-label={t("Language", "Idioma")}
-        >
-          <button
-            aria-pressed={language === "en"}
-            onClick={() => setLanguage("en")}
-            lang="en"
+        <div className="header-preferences">
+          <ThemeToggle language={language} />
+          <div
+            className="language"
+            role="group"
+            aria-label={t("Language", "Idioma")}
           >
-            English
-          </button>
-          <button
-            aria-pressed={language === "es"}
-            onClick={() => setLanguage("es")}
-            lang="es"
-          >
-            Español
-          </button>
+            <Globe2 size={17} aria-hidden="true" />
+            <button
+              aria-label="English"
+              aria-pressed={language === "en"}
+              onClick={() => setLanguage("en")}
+              lang="en"
+            >
+              EN
+            </button>
+            <button
+              aria-label="Español"
+              aria-pressed={language === "es"}
+              onClick={() => setLanguage("es")}
+              lang="es"
+            >
+              ES
+            </button>
+          </div>
         </div>
       </header>
-      <div className="connection" role="status">
-        {online ? t("Online", "Con conexión") : t("Offline", "Sin conexión")} ·{" "}
-        {offlineReady
-          ? t("Saved for offline use", "Guardado para usar sin conexión")
-          : t(
-              "Offline copy not ready yet",
-              "Copia sin conexión aún no preparada",
-            )}
-        <span className={motor ? "luz vivo" : "luz"} aria-hidden="true" />
-        {motor
-          ? t("Live engine connected", "Motor en vivo conectado")
-          : t(
-              "Live engine off · using exported data",
-              "Motor en vivo apagado · se usan los datos exportados",
-            )}
-      </div>
-      {mock && (
-        <aside className="mock-notice">
-          <strong>
-            {t("MOCK DATA · Demonstration", "DATOS DE MAQUETA · Demostración")}
-          </strong>
-          <span>
-            {t(
-              "Example values, not validated scientific results. Do not use for mission planning.",
-              "Valores de ejemplo, no resultados científicos validados. No usar para planificar misiones.",
-            )}
-          </span>
-        </aside>
-      )}
       {tour !== null && (
         <aside
           className="tour-bar"
@@ -447,21 +552,26 @@ function AppContent() {
         </aside>
       )}
       <main id="main-content" className="mvp-main">
-        <div className="eyebrow">
-          {t(
-            "EARTH / MOON · OPEN ANALOG EXPLORER",
-            "TIERRA / LUNA · EXPLORADOR DE ANÁLOGOS",
-          )}
-        </div>
-        <h1 ref={heading} tabIndex={-1}>
-          {titles[page]}
-        </h1>
-        {status === "loading" && (
+        {page !== "home" && (
+          <div className="page-title">
+            <a href="#home">{t("Field atlas", "Atlas de campo")}</a>
+            <span aria-hidden="true"> / </span>
+            <span>
+              {page === "card"
+                ? t("Site record", "Ficha del sitio")
+                : titles[page]}
+            </span>
+            <h1 ref={heading} tabIndex={-1}>
+              {titles[page]}
+            </h1>
+          </div>
+        )}
+        {page === "card" && status === "loading" && (
           <p role="status">
             {t("Loading project data…", "Cargando datos del proyecto…")}
           </p>
         )}
-        {status === "error" && (
+        {["card", "checks", "explore"].includes(page) && status === "error" && (
           <div className="notice" role="alert">
             <h2>
               {t("We could not load the data.", "No pudimos cargar los datos.")}
@@ -474,67 +584,60 @@ function AppContent() {
             </p>
             <button className="btn" onClick={() => setAttempt((a) => a + 1)}>
               {t("Retry", "Reintentar")}
-            </button>
+            </button>{" "}
+            <a href="#explore">{titles.explore}</a>
           </div>
         )}
-        {page === "home" && (
-          <button
-            className="btn sec tour-start"
-            onClick={() => {
-              setQuery("");
-              setTour(0);
-              setPaused(
-                window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-              );
-              setRemaining(15);
-              location.hash = "home";
-            }}
+        {(page === "compare" || page === "worlds") && (
+          <nav
+            className="view-switch"
+            aria-label={t("Comparison views", "Vistas de comparación")}
           >
-            {t(
-              "Optional: take the 90-second tour",
-              "Opcional: recorrido de 90 segundos",
-            )}
-          </button>
-        )}
-        {(page === "card" || page === "explore") && status === "ready" && (
-          <div className="compare-link">
-            <a href="#compare">
-              {t("Compare Earth and Moon →", "Comparar Tierra y Luna →")}
+            <a
+              href="#compare"
+              aria-current={page === "compare" ? "page" : undefined}
+            >
+              <MapPin size={17} />
+              {titles.compare}
             </a>
-          </div>
+            <a
+              href="#worlds"
+              aria-current={page === "worlds" ? "page" : undefined}
+            >
+              <Globe2 size={17} />
+              {titles.worlds}
+            </a>
+          </nav>
         )}
         {page === "compare" && (
           <>
-            <DosMundos minutosTierra={earthWindowMinutes} />
-            <div className="two-grid">
-              <section className="panel">
-                <h2>
-                  {t(
-                    "What a rehearsal can teach",
-                    "Qué permite aprender un ensayo",
-                  )}
-                </h2>
-                <p>
-                  {t(
-                    "How to move through uneven terrain, place instruments and work with low-angle light.",
-                    "Cómo desplazarse en terreno irregular, colocar instrumentos y trabajar con luz rasante.",
-                  )}
-                </p>
-              </section>
-              <section className="panel">
-                <h2>
-                  {t("What remains different", "Qué sigue siendo diferente")}
-                </h2>
-                <p>
-                  {t(
-                    "Atmosphere, gravity, dust and energy conditions. A successful Earth test does not certify a lunar operation.",
-                    "Atmósfera, gravedad, polvo y condiciones energéticas. Una prueba exitosa en la Tierra no certifica una operación lunar.",
-                  )}
-                </p>
-              </section>
-            </div>
-            <Comparador indice={candidateIndex} actual={candidateId} />
+            {indexMessage}
+            {!!entries.length && (
+              <Comparador
+                indice={entries}
+                actual={candidateId}
+                goal={operation}
+                changeGoal={changeGoal}
+                openSite={openSite}
+              />
+            )}
           </>
+        )}
+        {page === "worlds" && (
+          <DosMundos
+            minutosTierra={
+              status === "ready" &&
+              !references.some((c) => c.id === candidateId)
+                ? earthWindowMinutes
+                : null
+            }
+            site={
+              status === "ready" && ficha
+                ? siteName(ficha.lugar.nombre, t)
+                : candidateId
+            }
+            mock={!!ficha?.maqueta}
+          />
         )}
         {page === "lab" && (
           <Suspense
@@ -549,127 +652,119 @@ function AppContent() {
         )}
         {page === "home" && (
           <>
-            <div className="hero-grid">
-              <div>
+            <section className="atlas-hero">
+              <div className="hero-copy">
+                <div className="atlas-label">
+                  <Compass size={18} />
+                  {t(
+                    "Terrestrial analog atlas",
+                    "Atlas de análogos terrestres",
+                  )}
+                </div>
+                <h1 ref={heading} tabIndex={-1}>
+                  {titles.home}
+                </h1>
                 <p className="lead">
                   {t(
-                    "Where on Earth could we rehearse work at the lunar south pole? Explore a candidate, understand its limits, and find out what to measure next.",
-                    "¿Dónde podríamos practicar en la Tierra el trabajo en el polo sur lunar? Explora una candidata, entiende sus límites y descubre qué medir después.",
+                    "Find places to practice lunar operations on Earth. Explore the terrain, see which conditions match and decide what to measure in the field.",
+                    "Encuentra dónde ensayar operaciones lunares en la Tierra. Explora el terreno, identifica qué condiciones coinciden y decide qué medir en campo.",
                   )}
                 </p>
                 <div className="actions">
-                  <button className="btn" onClick={() => go("explore")}>
-                    {t("Explore a candidate →", "Explorar una candidata →")}
-                  </button>
-                  <button className="btn sec" onClick={() => go("guide")}>
-                    {t("How it works", "Cómo funciona")}
+                  <a className="btn" href="#explore">
+                    {t("Explore rehearsal sites", "Explorar sitios de ensayo")}{" "}
+                    <ArrowRight size={18} />
+                  </a>
+                  <button
+                    className="text-btn"
+                    onClick={() => {
+                      setQuery("");
+                      setTour(0);
+                      setPaused(
+                        matchMedia("(prefers-reduced-motion: reduce)").matches,
+                      );
+                      setRemaining(15);
+                      location.hash = "home";
+                    }}
+                  >
+                    <PlayCircle size={19} />
+                    {t("90-second tour", "Recorrido de 90 segundos")}
                   </button>
                 </div>
-                <p className="muted">
+                <p className="audience">
+                  <BookOpen size={16} />
                   {t(
-                    "A terrestrial analog is a practice site. It never reproduces every condition on the Moon.",
-                    "Un análogo terrestre es un lugar de ensayo. Nunca reproduce todas las condiciones de la Luna.",
+                    "For students, educators and field teams",
+                    "Para estudiantes, docentes y equipos de campo",
                   )}
                 </p>
               </div>
-              <Suspense
-                fallback={
-                  <div className="escena cargando">
-                    {t("Loading the 3D terrain…", "Cargando el terreno 3D…")}
-                  </div>
-                }
-              >
-                <HeroTerreno motor={motor} onAbrir={() => go("lab")} />
-              </Suspense>
-            </div>
-            <nav
-              className="puertas"
-              aria-label={t("What you can do here", "Qué puedes hacer aquí")}
-            >
-              {[
-                [
-                  "lab",
-                  t("Park a rover", "Estaciona un rover"),
-                  t(
-                    "Click the real lunar relief, pick a season and watch the battery through the night.",
-                    "Haz clic en el relieve lunar real, elige una estación y mira la batería durante la noche.",
-                  ),
-                  t("3D lab →", "Laboratorio 3D →"),
-                ],
-                [
-                  "compare",
-                  t("Compare two worlds", "Compara dos mundos"),
-                  t(
-                    "The same rover under the same Sun on the Moon and on Earth: shadows, power, gravity, time.",
-                    "El mismo rover bajo el mismo Sol en la Luna y en la Tierra: sombras, energía, gravedad, tiempo.",
-                  ),
-                  t("Earth / Moon in 3D →", "Tierra / Luna en 3D →"),
-                ],
-                [
-                  "explore",
-                  t("Choose a rehearsal site", "Elige un sitio de ensayo"),
-                  t(
-                    "Open a candidate, read compatibility and evidence separately, then put candidates side by side.",
-                    "Abre una candidata, lee compatibilidad y evidencia por separado y pon candidatas lado a lado.",
-                  ),
-                  t("Candidates →", "Candidatas →"),
-                ],
-                [
-                  "guide",
-                  t("Measure a real shadow", "Mide una sombra real"),
-                  t(
-                    "A 0.50 m board at sunset is enough to test the Sun model on real ground.",
-                    "Una tablita de 0,50 m al atardecer alcanza para probar el modelo del Sol en terreno real.",
-                  ),
-                  t("Field kit →", "Kit de campo →"),
-                ],
-              ].map(([to, h, p, cta]) => (
-                <a
-                  className="puerta"
-                  key={to}
-                  href={`#${to}`}
-                  onClick={() => setTour(null)}
-                >
-                  <strong>{h}</strong>
-                  <span>{p}</span>
-                  <em>{cta}</em>
+              <ReferencePlate motor={motor} openLab={() => go("lab")} />
+            </section>
+            <div className="atlas-lower">
+              <section>
+                <div className="section-heading">
+                  <h2>{t("Rehearsal sites", "Sitios de ensayo")}</h2>
+                  <a href="#explore">
+                    {t("View catalogue", "Ver catálogo")}{" "}
+                    <ArrowRight size={15} />
+                  </a>
+                </div>
+                <p className="muted">
+                  {t(
+                    "Open a site record to inspect its evidence.",
+                    "Abre una ficha para revisar su evidencia.",
+                  )}{" "}
+                  {sites.some((c) => c.maqueta) &&
+                    t(
+                      "The catalogue includes demonstration records.",
+                      "El catálogo incluye fichas de demostración.",
+                    )}
+                </p>
+                {indexMessage}
+                <SiteList entries={sites.slice(0, 3)} openSite={openSite} />
+              </section>
+              <aside className="field-tools">
+                <h2>{t("Field tools", "Herramientas de campo")}</h2>
+                <a href="#lab">
+                  <Box />
+                  <span>
+                    <strong>{titles.lab}</strong>
+                    <small>
+                      {t(
+                        "Test a rover on Mons Mouton",
+                        "Prueba un rover en Mons Mouton",
+                      )}
+                    </small>
+                  </span>
+                  <ArrowRight />
                 </a>
-              ))}
-            </nav>
+                <a href="#worlds">
+                  <Layers />
+                  <span>
+                    <strong>{titles.worlds}</strong>
+                    <small>
+                      {t(
+                        "Explore what transfers",
+                        "Explora qué se puede reproducir",
+                      )}
+                    </small>
+                  </span>
+                  <ArrowRight />
+                </a>
+              </aside>
+            </div>
           </>
         )}
         {page === "explore" && (
           <>
             <p className="lead">
               {t(
-                "Choose what you want to rehearse and explore the exported candidates. This interface does not calculate a new ranking.",
-                "Elige qué quieres ensayar y explora las candidatas exportadas. Esta interfaz no calcula una clasificación nueva.",
+                "Find a record by place or identifier. Each one documents the conditions a site can reproduce and what still needs measuring.",
+                "Busca por lugar o identificador. Cada ficha explica qué condiciones se pueden reproducir y qué falta medir.",
               )}
             </p>
             <div className="filters">
-              <label>
-                {t("Practice goal", "Objetivo del ensayo")}
-                <select
-                  value={operation}
-                  onChange={(e) => setOperation(e.target.value)}
-                >
-                  <option value="shadow">
-                    {t("Observe light and shadows", "Observar luz y sombras")}
-                  </option>
-                  <option value="robot">
-                    {t(
-                      "Practice robotic operations",
-                      "Practicar operaciones robóticas",
-                    )}
-                  </option>
-                  <option value="materials">
-                    {t(
-                      "Study surface materials",
-                      "Estudiar materiales superficiales",
-                    )}
-                  </option>
-                </select>
-              </label>
               <label>
                 {t("Search by place or ID", "Buscar por lugar o identificador")}
                 <input
@@ -679,105 +774,71 @@ function AppContent() {
                   placeholder="Payunia / P-07"
                 />
               </label>
+              <GoalPicker goal={operation} change={changeGoal} />
             </div>
-            {candidateIndex.length > 1 && (
-              <label>
-                {t(
-                  "Available candidates and controls",
-                  "Candidatas y controles disponibles",
-                )}
-                <select
-                  value={candidateId}
-                  onChange={(e) => {
-                    const id = e.target.value;
-                    setCandidateId(id);
-                    const url = new URL(location.href);
-                    url.searchParams.set("candidate", id);
-                    history.replaceState(null, "", url);
-                  }}
-                >
-                  {candidateIndex.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.id} ·{" "}
-                      {c.nombre.replace(
-                        " (maqueta)",
-                        t(" (mock)", " (maqueta)"),
-                      )}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-            <p className="notice">
-              {operation === "materials"
-                ? t(
-                    "Materials are marked as not comparable. This candidate cannot establish material similarity.",
-                    "Los materiales figuran como no comparables. Esta candidata no permite afirmar similitud de materiales.",
-                  )
-                : t(
-                    "Terrain and illumination can support a rehearsal. Earth’s atmosphere and gravity remain different.",
-                    "El relieve y la iluminación pueden servir para un ensayo. La atmósfera y la gravedad terrestres siguen siendo diferentes.",
-                  )}
+            <p className="goal-note">
+              <SlidersHorizontal size={17} />
+              {goalNote}{" "}
+              {t(
+                "Changing the goal only changes the reading guidance.",
+                "Cambiar el objetivo solo cambia la guía de lectura.",
+              )}
             </p>
-            {status === "ready" &&
-              (matches && ficha ? (
-                <div className="two-grid">
-                  <figure className="terrain-preview">
-                    <img
-                      src="/img/ui_tierra_top.png"
-                      alt={t(
-                        "Illustrative terrain preview of the candidate region",
-                        "Vista ilustrativa del relieve de la región candidata",
-                      )}
-                    />
-                    <figcaption>
-                      {t(
-                        "Synthetic illustration · Location is listed on the card, not plotted on this image",
-                        "Ilustración sintética · La ubicación está en la ficha; no está trazada sobre esta imagen",
-                      )}
-                    </figcaption>
-                  </figure>
-                  <section className="panel">
-                    <span className="eyebrow">
-                      {t("Selected candidate", "Candidata seleccionada")}
-                    </span>
-                    <h2>
-                      {ficha.id} · {ficha.lugar.nombre}
-                    </h2>
-                    <p>{ficha.lugar.region}</p>
-                    <p className="mono">
-                      {ficha.lugar.lat}, {ficha.lugar.lon}
-                    </p>
-                    <span className="verdict">
-                      {verdicts[ficha.etiqueta] ?? ficha.etiqueta}
-                    </span>
-                    <p>
-                      {t(
-                        "Review the verdict and evidence before choosing a rehearsal site.",
-                        "Revisa el veredicto y la evidencia antes de elegir un lugar de ensayo.",
-                      )}
-                    </p>
-                    <button className="btn" onClick={() => go("card")}>
-                      {t(
-                        "Open candidate card →",
-                        "Abrir ficha de la candidata →",
-                      )}
-                    </button>
-                  </section>
-                </div>
-              ) : (
-                <div role="status" className="notice">
-                  <p>
-                    {t(
-                      "No matching candidates.",
-                      "No hay candidatas que coincidan.",
-                    )}
-                  </p>
+            {indexMessage}
+            <section className="catalogue">
+              <h2>
+                {t("Terrestrial sites", "Sitios terrestres")}{" "}
+                <small>{sites.filter(matches).length}</small>
+              </h2>
+              <SiteList entries={sites.filter(matches)} openSite={openSite} />
+              {sites.some((c) => matches(c) && c.maqueta) && (
+                <p className="muted">
+                  {t(
+                    "The catalogue includes demonstration records. Open each record to check its source.",
+                    "El catálogo incluye fichas de demostración. Abre cada ficha para comprobar su fuente.",
+                  )}
+                </p>
+              )}
+            </section>
+            {!!references.filter(matches).length && (
+              <details
+                className="panel control-records"
+                open={query.trim() ? true : undefined}
+              >
+                <summary>
+                  {t(
+                    "Scientific reference controls",
+                    "Controles científicos de referencia",
+                  )}{" "}
+                  ({references.filter(matches).length})
+                </summary>
+                <p>
+                  {t(
+                    "These records test how the method behaves. Use the terrestrial catalogue above to choose a rehearsal site.",
+                    "Estas fichas comprueban cómo se comporta el método. Elige un lugar de ensayo en el catálogo terrestre.",
+                  )}
+                </p>
+                <SiteList
+                  entries={references.filter(matches)}
+                  openSite={openSite}
+                />
+              </details>
+            )}
+            {indexStatus !== "loading" && !entries.some(matches) && (
+              <div className="notice" role="status">
+                <p>
+                  {t(
+                    "No matching candidates.",
+                    "No hay candidatas que coincidan.",
+                  )}
+                </p>
+                {query && (
                   <button className="btn sec" onClick={() => setQuery("")}>
                     {t("Clear search", "Limpiar búsqueda")}
                   </button>
-                </div>
-              ))}
+                )}
+              </div>
+            )}
           </>
         )}
         {page === "card" && ficha && status === "ready" && (
@@ -786,21 +847,38 @@ function AppContent() {
               ← {t("Back to candidates", "Volver a candidatas")}
             </a>
             <div className="card-heading">
-              <h2>
-                {ficha.id} · {ficha.lugar.nombre}
-              </h2>
-              <span className="verdict">
-                {verdicts[ficha.etiqueta] ?? ficha.etiqueta}
-              </span>
-              <p>
-                {ficha.lugar.region} ·{" "}
-                <span className="mono">
-                  {ficha.lugar.lat}, {ficha.lugar.lon}
+              <div className="record-meta">
+                <MapPin size={17} />
+                <span>{ficha.id}</span> /{" "}
+                <span>
+                  {ficha.lugar.lat}°, {ficha.lugar.lon}°
                 </span>
-              </p>
+              </div>
+              <Verdict value={ficha.etiqueta} />{" "}
+              {ficha.maqueta && (
+                <span className="demo-tag">
+                  {t("Demonstration record", "Ficha de demostración")}
+                </span>
+              )}
+              {ficha.control && (
+                <p>
+                  {t(
+                    "Scientific reference control for checking the method.",
+                    "Control científico de referencia para comprobar el método.",
+                  )}
+                </p>
+              )}
               <p className="lead">{dataText(ficha.resumen)}</p>
+              <p>
+                <strong>{t("Practice goal", "Objetivo del ensayo")}</strong> ·{" "}
+                {t(goals[operation][0], goals[operation][1])}. {goalNote}
+              </p>
+              <button className="btn" onClick={compareWithSite}>
+                {t("Compare this record", "Comparar esta ficha")}{" "}
+                <ArrowRight size={17} />
+              </button>
             </div>
-            <div className="two-grid">
+            <div className="two-grid record-body">
               <section className="panel">
                 <h2>{t("How well does it fit?", "¿Qué tan bien encaja?")}</h2>
                 <div className="metrics">
@@ -815,17 +893,34 @@ function AppContent() {
                 </div>
                 <p>
                   {t(
-                    "Compatibility describes the fit to the selected conditions. Evidence describes how much supports that assessment. Neither is a percentage of similarity to the Moon.",
-                    "La compatibilidad describe el ajuste a las condiciones elegidas. La evidencia describe cuánto respaldo tiene esa evaluación. Ninguna es un porcentaje de similitud con la Luna.",
+                    "C describes the fit of measured properties. It is not a similarity percentage. E is the share of property weights covered by evidence, not a probability.",
+                    "C describe el ajuste de las propiedades medidas. No es un porcentaje de parecido. E indica qué parte del peso tiene evidencia, no una probabilidad.",
                   )}
                 </p>
                 <p className="muted">
                   {t("Model bounds (L–U)", "Límites del modelo (L–U)")}:{" "}
                   {number(ficha.L)}–{number(ficha.U)} ·{" "}
                   {t(
-                    "Example values from the candidate file.",
-                    "Valores de ejemplo del archivo de la candidata.",
+                    "Bounds under the model assumptions, not a confidence interval.",
+                    "Límites bajo los supuestos del modelo, no un intervalo de confianza.",
                   )}
+                </p>
+              </section>
+              <section className="panel">
+                <h2>{t("What does not transfer?", "¿Qué no se reproduce?")}</h2>
+                <ul>
+                  {ficha.no_transfiere.map((s) => (
+                    <li key={s}>{dataText(s)}</li>
+                  ))}
+                </ul>
+                <h3>{t("Measure first", "Qué medir primero")}</h3>
+                <p>
+                  {ficha.medir_primero
+                    ? ficha.medir_primero.split("; ").map(dataText).join(" · ")
+                    : t(
+                        "No priority measurement listed.",
+                        "La ficha no indica una medición prioritaria.",
+                      )}
                 </p>
               </section>
               <section className="panel">
@@ -843,31 +938,47 @@ function AppContent() {
                 </dl>
               </section>
               <section className="panel">
-                <h2>{t("What does not transfer?", "¿Qué no se reproduce?")}</h2>
-                <ul>
-                  {ficha.no_transfiere.map((s) => (
-                    <li key={s}>{dataText(s)}</li>
-                  ))}
-                </ul>
-                <h3>{t("Measure first", "Qué medir primero")}</h3>
-                <p>{dataText(ficha.medir_primero)}</p>
-              </section>
-              <section className="panel">
                 <h2>
                   {t(
-                    "Example rehearsal window",
-                    "Ventana de ensayo de ejemplo",
+                    "Recorded rehearsal windows",
+                    "Ventanas de ensayo registradas",
                   )}
                 </h2>
-                {ficha.horario.map((h, i) => (
-                  <p key={i}>
-                    <time>{h.fecha}</time> · {h.desde}–{h.hasta} (UTC−3)
+                {!ficha.horario.length && (
+                  <p>
+                    {t(
+                      "No rehearsal window supplied.",
+                      "La ficha no incluye una ventana de ensayo.",
+                    )}
                   </p>
-                ))}
+                )}
+                {!!ficha.horario.length && (
+                  <table className="window-table">
+                    <thead>
+                      <tr>
+                        <th>{t("Date", "Fecha")}</th>
+                        <th>{t("Local time", "Hora local")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ficha.horario.map((h, i) => (
+                        <tr key={i}>
+                          <td>
+                            <time>{h.fecha}</time>
+                          </td>
+                          <td>
+                            {h.desde}–{h.hasta}
+                            {h.zona && <small> UTC{h.zona}</small>}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
                 <p className="muted">
                   {t(
-                    "Historical mock schedule. It is not a forecast or a recommendation for today.",
-                    "Horario histórico de maqueta. No es un pronóstico ni una recomendación para hoy.",
+                    "Use the date and local time on the source record. These windows describe the recorded day.",
+                    "Consulta la fecha y hora local de la ficha fuente. Estas ventanas describen el día indicado.",
                   )}
                 </p>
                 <div className="actions">
@@ -900,11 +1011,7 @@ function AppContent() {
               >
                 /data/fichas/{candidateId}.json
               </a>{" "}
-              ·{" "}
-              {t(
-                "No scientific validation is claimed by this MVP.",
-                "Este MVP no afirma validación científica.",
-              )}
+              · <a href="#checks">{titles.checks}</a>
             </div>
           </>
         )}
@@ -920,7 +1027,7 @@ function AppContent() {
               <section className="panel">
                 <h2>{t("Data loading", "Carga de datos")}</h2>
                 <span className="verdict">
-                  {status === "ready"
+                  {status === "ready" && manifest
                     ? t(
                         "✓ File structure checked",
                         "✓ Estructura de archivos comprobada",
@@ -945,10 +1052,24 @@ function AppContent() {
               </h2>
               <p>
                 {t(
-                  "These are declarations in mock data. Source files and their hashes have not been independently verified.",
-                  "Son declaraciones en datos de maqueta. Los archivos fuente y sus hashes no fueron verificados de forma independiente.",
+                  "The manifest lists source datasets and the hashes supplied by their publishers or the project. A missing hash is shown explicitly.",
+                  "El manifiesto enumera las fuentes y las huellas declaradas por sus proveedores o por el proyecto. Las huellas ausentes se indican en cada entrada.",
                 )}
               </p>
+              {manifestFailed && (
+                <div className="notice" role="alert">
+                  {t(
+                    "The source manifest is unavailable.",
+                    "El manifiesto de fuentes no está disponible.",
+                  )}{" "}
+                  <button
+                    className="text-btn"
+                    onClick={() => setAttempt((n) => n + 1)}
+                  >
+                    {t("Retry manifest", "Reintentar manifiesto")}
+                  </button>
+                </div>
+              )}
               {manifest?.fuentes.map((f) => (
                 <details key={f.id}>
                   <summary>{f.nombre}</summary>
@@ -1004,8 +1125,8 @@ function AppContent() {
                     "¿Puedo confiar en las cifras de ejemplo?",
                   ),
                   t(
-                    "They demonstrate the interface, not a scientific conclusion. The mock banner stays visible until the source files declare real data.",
-                    "Sirven para demostrar la interfaz, no una conclusión científica. El aviso de maqueta permanece mientras los archivos declaren datos de ejemplo.",
+                    "Demo site records illustrate the method. The lunar reference uses LOLA relief and JPL ephemerides. Check the source of each product.",
+                    "Las fichas de demostración ilustran el método. La referencia lunar usa relieve LOLA y efemérides JPL. Revisa las fuentes de cada producto.",
                   ),
                 ],
                 [
@@ -1022,7 +1143,17 @@ function AppContent() {
                 </section>
               ))}
             </div>
-            <SunLab />
+            <div className="actions">
+              <a className="btn sec" href="#worlds">
+                {titles.worlds}
+              </a>
+              <a className="btn sec" href="#lab">
+                {titles.lab}
+              </a>
+              <a className="btn sec" href="#checks">
+                {titles.checks}
+              </a>
+            </div>
             <SombraCampo motor={motor} />
             <details className="notice">
               <summary>
@@ -1054,89 +1185,30 @@ function AppContent() {
         )}
       </main>
       <footer className="mvp-footer">
-        <span>
-          TERRA-X ·{" "}
-          {t("Open rehearsal explorer", "Explorador abierto de ensayos")}
-        </span>
-        <a href="#checks">
-          {t("Data and limitations", "Datos y limitaciones")}
-        </a>
+        <div>
+          <strong>TERRA-X</strong>
+          <span>{t("Field atlas", "Atlas de campo")}</span>
+        </div>
+        <a href="#checks">{titles.checks}</a>
+        <div className="connection" role="status">
+          {online ? t("Online", "Con conexión") : t("Offline", "Sin conexión")}{" "}
+          ·{" "}
+          {offlineReady
+            ? t("Saved for offline use", "Guardado para usar sin conexión")
+            : t(
+                "Offline copy not ready yet",
+                "Copia sin conexión aún no preparada",
+              )}
+          <span className={motor ? "luz vivo" : "luz"} aria-hidden="true" />
+          {motor
+            ? t("Live engine connected", "Motor en vivo conectado")
+            : t(
+                "Live engine off · using exported data",
+                "Motor en vivo apagado · se usan los datos exportados",
+              )}
+        </div>
       </footer>
-      <Horizon />
     </>
-  );
-}
-function SunLab() {
-  const { t, language } = useLanguage();
-  const sol = useSol();
-  return (
-    <section className="panel sun-lab">
-      <h2>
-        {t(
-          "Why are low-Sun shadows long?",
-          "¿Por qué el Sol bajo produce sombras largas?",
-        )}
-      </h2>
-      <p>
-        {t(
-          "Move the slider. This ideal geometric example uses a vertical 0.5 m post on flat ground; it does not model real terrain.",
-          "Mueve el control. Este ejemplo geométrico ideal usa un poste vertical de 0,5 m sobre suelo plano; no modela un terreno real.",
-        )}
-      </p>
-      <label htmlFor="sun-angle">
-        {t("Sun elevation", "Elevación del Sol")}:{" "}
-        {sol.elevacion.toLocaleString(language)}°
-      </label>
-      <input
-        id="sun-angle"
-        type="range"
-        min="1.5"
-        max="10"
-        step="0.5"
-        value={sol.elevacion}
-        onChange={(e) => sol.setElevacion(Number(e.target.value))}
-      />
-      <p>
-        <strong>
-          {t("Shadow length", "Longitud de sombra")}:{" "}
-          {(0.5 / Math.tan((sol.elevacion * Math.PI) / 180)).toLocaleString(
-            language,
-            { maximumFractionDigits: 2 },
-          )}{" "}
-          m
-        </strong>
-      </p>
-      <p className="mono">
-        {t(
-          "Formula: height / tan(sun elevation)",
-          "Fórmula: altura / tan(elevación solar)",
-        )}
-      </p>
-    </section>
-  );
-}
-function Horizon() {
-  const { t, language } = useLanguage();
-  const sol = useSol();
-  return (
-    <div className="mvp-horizon">
-      <label htmlFor="global-sun">
-        {t("Sun · visual example", "Sol · ejemplo visual")}{" "}
-        <strong>{sol.elevacion.toLocaleString(language)}°</strong>
-      </label>
-      <input
-        id="global-sun"
-        type="range"
-        min="1.5"
-        max="10"
-        step="0.5"
-        value={sol.elevacion}
-        onChange={(e) => sol.setElevacion(Number(e.target.value))}
-      />
-      <span>
-        {t("Move to change panel shadows", "Mueve para cambiar las sombras")}
-      </span>
-    </div>
   );
 }
 export default function MvpApp() {

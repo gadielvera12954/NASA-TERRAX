@@ -1,4 +1,4 @@
-/* TERRA-X · 3D lab, two worlds and comparator. Instrument rules: 2px corners, 1px lines, one accent. */
+/* Scientific displays and their local controls. */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -8,7 +8,7 @@
   white-space: nowrap;
 }
 .btn.chico {
-  min-height: 36px;
+  min-height: 44px;
   padding: 6px 12px;
   font-size: 13px;
 }
@@ -27,8 +27,8 @@
   width: 100%;
   min-height: 260px;
   border: 1px solid var(--borde-light);
-  border-radius: 2px;
-  background: #030a1c;
+  border-radius: var(--small-radius);
+  background: var(--dark-plate);
   overflow: hidden;
 }
 .escena canvas {
@@ -42,26 +42,28 @@
   right: 10px;
   bottom: 10px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   border: 1px solid var(--borde-light);
-  border-radius: 2px;
-  background: #07173f;
+  border-radius: var(--small-radius);
+  background: var(--dark-plate);
 }
 .zoom button {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border: 0;
   background: transparent;
-  color: #fff;
+  color: var(--on-dark-plate);
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
 }
+.zoom button svg { width: 16px; height: 16px; }
 .zoom button + button {
-  border-top: 1px solid var(--borde-light);
+  border-left: 1px solid var(--borde-light);
 }
 .zoom button:hover {
-  background: #25385d;
+  background: var(--action-hover);
+  color: var(--on-action);
 }
 .escena canvas:active {
   cursor: grabbing;
@@ -91,7 +93,7 @@ figure.escena-plana img {
 }
 .hero-mandos input[type="range"] {
   flex: 1 1 140px;
-  min-height: 36px;
+  min-height: 44px;
   accent-color: var(--sol);
 }
 .hero-mandos .mono {
@@ -121,48 +123,10 @@ figure.escena-plana img {
   background: var(--sost);
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
 }
-.puertas {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 20px;
-  margin-top: 48px;
-}
-.puerta {
-  display: block;
-  padding: 20px;
-  border: 1px solid var(--borde-light);
-  border-radius: 2px;
-  background: var(--noche-panel);
-  color: var(--texto);
-  text-decoration: none;
-  transition: border-color 0.15s;
-}
-.puerta:hover {
-  border-color: var(--sol);
-}
-.puerta strong {
-  display: block;
-  font-family: var(--tit);
-  font-size: 18px;
-  margin-bottom: 8px;
-}
-.puerta span {
-  color: var(--texto-sec);
-  line-height: 1.6;
-}
-.puerta em {
-  display: block;
-  margin-top: 12px;
-  font-style: normal;
-  color: var(--sol);
-  font-family: var(--mono);
-  font-size: 12px;
-}
-
 /* ---------------------------------------------------------------- lab */
 .fuente-calculo {
   border: 1px solid var(--borde-light);
-  border-radius: 2px;
+  border-radius: var(--small-radius);
   background: var(--noche-panel);
   padding: 10px 14px;
   margin: 0 0 20px;
@@ -195,7 +159,7 @@ figure.escena-plana img {
 .segmento {
   display: inline-flex;
   border: 1px solid var(--borde-light);
-  border-radius: 2px;
+  border-radius: var(--small-radius);
 }
 .segmento.vertical {
   display: flex;
@@ -208,7 +172,7 @@ figure.escena-plana img {
   background: transparent;
   color: var(--texto-sec);
   padding: 9px 12px;
-  min-height: 40px;
+  min-height: 44px;
   cursor: pointer;
   text-align: left;
 }
@@ -222,8 +186,8 @@ figure.escena-plana img {
 .segmento button[aria-pressed="true"],
 .fichas-rapidas button[aria-pressed="true"],
 .selector button[aria-pressed="true"] {
-  background: #25385d;
-  color: #fff;
+  background: var(--action-hover);
+  color: var(--on-action);
   box-shadow: inset 0 -2px 0 var(--sol);
 }
 .segmento button:disabled,
@@ -242,8 +206,8 @@ figure.escena-plana img {
 .rampa i {
   flex: 0 1 220px;
   height: 10px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, #e7f434, #1a2c6e);
+  border-radius: var(--small-radius);
+  background: linear-gradient(90deg, #d5aa65, #304953);
 }
 .mvp-main .pie-escena {
   font-size: 12px;
@@ -270,12 +234,12 @@ figure.escena-plana img {
   font-size: 13px;
 }
 .campos input:not([type="range"]) {
-  min-height: 42px;
+  min-height: 44px;
   padding: 8px 10px;
 }
 .consola input[type="range"] {
   width: 100%;
-  min-height: 36px;
+  min-height: 44px;
   accent-color: var(--sol);
 }
 .fichas-rapidas,
@@ -287,10 +251,10 @@ figure.escena-plana img {
 .fichas-rapidas button,
 .selector button {
   border: 1px solid var(--borde-light);
-  border-radius: 2px;
+  border-radius: var(--small-radius);
   font-family: var(--mono);
   font-size: 12px;
-  min-height: 34px;
+  min-height: 44px;
   padding: 6px 9px;
 }
 .dato-punto {
@@ -302,7 +266,7 @@ figure.escena-plana img {
   margin: 20px 0;
   border: 1px solid var(--borde-light);
   border-left-width: 3px;
-  border-radius: 2px;
+  border-radius: var(--small-radius);
   background: var(--noche-panel);
   padding: 16px 20px;
 }
@@ -324,7 +288,7 @@ figure.escena-plana img {
 }
 .sello {
   font-family: var(--tit);
-  font-weight: 900;
+  font-weight: 550;
   font-size: 22px;
 }
 .condiciones {
@@ -366,7 +330,7 @@ figure.escena-plana img {
 .barra-limite {
   height: 6px;
   background: var(--inco);
-  border-radius: 2px;
+  border-radius: var(--small-radius);
   margin-top: 8px;
   overflow: hidden;
 }
@@ -393,7 +357,7 @@ figure.escena-plana img {
 }
 .reloj > input[type="range"] {
   width: 100%;
-  min-height: 40px;
+  min-height: 44px;
   accent-color: var(--sol);
 }
 .lectura-reloj {
@@ -432,7 +396,7 @@ figure.escena-plana img {
   gap: 6px;
 }
 svg .lienzo {
-  fill: #081a45;
+  fill: var(--paper);
 }
 svg .rejilla {
   stroke: var(--borde-dark);
@@ -452,11 +416,11 @@ svg .eje.fuerte {
   fill: var(--texto);
 }
 svg .cursor {
-  stroke: #fff;
+  stroke: var(--ink);
   stroke-width: 1;
 }
 svg .punto {
-  stroke: #081a45;
+  stroke: var(--paper);
   stroke-width: 2;
 }
 svg .franja {
@@ -466,8 +430,8 @@ svg .margen {
   fill: rgba(7, 23, 63, 0.62);
 }
 svg .silueta {
-  fill: #3d4f7c;
-  stroke: #8f9cae;
+  fill: var(--input-line);
+  stroke: var(--muted);
   stroke-width: 1;
 }
 
@@ -478,6 +442,7 @@ svg .silueta {
   font-size: 13px;
 }
 .tabla-scroll {
+  position: relative;
   overflow-x: auto;
   margin: 12px 0;
 }
@@ -506,7 +471,7 @@ svg .silueta {
   height: min(62vh, 520px);
   min-height: 320px;
   border: 1px solid var(--borde-light);
-  border-radius: 2px;
+  border-radius: var(--small-radius);
 }
 .comparison.mundos .escena {
   position: absolute;
@@ -519,7 +484,7 @@ svg .silueta {
   inset: 0;
   pointer-events: none;
   box-shadow: inset 0 0 0 1px rgba(244, 246, 251, 0.25);
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.22), transparent 30%);
+
 }
 .comparison.mundos .curtain,
 .comparison.mundos .world-label {
@@ -541,7 +506,7 @@ svg .silueta {
 }
 .lecturas {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
   margin-top: 20px;
 }
@@ -574,14 +539,14 @@ svg .silueta {
 }
 .par dd {
   font-family: var(--tit);
-  font-weight: 900;
+  font-weight: 550;
   font-size: 26px;
   font-variant-numeric: tabular-nums;
 }
 .barras-tiempo i {
   display: block;
   height: 8px;
-  border-radius: 2px;
+  border-radius: var(--small-radius);
   background: var(--luna);
   margin: 4px 0;
   min-width: 3px;
@@ -592,9 +557,8 @@ svg .silueta {
 
 /* ---------------------------------------------------------------- comparator */
 .comparador {
-  margin-top: 32px;
+  margin-top: 16px;
   min-width: 0;
-  overflow: hidden;
 }
 .mvp-main .comparador h3 {
   margin: 28px 0 10px;
@@ -604,8 +568,8 @@ svg .silueta {
   place-items: center;
   width: 20px;
   height: 20px;
-  border-radius: 2px;
-  color: #07173f;
+  border-radius: var(--small-radius);
+  color: var(--on-action);
   font-family: var(--mono);
   font-weight: 700;
   font-size: 12px;
@@ -617,9 +581,9 @@ svg .silueta {
   align-items: center;
 }
 .mvp-main .aviso-maqueta {
-  border-left: 3px solid #bca448;
-  background: #222432;
-  color: #f9e4aa;
+  border-left: 3px solid var(--amber);
+  background: var(--ochre-bg);
+  color: var(--ochre-ink);
   padding: 10px 14px;
   margin: 14px 0 0;
   font-size: 13px;
@@ -628,10 +592,10 @@ svg .silueta {
   font-style: normal;
   font-family: var(--mono);
   font-size: 11px;
-  color: #f9e4aa;
-  border: 1px solid #bca448;
+  color: var(--ochre-ink);
+  border: 1px solid var(--amber);
   padding: 1px 4px;
-  border-radius: 2px;
+  border-radius: var(--small-radius);
 }
 .carril {
   display: grid;
@@ -650,7 +614,7 @@ svg .silueta {
 .carril-pista {
   position: relative;
   height: 26px;
-  background: linear-gradient(#081a45, #081a45) center / 100% 2px no-repeat;
+  background: linear-gradient(var(--line), var(--line)) center / 100% 2px no-repeat;
 }
 .carril-pista .rango {
   position: absolute;
@@ -667,7 +631,7 @@ svg .silueta {
   margin-left: -9px;
   border-radius: 50%;
   border: 3px solid;
-  background: #07173f;
+  background: var(--dark-plate);
 }
 .carril-pista .umbral {
   position: absolute;
@@ -675,7 +639,7 @@ svg .silueta {
   bottom: 0;
   width: 2px;
   margin-left: -1px;
-  background: #fff;
+  background: var(--ink);
 }
 .carril-cifras {
   grid-column: 2;
@@ -691,7 +655,7 @@ svg .silueta {
   flex: 1 1 90px;
   max-width: 160px;
   height: 8px;
-  background: #081a45;
+  background: var(--paper);
   border-radius: 0 4px 4px 0;
   overflow: hidden;
 }
@@ -702,9 +666,9 @@ svg .silueta {
 }
 .sin-medir {
   color: var(--texto-sec);
-  background: repeating-linear-gradient(135deg, transparent, transparent 5px, #ffffff10 5px, #ffffff10 8px);
+  background: var(--paper);
   padding: 3px 8px;
-  border-radius: 2px;
+  border-radius: var(--small-radius);
 }
 .tabla-comparar td.dim-fuerte {
   font-weight: 700;
@@ -725,9 +689,9 @@ svg .silueta {
 .campo-resultado svg {
   width: 100%;
   height: auto;
-  background: #081a45;
+  background: var(--paper);
   border: 1px solid var(--borde-dark);
-  border-radius: 2px;
+  border-radius: var(--small-radius);
   margin-top: 8px;
 }
 .campo-resultado .suelo {
@@ -760,13 +724,11 @@ svg .silueta {
   .lecturas {
     grid-template-columns: minmax(0, 1fr);
   }
-  .puertas,
   .mandos {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (max-width: 600px) {
-  .puertas,
   .mandos,
   .carril {
     grid-template-columns: minmax(0, 1fr);
@@ -782,17 +744,30 @@ svg .silueta {
   }
 }
 
-/* Phone: segmented controls wrap instead of pushing the page sideways. */
+/* Keep long translated labels and tables within their local controls. */
 .segmento {
   flex-wrap: wrap;
   max-width: 100%;
 }
 .lab {
   max-width: 100%;
-  overflow-x: clip;
+  min-width: 0;
 }
 
-/* Home: text and 3D view start at the same height. */
-.hero-grid {
-  align-items: start;
-}
+.reference-plate .hero-3d { padding: 12px; }
+.zoom button { display:grid; place-content:center; min-width:44px; min-height:44px; }
+.escena.cargando { color: var(--on-dark-plate); }
+.record-column .letra { color: var(--on-action); }
+.mandos { grid-template-columns: repeat(auto-fit,minmax(min(100%,185px),1fr)); max-width: 900px; }
+.mandos:empty { display: none; }
+.lecturas p { max-width: 76ch; }
+.lecturas .par { max-width: 720px; margin-top: 18px; }
+.lecturas .par > div { border-left: 2px solid var(--series-a); padding-left: 14px; }
+.lecturas .par > div:nth-child(2) { border-color: var(--series-c); }
+.comparador .technical { min-width:0; }
+
+
+.static-caption { position: absolute; bottom: 10px; left: 10px; z-index: 1; color: var(--on-dark-plate); background: var(--dark-plate); padding: 5px 8px; border-radius: var(--small-radius); font-size: 13px; }
+.escena-plana { background: var(--surface); }
+.escena-plana img { display: block; width: 100%; object-fit: cover; }
+.escena-plana figcaption { display: block; padding: 10px; font-size: 14px; }

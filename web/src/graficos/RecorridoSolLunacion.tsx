@@ -87,7 +87,7 @@ export const RecorridoSolLunacion: React.FC<RecorridoSolLunacionProps> = ({
 
       <svg
         viewBox={`0 0 ${ancho} ${alto}`}
-        style={{ width: '100%', height: 'auto', display: 'block', background: '#091A42', borderRadius: '2px', border: '1px solid var(--borde-dark)' }}
+        style={{ width: '100%', height: 'auto', display: 'block', background: 'var(--paper)', borderRadius: '2px', border: '1px solid var(--borde-dark)' }}
       >
         {/* Shaded darkness zone (under 0° horizon) */}
         <rect
@@ -127,7 +127,7 @@ export const RecorridoSolLunacion: React.FC<RecorridoSolLunacionProps> = ({
               y1={sy(deg)}
               x2={padLeft + graphW}
               y2={sy(deg)}
-              stroke="#1E3160"
+              stroke="var(--line)"
               strokeWidth="1"
               strokeDasharray="2,2"
             />
@@ -154,7 +154,7 @@ export const RecorridoSolLunacion: React.FC<RecorridoSolLunacionProps> = ({
                 y1={padTop}
                 x2={sx(hours)}
                 y2={padTop + graphH}
-                stroke="#162955"
+                stroke="var(--line)"
                 strokeWidth="1"
               />
               <text
@@ -187,7 +187,7 @@ export const RecorridoSolLunacion: React.FC<RecorridoSolLunacionProps> = ({
           <path
             d={inviernoPath}
             fill="none"
-            stroke="#2491FF"
+            stroke="var(--series-b)"
             strokeWidth="2.2"
             strokeDasharray={temporada === 'ambas' ? '4,3' : undefined}
             strokeLinecap="round"
@@ -208,7 +208,7 @@ export const RecorridoSolLunacion: React.FC<RecorridoSolLunacionProps> = ({
         <text
           x={padLeft + 18}
           y={padTop + graphH - 13}
-          fill="#FCA5A5"
+          fill="var(--error)"
           fontSize="9"
           fontFamily="var(--mono)"
           fontWeight="700"

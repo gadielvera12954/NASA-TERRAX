@@ -35,13 +35,13 @@ test("Spanish desktop screens have no automated WCAG A/AA violations", async ({
     "explore",
     "card",
     "compare",
+    "worlds",
     "checks",
     "guide",
   ]) {
     await page.goto("/#" + route);
-    await expect(
-      page.getByText("DATOS DE MAQUETA · Demostración"),
-    ).toBeVisible();
+    if (route === "card") await expect(page.getByText("Ficha de demostración")).toBeVisible();
+    if (route === "home") await expect(page.getByText("NASA / LOLA")).toBeVisible();
     const result = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
       .analyze();
@@ -61,12 +61,12 @@ test("bilingual candidate flow, search, sources and language persistence", async
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Practice on Earth. Prepare for the Moon.",
+    "Earth sites for lunar rehearsals",
   );
   await page.getByRole("button", { name: "Español", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "es");
   await page
-    .getByRole("button", { name: "Explorar una candidata →", exact: true })
+    .getByRole("link", { name: "Explorar sitios de ensayo", exact: true })
     .click();
   await page.getByRole("searchbox").fill("unknown place");
   await expect(
@@ -75,12 +75,12 @@ test("bilingual candidate flow, search, sources and language persistence", async
   await page.getByRole("button", { name: "Limpiar búsqueda" }).click();
   await page.getByLabel("Objetivo del ensayo").selectOption("materials");
   await expect(
-    page.getByText("Los materiales figuran como no comparables.", {
+    page.getByText("Consulta la dimensión de materiales", {
       exact: false,
     }),
   ).toBeVisible();
   await page
-    .getByRole("button", { name: "Abrir ficha de la candidata →" })
+    .getByRole("link", { name: /Volcán Malacara/ })
     .click();
   await expect(
     page.getByRole("heading", { name: "¿Qué tan bien encaja?" }),
@@ -103,7 +103,7 @@ test("bilingual candidate flow, search, sources and language persistence", async
   await expect(
     page.getByRole("heading", { name: "How well does it fit?" }),
   ).toBeVisible();
-  await page.getByRole("link", { name: "Verification", exact: true }).click();
+  await page.getByRole("contentinfo").getByRole("link", { name: "Sources and verification", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Scientific tests", exact: true }),
   ).toBeVisible();
@@ -123,7 +123,7 @@ test("mobile layout, keyboard focus, comparison and reduced-motion tour", async 
   await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { level: 1 })).toBeFocused();
   await page
-    .getByRole("button", { name: "Optional: take the 90-second tour" })
+    .getByRole("button", { name: "90-second tour" })
     .click();
   await expect(
     page.getByRole("button", { name: "Resume", exact: true }),
@@ -131,16 +131,19 @@ test("mobile layout, keyboard focus, comparison and reduced-motion tour", async 
   for (let i = 0; i < 3; i++)
     await page.getByRole("button", { name: "Next step", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Two worlds. Different limits." }),
+    page.getByRole("heading", { name: "Compare sites", level: 1 }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Exit tour", exact: true }).click();
+  await page.getByRole("link", { name: "Earth and Moon", exact: true }).click();
+  await page.getByRole("button", { name: "Open illustrative 3D view" }).click();
   await page.getByLabel("Comparison divider").fill("75");
   await expect(page.locator(".moon-layer")).toHaveAttribute("style", /25%/);
-  await page.getByRole("button", { name: "Exit tour", exact: true }).click();
   for (const route of [
     "home",
     "explore",
     "card",
     "compare",
+    "worlds",
     "checks",
     "guide",
   ]) {
@@ -164,7 +167,7 @@ test("tour completes six stages in 90 seconds and stops on manual navigation", a
   await page.goto("/");
   await page.clock.install();
   await page
-    .getByRole("button", { name: "Optional: take the 90-second tour" })
+    .getByRole("button", { name: "90-second tour" })
     .click();
   for (const route of ["explore", "card", "compare", "checks", "guide"]) {
     await page.clock.runFor(15000);
@@ -176,9 +179,9 @@ test("tour completes six stages in 90 seconds and stops on manual navigation", a
   ).toHaveCount(0);
   await page.getByRole("link", { name: "Home", exact: true }).click();
   await page
-    .getByRole("button", { name: "Optional: take the 90-second tour" })
+    .getByRole("button", { name: "90-second tour" })
     .click();
-  await page.getByRole("link", { name: "Guide", exact: true }).click();
+  await page.getByRole("link", { name: "How it works", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Exit tour", exact: true }),
   ).toHaveCount(0);
@@ -198,8 +201,8 @@ test("production offline copy reloads with candidate and persisted language", as
   await expect(
     page.getByRole("heading", { name: "¿Qué tan bien encaja?" }),
   ).toBeVisible();
-  await expect(page.getByText("DATOS DE MAQUETA · Demostración")).toBeVisible();
-  await page.getByRole("link", { name: "Guía", exact: true }).click();
+  await expect(page.getByText("Ficha de demostración")).toBeVisible();
+  await page.getByRole("link", { name: "Cómo funciona", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "¿Qué es un análogo?" }),
   ).toBeVisible();

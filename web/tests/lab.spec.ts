@@ -11,7 +11,7 @@ test("3D lab computes in the browser, close to the exported engine card", async 
   page.on("pageerror", (e) => errors.push(e.message));
   const card = await (await page.request.get("/data/destino/ficha_verano.json")).json();
   await page.goto("/#lab");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Park the rover. Survive the night.");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Lunar terrain laboratory");
   await expect(page.getByText("Computed in your browser")).toBeVisible({ timeout: 30000 });
   await expect(page.getByText("× Rover lost")).toBeVisible({ timeout: 30000 });
   // Same point and lunation as the exported card (360 azimuths there, 72 here): within 5 %.
@@ -43,9 +43,10 @@ test("lab and comparator are accessible in Spanish and fit a phone", async ({ pa
   let result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
   expect(result.violations, "lab").toEqual([]);
   await page.goto("/#compare");
-  await expect(page.getByRole("heading", { name: "Compara candidatas lado a lado" })).toBeVisible();
-  await expect(page.locator(".carril")).toHaveCount(2);
-  await page.getByRole("button", { name: "CTRL-MEDANOS" }).click();
+  await expect(page.getByRole("heading", { name: "Comparar sitios", level: 1 })).toBeVisible();
+  await expect(page.locator(".record-column .record-tags")).toHaveCount(2);
+  await page.locator(".record-column select").nth(2).selectOption("CTRL-MEDANOS");
+  await page.getByText("Compatibilidad, evidencia y detalles técnicos", { exact: true }).click();
   await expect(page.locator(".carril")).toHaveCount(3);
   await expect(page.getByText(/× Vegetación: NDVI/)).toBeVisible();
   result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
@@ -61,13 +62,14 @@ test("lab and comparator are accessible in Spanish and fit a phone", async ({ pa
 
 test("two worlds: readouts follow the Sun and the drop test reports both fall times", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/#compare");
+  await page.goto("/#worlds");
   await page.getByLabel(/^Sun elevation/).first().fill("5");
   // 0.50 m board at 5°: 0.5 / tan(5°) = 5.72 m on the Moon.
   await expect(page.locator(".lecturas dd").first()).toHaveText("5.72 m");
+  await page.getByRole("button", { name: "Gravity", exact: true }).click();
   await page.getByRole("button", { name: "Drop the ball in both worlds" }).click();
-  await expect(page.locator(".lecturas section").nth(2).locator("dd").first()).toHaveText("1.76 s");
-  await expect(page.locator(".lecturas section").nth(2).locator("dd").nth(1)).toHaveText("0.71 s");
+  await expect(page.locator(".lecturas section").locator("dd").first()).toHaveText("1.76 s");
+  await expect(page.locator(".lecturas section").locator("dd").nth(1)).toHaveText("0.71 s");
 });
 
 test("field kit without the engine applies only the geometry", async ({ page }) => {

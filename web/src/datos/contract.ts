@@ -7,6 +7,7 @@ export interface Manifest {
 }
 export interface Ficha {
   source?: unknown;
+  control?: string | null;
   id: string;
   etiqueta: string;
   maqueta: boolean;
@@ -16,7 +17,7 @@ export interface Ficha {
   L: number;
   U: number;
   dimensiones: Record<string, string>;
-  horario: { fecha: string; desde: string; hasta: string }[];
+  horario: { fecha: string; desde: string; hasta: string; zona?: string; duracion_min?: number }[];
   no_transfiere: string[];
   medir_primero: string;
   resumen: string;
@@ -49,7 +50,9 @@ export function validFicha(value: unknown): value is Ficha {
       (k) => typeof value[k] === "string",
     ) &&
     typeof value.maqueta === "boolean" &&
-    ["C", "E", "L", "U"].every(
+    (value.control == null || typeof value.control === "string") &&
+    (value.C === null || (typeof value.C === "number" && value.C >= 0 && value.C <= 1)) &&
+    ["E", "L", "U"].every(
       (k) =>
         typeof value[k] === "number" &&
         Number.isFinite(value[k]) &&

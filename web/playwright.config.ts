@@ -1,4 +1,6 @@
 import { defineConfig } from "@playwright/test";
+const port = Number(process.env.PLAYWRIGHT_PORT || 4173);
+const baseURL = `http://127.0.0.1:${port}`;
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: false,
@@ -6,13 +8,13 @@ export default defineConfig({
   // spec files at once starves the long candidate loop of integration.spec.ts past its 30 s.
   workers: 2,
   use: {
-    baseURL: "http://127.0.0.1:4173",
+    baseURL,
     channel: process.env.PLAYWRIGHT_CHANNEL || "msedge",
     headless: true,
   },
   webServer: {
-    command: "npm run build && npm run preview -- --host 127.0.0.1 --port 4173",
-    url: "http://127.0.0.1:4173",
+    command: `npm run build && npm run preview -- --host 127.0.0.1 --port ${port} --strictPort`,
+    url: baseURL,
     reuseExistingServer: !process.env.CI,
   },
 });

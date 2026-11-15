@@ -76,7 +76,7 @@ export const TestsScreen: React.FC = () => {
         <div className="et" style={{ marginBottom: '4px' }}>
           Verification Suite · Full Transparency
         </div>
-        <h1 style={{ fontSize: '30px', fontWeight: 900 }}>
+        <h1 style={{ fontSize: '30px', fontWeight: 600 }}>
           Every claim has a test. <span style={{ color: 'var(--sol)' }}>Every test is public.</span>
         </h1>
         <p style={{ color: 'var(--texto-sec)', fontSize: '14px', marginTop: '4px' }}>

@@ -48,3 +48,7 @@ TERRA-X incorporates and references open scientific datasets and open-source sof
 ### pyproj (used by `motor/escala`)
 - **License**: MIT
 - **Copyright**: (c) pyproj contributors.
+
+## IBM Plex Sans
+
+The atlas bundles the Latin variable-weight webfont from IBM Plex Sans, distributed via Fontsource. Copyright 2019 IBM Corp. Licensed under the SIL Open Font License 1.1. The full notice is in [web/public/fonts/OFL.txt](web/public/fonts/OFL.txt).

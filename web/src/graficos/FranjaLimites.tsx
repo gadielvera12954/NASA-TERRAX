@@ -68,8 +68,8 @@ export const FranjaLimites: React.FC<FranjaLimitesProps> = ({
           y={barY}
           width={graphW}
           height={barHeight}
-          fill="#0C1E4D"
-          stroke="#1E3160"
+          fill="var(--surface)"
+          stroke="var(--line)"
           strokeWidth="1"
           rx="2"
         />
@@ -92,14 +92,14 @@ export const FranjaLimites: React.FC<FranjaLimitesProps> = ({
           y1={barY - 8}
           x2={xUmbral}
           y2={barY + barHeight + 8}
-          stroke="#EF4444"
+          stroke="var(--error)"
           strokeWidth="1.5"
           strokeDasharray="3,3"
         />
         <text
           x={xUmbral}
           y={barY - 11}
-          fill="#EF4444"
+          fill="var(--error)"
           fontSize="9"
           fontFamily="var(--mono)"
           fontWeight="700"
@@ -109,12 +109,12 @@ export const FranjaLimites: React.FC<FranjaLimitesProps> = ({
         </text>
 
         {/* Marker for Compatibility C */}
-        <circle cx={xC} cy={barY + barHeight / 2} r="4.5" fill="var(--sol)" stroke="#07173F" strokeWidth="1.5" />
+        <circle cx={xC} cy={barY + barHeight / 2} r="4.5" fill="var(--sol)" stroke="var(--ink)" strokeWidth="1.5" />
 
         {/* Marker for Evidence E */}
         <polygon
           points={`${xE},${barY + barHeight + 4} ${xE - 4},${barY + barHeight + 10} ${xE + 4},${barY + barHeight + 10}`}
-          fill="#2491FF"
+          fill="var(--series-b)"
         />
 
         {/* Axis Ticks and Labels */}

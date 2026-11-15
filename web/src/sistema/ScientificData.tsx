@@ -16,7 +16,9 @@ export function ScientificData() {
   const { t, language } = useLanguage();
   const [report, setReport] = useState<Report>();
   const [error, setError] = useState(false);
+  const [attempt, retry] = useState(0);
   useEffect(() => {
+    setError(false);
     let active = true;
     fetch("/data/pruebas.json")
       .then((r) => {
@@ -46,7 +48,7 @@ export function ScientificData() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [attempt]);
   return (
     <section className="panel">
       <h2>{t("Scientific tests", "Pruebas científicas")}</h2>
@@ -104,6 +106,7 @@ export function ScientificData() {
                 "? Resultados no disponibles; sin verificar",
               )
             : t("Loading test report…", "Cargando informe de pruebas…")}
+          {error && <button className="text-btn" onClick={() => retry(n => n+1)}>{t("Retry report", "Reintentar informe")}</button>}
         </p>
       )}
     </section>
