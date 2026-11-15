@@ -13,8 +13,9 @@ Qué arma (hallazgos_para_el_equipo.md, sección 3, y esquemas/distribuciones.sc
 * 40 parcelas de 3 x 3 km en Payunia (Copernicus GLO-30 -> UTM 19S a 60 m), con 30 km de margen
   de relieve alrededor y preseleccionadas por el requisito de pendiente (mediana < 15°). El de
   vegetación (NDVI p90 < 0,20) lo evalúa motor/puntaje: una parcela que lo incumpla sale Incompatible;
-* control positivo: recorte de 3 x 3 km del centro de Mons Mouton, más tres copias con ruido creciente
-  en las alturas (σ = 2, 5 y 10 m, mismo código para todo);
+* control positivo: el propio recorte de Mons Mouton (documento 02), más tres copias con ruido
+  creciente en las alturas (σ = 2, 5 y 10 m, mismo código para todo). Aparte, como diagnóstico que
+  no puntúa, un recorte de 3 x 3 km del centro mide cuánto varía la huella dentro de Mons Mouton;
 * control negativo: una parcela de Médanos del Chaco (Paraguay), con vegetación.
 
 Cada terreno lleva pendiente (F8), rugosidad a 200/400/800/1.600 m (F9), f̄(e) de 1,5° a 10° (F16),
@@ -127,29 +128,38 @@ def luna(prm, e_deg) -> tuple[dict, list[dict], list[dict]]:
     mapas = Mapas(obj.z, obj.pixel_m, escalas)
     h_ref = mapas.huella(0, 0, obj.alto, obj.ancho)
     t0 = time.time()
-    f_ref = f_media([obj, mar, lej], puntos(2, 2, obj.alto - 2, obj.ancho - 2, paso=5), cuerpo, prm, e_deg)
+    pts_ref = puntos(2, 2, obj.alto - 2, obj.ancho - 2, paso=5)
+    f_ref = f_media([obj, mar, lej], pts_ref, cuerpo, prm, e_deg)
     informar(f"  f̄(e) de la referencia en {time.time() - t0:.0f} s")
     ref = terreno("MM-REF", "Mons Mouton (30 x 30 km, referencia)", -84.60, 31.00, h_ref, f_ref, e_deg, 0.0,
                   fuentes + [LUNA_SIN_VEGETACION])
 
-    f0 = c0 = (obj.alto - n) // 2
-    controles = []
-    pts = puntos(f0, c0, n, n)
-    h = mapas.huella(f0, c0, n, n)
-    controles.append(terreno("CTRL-MM", "Mons Mouton, recorte de 3 x 3 km del centro (control positivo)", -84.60, 31.00,
-                             h, f_media([obj, mar, lej], pts, cuerpo, prm, e_deg), e_deg, 0.0,
-                             fuentes + [LUNA_SIN_VEGETACION], control="positivo"))
+    # Control positivo del documento 02 (sección 3.1 y plan de validación): "el propio recorte lunar
+    # insertado entre las parcelas". Es el MISMO recorte de 30 x 30 km pasado por el mismo código; las
+    # tres copias con ruido son ese recorte con ruido blanco en las alturas.
+    controles = [terreno("CTRL-MM", "Mons Mouton, el propio recorte de 30 x 30 km (control positivo)", -84.60, 31.00,
+                         h_ref, f_ref, e_deg, 0.0, fuentes + [LUNA_SIN_VEGETACION], control="positivo")]
     rng = np.random.default_rng(SEMILLA)
     for nivel, sigma in enumerate(RUIDO_M, start=1):
-        zr = obj.z.copy()
-        zr[f0:f0 + n, c0:c0 + n] += rng.normal(0.0, sigma, (n, n)).astype(np.float32)
+        zr = obj.z + rng.normal(0.0, sigma, obj.z.shape).astype(np.float32)
         capa_r = Capa(zr, obj.pixel_m, obj.x0, obj.y0, nombre=f"mons_mouton_ruido_{nivel}")
-        h = Mapas(zr, obj.pixel_m, escalas).huella(f0, c0, n, n)
+        h = Mapas(zr, obj.pixel_m, escalas).huella(0, 0, obj.alto, obj.ancho)
         controles.append(terreno(f"CTRL-MM-R{nivel}", f"Mons Mouton con ruido de {sigma:g} m (control)", -84.60, 31.00, h,
-                                 f_media([capa_r, mar, lej], pts, cuerpo, prm, e_deg), e_deg, 0.0,
+                                 f_media([capa_r, mar, lej], pts_ref, cuerpo, prm, e_deg), e_deg, 0.0,
                                  fuentes + [LUNA_SIN_VEGETACION], control="positivo_ruido", ruido=nivel))
-    informar("  controles lunares listos")
-    return ref, controles, fuentes
+
+    # Diagnóstico (no entra al puntaje): un recorte de 3 x 3 km del centro, del tamaño de una parcela,
+    # para medir cuánto varía la huella DENTRO de Mons Mouton a escala de parcela.
+    f0 = c0 = (obj.alto - n) // 2
+    h3 = mapas.huella(f0, c0, n, n)
+    diag = {"id": "DIAG-MM-3KM", "nombre": "Mons Mouton, recorte de 3 x 3 km del centro (diagnóstico, no puntúa)",
+            "pendiente_mediana_deg": h3["pendiente_mediana_deg"],
+            "rugosidad_800m_mediana_m": (h3["rugosidad_m"]["800"] or {}).get("cuantiles", [None] * 101)[50],
+            "luz_rasante": {"e_deg": e_deg, "f_media": f_media([obj, mar, lej], puntos(f0, c0, n, n), cuerpo, prm, e_deg)},
+            "luz_rasante_referencia": f_ref}
+    diag["luz_rasante_media_abs_diferencia"] = round(float(np.mean(np.abs(np.array(diag["luz_rasante"]["f_media"]) - np.array(f_ref)))), 4)
+    informar(f"  controles lunares listos · diagnóstico 3 km: |Δf̄| medio = {diag['luz_rasante_media_abs_diferencia']}")
+    return ref, controles, fuentes, diag
 
 
 # ------------------------------------------------------------------------------------- Tierra
@@ -257,14 +267,21 @@ def medanos(prm, e_deg) -> dict:
 def ndvi(prm) -> dict:
     """Etapa con red: NDVI p90 anual (Sentinel-2) sobre las grillas de Payunia y Médanos."""
     salida = {}
-    for nombre in ("payunia_60m", "medanos_chaco_60m"):
+    for nombre in ("medanos_chaco_60m", "payunia_60m"):
+        npy = DATOS / "grillas" / f"{nombre}_ndvi_p90.npy"
+        lado = DATOS / "grillas" / f"{nombre}_ndvi_p90.json"
+        if npy.exists() and lado.exists():                 # ya calculada en una corrida anterior
+            salida[nombre] = json.loads(lado.read_text(encoding="utf-8"))
+            informar(f"  NDVI {nombre}: se reutiliza")
+            continue
         capa, meta = leer_grilla(DATOS / "grillas" / nombre)
         pr = meta["proyeccion"]
         capa.epsg = (32700 if pr["hemisferio"] == "S" else 32600) + pr["zona"]
         fuentes: list[dict] = []
         p90, prov = ndvi_en(capa, fuentes, True)
-        np.save(DATOS / "grillas" / f"{nombre}_ndvi_p90.npy", p90, allow_pickle=False)
+        np.save(npy, p90, allow_pickle=False)
         salida[nombre] = {"fuente": fuentes[0], "escenas": prov["escenas"]}
+        lado.write_text(json.dumps(salida[nombre], ensure_ascii=False) + "\n", encoding="utf-8")
         informar(f"  NDVI {nombre}: {100 * np.isfinite(p90).mean():.0f} % de la grilla con dato")
     return salida
 
@@ -312,8 +329,8 @@ def principal(argv=None) -> dict:
         if not (DATOS / "grillas" / "mons_mouton_60m.npy").exists():
             raise SystemExit("faltan las grillas de LOLA: correr python -m puente_lola.bajar")
         def _luna():
-            ref, ctrl, fu = luna(prm, e_deg)
-            return {"referencia": ref, "controles": ctrl, "fuentes": fu}
+            ref, ctrl, fu, diag = luna(prm, e_deg)
+            return {"referencia": ref, "controles": ctrl, "fuentes": fu, "diagnostico": diag}
         r["luna"] = etapa("luna", _luna, a.rehacer)
     info_ndvi = None
     if "ndvi" in a.etapas and not a.sin_ndvi:
@@ -337,6 +354,7 @@ def principal(argv=None) -> dict:
     salida.write_text(texto, encoding="utf-8")
     resumen = {"archivo": str(salida), "sha256": sha(np.frombuffer(texto.encode("utf-8"), dtype=np.uint8)),
                "parcelas": len(parcelas), "controles": len(ctrl_luna) + 1, "ndvi": info_ndvi is not None,
+               "diagnostico_recorte_3km": r["luna"].get("diagnostico"),
                "parametros_sha256": parametros.huella(), "minutos": round((time.time() - t0) / 60, 1),
                "generado_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")}
     salida.with_name(salida.stem + "_resumen.json").write_text(json.dumps(resumen, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")

@@ -1,8 +1,8 @@
 {
  "proyecto": "TERRA-X",
  "version": "1.0.0",
- "maqueta": true,
- "fecha": "2026-11-14",
+ "maqueta": false,
+ "fecha": "2026-11-15",
  "parametros_sha256": "346a6cd22cc8cb1c75852fd8310971a78d50b2bf33d4c0710658e79e8556231c",
  "parametros": {
   "sol_elevacion_min": 1.5,
@@ -16,14 +16,14 @@
    "id": "JPL Horizons API v1.2",
    "entidad": "NASA JPL Solar System Dynamics",
    "coordenadas": "Mons Mouton (84.60°S, 31.00°E), IM-2, rim points; Ciudad del Este, Payunia, Puna",
-   "resolucion": "2 h (Moon 2027-2028) and 1 min (Earth, Nov 14-15, 2026); queried Nov 7 and Nov 14, 2026",
+   "resolucion": "2 h (Moon 2027-2028) and 1 min (Earth, Nov 14-15, 2026)",
    "licencia": "NASA Open Data",
    "sha256": null
   },
   {
    "id": "NAIF kernel de421.bsp",
    "entidad": "NASA JPL NAIF (used by Skyfield)",
-   "coordenadas": "Solar system ephemeris DE421 and lunar MOON_ME frame",
+   "coordenadas": "DE421 ephemeris and lunar MOON_ME frame",
    "resolucion": "—",
    "licencia": "NASA Open Data",
    "sha256": "a20a7139da04cbc462454634918e9a9ca69127044e2cc9d4f9c16e238d2deedc"
@@ -31,7 +31,7 @@
   {
    "id": "NAIF kernel moon_080317.tf",
    "entidad": "NASA JPL NAIF (used by Skyfield)",
-   "coordenadas": "Solar system ephemeris DE421 and lunar MOON_ME frame",
+   "coordenadas": "DE421 ephemeris and lunar MOON_ME frame",
    "resolucion": "—",
    "licencia": "NASA Open Data",
    "sha256": "78732477b96f9863e7b0d65bcee3c22b8707ca5ed0db56d1173319cb2e8c7993"
@@ -39,7 +39,7 @@
   {
    "id": "NAIF kernel pck00008.tpc",
    "entidad": "NASA JPL NAIF (used by Skyfield)",
-   "coordenadas": "Solar system ephemeris DE421 and lunar MOON_ME frame",
+   "coordenadas": "DE421 ephemeris and lunar MOON_ME frame",
    "resolucion": "—",
    "licencia": "NASA Open Data",
    "sha256": "ca07df56e9f1bca85a4c6748b618a46c0bf8e081f96f81e324896f2fdc54ea27"
@@ -47,42 +47,91 @@
   {
    "id": "NAIF kernel moon_pa_de421_1900-2050.bpc",
    "entidad": "NASA JPL NAIF (used by Skyfield)",
-   "coordenadas": "Solar system ephemeris DE421 and lunar MOON_ME frame",
+   "coordenadas": "DE421 ephemeris and lunar MOON_ME frame",
    "resolucion": "—",
    "licencia": "NASA Open Data",
    "sha256": "656f90616403d75a75f0cd6c8830fc5b44f8cb4facb5ccb8915e752b397520cf"
   },
   {
-   "id": "LOLA LDEM_80S_20MPP_ADJ (PGDA 90), target crop",
-   "entidad": "NASA GSFC Planetary Geology, Geophysics and Geochemistry Lab (LOLA team)",
-   "coordenadas": "30 × 30 km around Mons Mouton",
-   "resolucion": "20 m averaged in 3 × 3 blocks to 60 m (no interpolation)",
+   "id": "LDEM_80S_20MPP_ADJ -> mons_mouton_60m",
+   "entidad": "NASA GSFC PGDA (LOLA team; illumination: Mazarico et al.)",
+   "coordenadas": "Mons Mouton, lunar south pole",
+   "resolucion": "promedio de bloques de 3 × 3 píxeles de 20 m (sin interpolar)",
+   "version": "Fri, 07 Jul 2023 22:28:19 GMT · ETag W/\"a0b2f283-189327867b8\"",
    "licencia": "NASA Open Data (cite Barker et al. 2023; Mazarico et al. 2011)",
    "sha256": "c19914b1fc45fadd86611819fd10b4165d221b13fe6abdbaa78e6dff3740fa30"
   },
   {
-   "id": "LOLA LDEM_60S_60MPP_ADJ (PGDA 90), near relief",
-   "entidad": "NASA GSFC Planetary Geology, Geophysics and Geochemistry Lab (LOLA team)",
-   "coordenadas": "±60 km around Mons Mouton",
-   "resolucion": "60 m native",
+   "id": "LDEM_60S_60MPP_ADJ -> mons_mouton_margen_60m",
+   "entidad": "NASA GSFC PGDA (LOLA team; illumination: Mazarico et al.)",
+   "coordenadas": "Mons Mouton, lunar south pole",
+   "resolucion": "60 m nativos",
+   "version": "Fri, 07 Jul 2023 22:02:50 GMT · ETag W/\"b820144d-18932611310\"",
    "licencia": "NASA Open Data (cite Barker et al. 2023; Mazarico et al. 2011)",
    "sha256": "d82aa5426e5c50c166a9f83e2ca0d489dfb76aabea6f153ab056a507ab1903c0"
   },
   {
-   "id": "LOLA LDEM_60S_240MPP_ADJ (PGDA 90), far relief",
-   "entidad": "NASA GSFC Planetary Geology, Geophysics and Geochemistry Lab (LOLA team)",
-   "coordenadas": "±312 km around Mons Mouton",
-   "resolucion": "240 m native",
+   "id": "LDEM_60S_240MPP_ADJ -> mons_mouton_lejano_240m",
+   "entidad": "NASA GSFC PGDA (LOLA team; illumination: Mazarico et al.)",
+   "coordenadas": "Mons Mouton, lunar south pole",
+   "resolucion": "240 m nativos",
+   "version": "Fri, 07 Jul 2023 22:04:03 GMT · ETag W/\"d0d148f-18932623038\"",
    "licencia": "NASA Open Data (cite Barker et al. 2023; Mazarico et al. 2011)",
    "sha256": "2be359e79416a00324831c51591dd6e569be511a63a9dfbdd4b56f2725e09efa"
   },
   {
-   "id": "NASA AVGVISIB_85S_060M_201608 (PGDA 69), average illumination",
-   "entidad": "NASA GSFC Planetary Geology, Geophysics and Geochemistry Lab (LOLA team)",
-   "coordenadas": "Target crop (inside 85°S map extent)",
-   "resolucion": "60 m native; DN × 0.00004",
+   "id": "AVGVISIB_85S_060M_201608 -> nasa_avgvisib_85s_60m",
+   "entidad": "NASA GSFC PGDA (LOLA team; illumination: Mazarico et al.)",
+   "coordenadas": "Mons Mouton, lunar south pole",
+   "resolucion": "valores de NASA sin cambiar (DN × 0,00004)",
+   "version": "Thu, 20 Mar 2025 15:01:58 GMT · ETag W/\"206b6e0-195b4134a70\"",
    "licencia": "NASA Open Data (cite Barker et al. 2023; Mazarico et al. 2011)",
    "sha256": "1788c227c4876112598370521717256aeca31f1fbb6e746123acf20d1df067f6"
+  },
+  {
+   "id": "copernicus_glo30_Copernicus_DSM_COG_10_S20_00_W062_00_DEM",
+   "entidad": "European Union / ESA (Copernicus DEM GLO-30, AWS Open Data)",
+   "coordenadas": "S20_00_W062_00",
+   "resolucion": "1 arc-second, reprojected to UTM at 60 m by averaging",
+   "version": "Mon, 09 May 2022 14:59:47 GMT · ETag \"6386a0c0dfd3edf2c3435f6336d1391f\"",
+   "licencia": "Copernicus DEM GLO-30 licence: free use; modified data must carry the attribution notice set in the licence ('Produced using Copernicus WorldDEM-30 © DLR e.V. …'). Full text: https://documentation.dataspace.copernicus.eu/APIs/SentinelHub/Data/DEM/resources/license/License-COPDEM-30.pdf",
+   "sha256": "7991014d627384cbc65e2284b311b8f49598ac9c0d05e17e96a901db11f29efb"
+  },
+  {
+   "id": "copernicus_glo30_Copernicus_DSM_COG_10_S21_00_W062_00_DEM",
+   "entidad": "European Union / ESA (Copernicus DEM GLO-30, AWS Open Data)",
+   "coordenadas": "S21_00_W062_00",
+   "resolucion": "1 arc-second, reprojected to UTM at 60 m by averaging",
+   "version": "Mon, 09 May 2022 15:00:10 GMT · ETag \"d68bdc0c9094fe54ccf6f505afa2aaa4\"",
+   "licencia": "Copernicus DEM GLO-30 licence: free use; modified data must carry the attribution notice set in the licence ('Produced using Copernicus WorldDEM-30 © DLR e.V. …'). Full text: https://documentation.dataspace.copernicus.eu/APIs/SentinelHub/Data/DEM/resources/license/License-COPDEM-30.pdf",
+   "sha256": "65f30805d1c545624b9b89fa975273bf2333d4fec4e614a6d49aad333d84b401"
+  },
+  {
+   "id": "copernicus_glo30_Copernicus_DSM_COG_10_S37_00_W070_00_DEM",
+   "entidad": "European Union / ESA (Copernicus DEM GLO-30, AWS Open Data)",
+   "coordenadas": "S37_00_W070_00",
+   "resolucion": "1 arc-second, reprojected to UTM at 60 m by averaging",
+   "version": "Mon, 09 May 2022 15:04:59 GMT · ETag \"f413e06fc73743ea0bd78748173859b2\"",
+   "licencia": "Copernicus DEM GLO-30 licence: free use; modified data must carry the attribution notice set in the licence ('Produced using Copernicus WorldDEM-30 © DLR e.V. …'). Full text: https://documentation.dataspace.copernicus.eu/APIs/SentinelHub/Data/DEM/resources/license/License-COPDEM-30.pdf",
+   "sha256": "a886aa9f9eccb2f62d8a60dcabdf97c8090724fcfacee08ea237177430aa81fb"
+  },
+  {
+   "id": "sentinel2_l2a_ndvi_p90 (medanos_chaco_60m)",
+   "entidad": "ESA Copernicus Sentinel-2 L2A via Element 84 Earth Search (AWS Open Data)",
+   "coordenadas": "medanos_chaco_60m",
+   "resolucion": "B04/B08 averaged to 60 m; annual 90th percentile of monthly NDVI",
+   "version": "earth-search sentinel-2-l2a, 2025-11-01 a 2026-10-31, 11 meses, 22 escenas con < 10 % de nubes",
+   "licencia": "Copernicus Sentinel data (free, full and open; attribution: contains modified Copernicus Sentinel data)",
+   "sha256": "03ead08c7468af67cafc9e282c1379f99edebf916e285a07c00d62eaf29b8358"
+  },
+  {
+   "id": "sentinel2_l2a_ndvi_p90 (payunia_60m)",
+   "entidad": "ESA Copernicus Sentinel-2 L2A via Element 84 Earth Search (AWS Open Data)",
+   "coordenadas": "payunia_60m",
+   "resolucion": "B04/B08 averaged to 60 m; annual 90th percentile of monthly NDVI",
+   "version": "earth-search sentinel-2-l2a, 2025-11-01 a 2026-10-31, 10 meses, 20 escenas con < 10 % de nubes",
+   "licencia": "Copernicus Sentinel data (free, full and open; attribution: contains modified Copernicus Sentinel data)",
+   "sha256": "4d16f2b82d2e9597632cb1f534c8ccabbbd0153542ad26940c78accca80738e4"
   }
  ],
  "archivos": [
@@ -154,92 +203,290 @@
   },
   {
    "archivo": "fichas/CTRL-MEDANOS.json",
-   "bytes": 8251,
-   "sha256": "e9f1bf139e481b8a1adf5366099599a81cfceeb601aa21fc396aed547f8bdf24",
-   "maqueta": true
+   "bytes": 9213,
+   "sha256": "d4f8c3b288a2fe65948392f8d561aaa8f981f8298118e6029f5061dccf0c939b",
+   "maqueta": false
   },
   {
    "archivo": "fichas/CTRL-MM-R1.json",
-   "bytes": 4394,
-   "sha256": "36b98c2cf152b3d61647034b4c2b5b5944e7569cb1546263b05cfcbf722a967c",
-   "maqueta": true
+   "bytes": 5407,
+   "sha256": "9657b4b5b1547db85a2666d8240bacbbda619fc546df8a17f7a67336641fd749",
+   "maqueta": false
   },
   {
    "archivo": "fichas/CTRL-MM-R2.json",
-   "bytes": 4392,
-   "sha256": "722a3c0fcbadb932da311d16dadf03ada1578a935ae16da7ed60b12fb866ff5d",
-   "maqueta": true
+   "bytes": 5400,
+   "sha256": "cb42c152e180a481c213685a57ae7bdaca285e2f956b3fbbfd349f621acf216b",
+   "maqueta": false
   },
   {
    "archivo": "fichas/CTRL-MM-R3.json",
-   "bytes": 4389,
-   "sha256": "f334520774ad179e36ffa006b20ee33a8b0986a09f08e87fe9ae76dee06d7fdb",
-   "maqueta": true
+   "bytes": 5399,
+   "sha256": "554e530c265c5c42e3f38994cf56ea6b359619283ed265623aa4a65946520981",
+   "maqueta": false
   },
   {
    "archivo": "fichas/CTRL-MM.json",
-   "bytes": 4325,
-   "sha256": "7068ee359159a3025e18292b0eb68ac54e1a0590956e0c472d30ecf921d790c0",
-   "maqueta": true
+   "bytes": 5366,
+   "sha256": "9fc10fc8375f4459c86b3edbce86704f3b77de1e6a483a2eb654cc4fd02bea49",
+   "maqueta": false
   },
   {
    "archivo": "fichas/indice.json",
-   "bytes": 5887,
-   "sha256": "01ad09eb3ad0b25d1a5d9fd740734b1493c73c1e698c561bb1d15cb0de61feae",
-   "maqueta": true
+   "bytes": 16430,
+   "sha256": "9cd171f4e9a43b034bb951b5e30312c0864530b631236456e7a7166fc5016729",
+   "maqueta": false
   },
   {
    "archivo": "fichas/P-01.json",
-   "bytes": 8880,
-   "sha256": "29e908726f3599faa75ecc84813493b9fe16ab7a57f29d8a15a42695ab2d60de",
-   "maqueta": true
+   "bytes": 9904,
+   "sha256": "1d72c6444532303d3843035da8449959c78d9bfe7f5266cb73aa7d6d139c7d31",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-02.json",
+   "bytes": 9905,
+   "sha256": "279af9f6a8b5e92de894e310ef6617f597189f60910f1fc0ad0a68622d64d2e4",
+   "maqueta": false
   },
   {
    "archivo": "fichas/P-03.json",
-   "bytes": 8903,
-   "sha256": "e54ba1b613946c8632599fdce9c16cad601c9f061a1f483f4d22ae11ed925ada",
-   "maqueta": true
+   "bytes": 9904,
+   "sha256": "73101745098d8fee62068a9b01c1f5392fd8382f8b371e4b8e1865928926604d",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-04.json",
+   "bytes": 9901,
+   "sha256": "7d04da5c8215aa76c9efe92554e721f6fdf7929f035eddaf2297734f23c98c53",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-05.json",
+   "bytes": 9896,
+   "sha256": "ede922e7316400e2e3b8f2c03d3a4c41e6ed716d8165b4b6a2e2a5407224f26c",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-06.json",
+   "bytes": 9909,
+   "sha256": "de203559c0f5b1e5f2c7935b51216d76640f1e066c2bae2769cbce63c7c94475",
+   "maqueta": false
   },
   {
    "archivo": "fichas/P-07.json",
-   "bytes": 8930,
-   "sha256": "e7a74897368bf0e965a504f3c9e3be7360460303b94d7d711ede78cf89da81b8",
-   "maqueta": true
+   "bytes": 9906,
+   "sha256": "400eca457b44f5ae4d91c30d3cdde2cd7b7016423c10f9e232f896d89a394547",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-08.json",
+   "bytes": 9902,
+   "sha256": "22fbf8570617fdea7d11f9416483475f7b2e8dc75f3d2cffd54cd1ab9ebc91ba",
+   "maqueta": false
   },
   {
    "archivo": "fichas/P-09.json",
-   "bytes": 8903,
-   "sha256": "ad9e2b20c3854e1830d7199fe5f36cb0e66fa9f9ca4e04d9204ad172a7949c79",
-   "maqueta": true
+   "bytes": 9905,
+   "sha256": "7e42f89bf637bf131a5ff64021410fb80f38c8019f012f09f2eba82b0762c22a",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-10.json",
+   "bytes": 9906,
+   "sha256": "17040792c0cc59f65d4f86dd93c640be5b3a963d445152c171b65856c7c3a37e",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-11.json",
+   "bytes": 9895,
+   "sha256": "72a5945c1c06e1daf3699c834e25c3672cd9085696f0c4fe734e747f6b14746f",
+   "maqueta": false
   },
   {
    "archivo": "fichas/P-12.json",
-   "bytes": 8888,
-   "sha256": "780d5f2d6bd07552c68a706aa416c436e84baa5f9e8474c9e58e7b8081b28408",
-   "maqueta": true
+   "bytes": 9901,
+   "sha256": "8bb00d4600e6edd7eab05bf9f84a9ef93d3345966297f1ac4d2da01d91083932",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-13.json",
+   "bytes": 9901,
+   "sha256": "dbd472072700a7f62edc32bd1a720fb062dd01a22d8d710805b03db31bf90742",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-14.json",
+   "bytes": 9273,
+   "sha256": "e27773d4d40d41af697a081d5f505f70b41efbd7c68cd13789a4a06a54cca64c",
+   "maqueta": false
   },
   {
    "archivo": "fichas/P-15.json",
-   "bytes": 8906,
-   "sha256": "288bfcb271c0a05ead3c3754b504df5f2af2d194ec0626d18e061a5ecd5c1c1d",
-   "maqueta": true
+   "bytes": 9904,
+   "sha256": "0509c9bfe6eac740bd605b2a7c5ece8e4e0aa336ecfaab4e438e781ac842cd87",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-16.json",
+   "bytes": 9900,
+   "sha256": "7e21db5a21f3d566d0700a22522353d624b7da39f7f6cd4ca462f4ea974d6c26",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-17.json",
+   "bytes": 9907,
+   "sha256": "0463204e7e4c6944ad0a2938aa400d3ef547756c84b37c9860ec5b11a73242c5",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-18.json",
+   "bytes": 9904,
+   "sha256": "061cc1b00e718a075585417d3a8d2e2ee56aa91a27b96a370612dcff0583f618",
+   "maqueta": false
   },
   {
    "archivo": "fichas/P-19.json",
-   "bytes": 8903,
-   "sha256": "4ffb36eba358fef77ad890223da5bac13944fadcfc657accf0fbe6084a58651f",
-   "maqueta": true
+   "bytes": 9906,
+   "sha256": "230346ffd21daaa245f8e126ab64c6495b8cc45917d503b706643330adec5487",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-20.json",
+   "bytes": 9908,
+   "sha256": "766ca07ab198f97b88488b07ebf4a793d0fc60dfbd2c040bdf8deb6a1cf86235",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-21.json",
+   "bytes": 9900,
+   "sha256": "c6bbf072517cf1a80791441ccb0251f680a86cc4eb803ac7efe912a65b9b04ec",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-22.json",
+   "bytes": 9908,
+   "sha256": "005072ce27ecee6e8bebdfb5173d2b011a1f294725d271edbfc0bce6a0cf694b",
+   "maqueta": false
   },
   {
    "archivo": "fichas/P-23.json",
-   "bytes": 8905,
-   "sha256": "c8f3afd46d8351e60ea0bbb084b0fd27c4d50b9fba6ed87d9bbe43a67dbf395b",
-   "maqueta": true
+   "bytes": 9907,
+   "sha256": "73f366075203b0d066a1b6751cff1fd66c9949a26214ef7a5f87867eb9d03400",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-24.json",
+   "bytes": 9909,
+   "sha256": "2ac0cd44ecf491c6afbf47957b005e77d064656d4ae91a8e011f9f386b1db15d",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-25.json",
+   "bytes": 9903,
+   "sha256": "bf4f811765d75e19063820ac996b9d7c96c01845a22bc9f873e3bf9a87d5e73e",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-26.json",
+   "bytes": 9901,
+   "sha256": "e01002d0735a0fd2f504a156a90564b9a332076b1cc192fc2c406e2d992126c9",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-27.json",
+   "bytes": 9899,
+   "sha256": "5cf1054c4b7207dc1974b8c62a8d60cab440a530b0e65c81088c0ba57e663e37",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-28.json",
+   "bytes": 9906,
+   "sha256": "36bc4714ccdec55d472962ff6d670de592dd760f57b39e907da33a235378ad7b",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-29.json",
+   "bytes": 9896,
+   "sha256": "48e319736797c1dff910a27d2ba99e337c45bb7daea52e5765a06899cb318bb0",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-30.json",
+   "bytes": 9903,
+   "sha256": "f5ed8363ff32ac76a39e5d089b99cd536a6b6a5725e4ea27fdeaa6292348e44a",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-31.json",
+   "bytes": 9906,
+   "sha256": "2f60ea084593c5d185ffc522cbba55858fce11781e3ab96c1223e18abfa25587",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-32.json",
+   "bytes": 9911,
+   "sha256": "4d9532d72442f21f137fcdb481a39a18cb2ea25d778ca5f51e4710258d09b552",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-33.json",
+   "bytes": 9903,
+   "sha256": "903734699d8f2810fce749883165c385c57221758a8ada82e0cfb9d6fbb50589",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-34.json",
+   "bytes": 9907,
+   "sha256": "a66d712ea6b10d9abb941619a64d1981d9179503dfe782495d4dc51777e6e25f",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-35.json",
+   "bytes": 9902,
+   "sha256": "90e5355a965ba2caa718b6a5be6ec1ce80674782212f2f93e24fe8df0de13f99",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-36.json",
+   "bytes": 9897,
+   "sha256": "5096d140ccc9f9e54f372281c9e5c23a0d95fdb906809ba6b634acc939fba11a",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-37.json",
+   "bytes": 9900,
+   "sha256": "66fa9ae60cf241724908d7aa797280322ca883d90e2d9665227724d51b200886",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-38.json",
+   "bytes": 9889,
+   "sha256": "9d96098e91ab6eb9356b9536d32e05cd56e2d582102445c33d82082b3a3c76ef",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-39.json",
+   "bytes": 9901,
+   "sha256": "38d394c771f835a5f4cea8a0c432db33a3dfa5b60d1b9308bd050c3355726a60",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-40.json",
+   "bytes": 9885,
+   "sha256": "c791e4d85772604d3d7f82df8624f75e14fbb4e33b0fc262820c6e1bbba1bd47",
+   "maqueta": false
+  },
+  {
+   "archivo": "huella/distribuciones_payunia.json",
+   "bytes": 440278,
+   "sha256": "e6474e4b8162948a726a23d8df1cd89a7f75a49c183bfbff34b936a5ee1aabaa",
+   "maqueta": false
   },
   {
    "archivo": "manifest_parte3.json",
-   "bytes": 6242,
-   "sha256": "f9d266b5eacca75fab94b6fbe4d6dd52fa72285364d5487b510ee59be65fd4fb",
+   "bytes": 11633,
+   "sha256": "d03cba9dcd0942ae385032daaf274e742dadec1447141a5bc9dc930497ef46ad",
    "maqueta": null
   },
   {
@@ -273,5 +520,446 @@
    "maqueta": false
   }
  ],
- "nota": "Escrito por puente_lola/exportar_web.py hasta que exista motor/exportar."
+ "partes": {
+  "parte3": {
+   "manifest": "salida/manifest_parte3.json",
+   "sha256": "d03cba9dcd0942ae385032daaf274e742dadec1447141a5bc9dc930497ef46ad",
+   "archivos": [
+    {
+     "archivo": "destino/ficha_invierno.json",
+     "bytes": 4298,
+     "sha256": "863665061fe6633584729ec2e2c8939766daeb127ed385e12f6c02045a2ff061",
+     "maqueta": false
+    },
+    {
+     "archivo": "destino/ficha_liso_invierno.json",
+     "bytes": 4170,
+     "sha256": "648d61495f35683adbe1b9cd246f1fdd65636ca0697e303072f3a621500f3cff",
+     "maqueta": false
+    },
+    {
+     "archivo": "destino/ficha_liso_verano.json",
+     "bytes": 4159,
+     "sha256": "f01b35c0154b95187ece50789407bdbed8f0438f9c652acd165e6387d0132ff4",
+     "maqueta": false
+    },
+    {
+     "archivo": "destino/ficha_verano.json",
+     "bytes": 4294,
+     "sha256": "af8bfa9ddc54dea7f46a5bbd441a8350893e0f6dc87ad23cb5b1d26b302a65b5",
+     "maqueta": false
+    },
+    {
+     "archivo": "destino/horizontes.bin",
+     "bytes": 18000032,
+     "sha256": "7c29f7f56d8fd8cd974da32b6b7ac3002265f8db67c826465102b598da575e3d",
+     "maqueta": false
+    },
+    {
+     "archivo": "destino/horizontes.json",
+     "bytes": 768,
+     "sha256": "9640a43edbb9c2710fea3e06813e791d2e858253f0e5ce1654123afeb052fe3e",
+     "maqueta": false
+    },
+    {
+     "archivo": "destino/paridad.json",
+     "bytes": 179670,
+     "sha256": "3c7bc22f6d7abf94100029c4203839d86a283a02a8b302734a171f6b18ec56ce",
+     "maqueta": false
+    },
+    {
+     "archivo": "destino/refugios_invierno.png",
+     "bytes": 211982,
+     "sha256": "9ffec0ec4d9c4889b08c9f180f6366f471d603e80888248c474587abfffd53d8",
+     "maqueta": false
+    },
+    {
+     "archivo": "destino/refugios_verano.png",
+     "bytes": 236008,
+     "sha256": "312093e48cc30e3f3db7cce6b47e2fb4c8be113f84e8865785c1ddab3df7f4db",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/CTRL-MEDANOS.json",
+     "bytes": 9213,
+     "sha256": "d4f8c3b288a2fe65948392f8d561aaa8f981f8298118e6029f5061dccf0c939b",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/CTRL-MM-R1.json",
+     "bytes": 5407,
+     "sha256": "9657b4b5b1547db85a2666d8240bacbbda619fc546df8a17f7a67336641fd749",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/CTRL-MM-R2.json",
+     "bytes": 5400,
+     "sha256": "cb42c152e180a481c213685a57ae7bdaca285e2f956b3fbbfd349f621acf216b",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/CTRL-MM-R3.json",
+     "bytes": 5399,
+     "sha256": "554e530c265c5c42e3f38994cf56ea6b359619283ed265623aa4a65946520981",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/CTRL-MM.json",
+     "bytes": 5366,
+     "sha256": "9fc10fc8375f4459c86b3edbce86704f3b77de1e6a483a2eb654cc4fd02bea49",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/indice.json",
+     "bytes": 16430,
+     "sha256": "9cd171f4e9a43b034bb951b5e30312c0864530b631236456e7a7166fc5016729",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-01.json",
+     "bytes": 9904,
+     "sha256": "1d72c6444532303d3843035da8449959c78d9bfe7f5266cb73aa7d6d139c7d31",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-02.json",
+     "bytes": 9905,
+     "sha256": "279af9f6a8b5e92de894e310ef6617f597189f60910f1fc0ad0a68622d64d2e4",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-03.json",
+     "bytes": 9904,
+     "sha256": "73101745098d8fee62068a9b01c1f5392fd8382f8b371e4b8e1865928926604d",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-04.json",
+     "bytes": 9901,
+     "sha256": "7d04da5c8215aa76c9efe92554e721f6fdf7929f035eddaf2297734f23c98c53",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-05.json",
+     "bytes": 9896,
+     "sha256": "ede922e7316400e2e3b8f2c03d3a4c41e6ed716d8165b4b6a2e2a5407224f26c",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-06.json",
+     "bytes": 9909,
+     "sha256": "de203559c0f5b1e5f2c7935b51216d76640f1e066c2bae2769cbce63c7c94475",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-07.json",
+     "bytes": 9906,
+     "sha256": "400eca457b44f5ae4d91c30d3cdde2cd7b7016423c10f9e232f896d89a394547",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-08.json",
+     "bytes": 9902,
+     "sha256": "22fbf8570617fdea7d11f9416483475f7b2e8dc75f3d2cffd54cd1ab9ebc91ba",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-09.json",
+     "bytes": 9905,
+     "sha256": "7e42f89bf637bf131a5ff64021410fb80f38c8019f012f09f2eba82b0762c22a",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-10.json",
+     "bytes": 9906,
+     "sha256": "17040792c0cc59f65d4f86dd93c640be5b3a963d445152c171b65856c7c3a37e",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-11.json",
+     "bytes": 9895,
+     "sha256": "72a5945c1c06e1daf3699c834e25c3672cd9085696f0c4fe734e747f6b14746f",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-12.json",
+     "bytes": 9901,
+     "sha256": "8bb00d4600e6edd7eab05bf9f84a9ef93d3345966297f1ac4d2da01d91083932",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-13.json",
+     "bytes": 9901,
+     "sha256": "dbd472072700a7f62edc32bd1a720fb062dd01a22d8d710805b03db31bf90742",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-14.json",
+     "bytes": 9273,
+     "sha256": "e27773d4d40d41af697a081d5f505f70b41efbd7c68cd13789a4a06a54cca64c",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-15.json",
+     "bytes": 9904,
+     "sha256": "0509c9bfe6eac740bd605b2a7c5ece8e4e0aa336ecfaab4e438e781ac842cd87",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-16.json",
+     "bytes": 9900,
+     "sha256": "7e21db5a21f3d566d0700a22522353d624b7da39f7f6cd4ca462f4ea974d6c26",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-17.json",
+     "bytes": 9907,
+     "sha256": "0463204e7e4c6944ad0a2938aa400d3ef547756c84b37c9860ec5b11a73242c5",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-18.json",
+     "bytes": 9904,
+     "sha256": "061cc1b00e718a075585417d3a8d2e2ee56aa91a27b96a370612dcff0583f618",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-19.json",
+     "bytes": 9906,
+     "sha256": "230346ffd21daaa245f8e126ab64c6495b8cc45917d503b706643330adec5487",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-20.json",
+     "bytes": 9908,
+     "sha256": "766ca07ab198f97b88488b07ebf4a793d0fc60dfbd2c040bdf8deb6a1cf86235",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-21.json",
+     "bytes": 9900,
+     "sha256": "c6bbf072517cf1a80791441ccb0251f680a86cc4eb803ac7efe912a65b9b04ec",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-22.json",
+     "bytes": 9908,
+     "sha256": "005072ce27ecee6e8bebdfb5173d2b011a1f294725d271edbfc0bce6a0cf694b",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-23.json",
+     "bytes": 9907,
+     "sha256": "73f366075203b0d066a1b6751cff1fd66c9949a26214ef7a5f87867eb9d03400",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-24.json",
+     "bytes": 9909,
+     "sha256": "2ac0cd44ecf491c6afbf47957b005e77d064656d4ae91a8e011f9f386b1db15d",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-25.json",
+     "bytes": 9903,
+     "sha256": "bf4f811765d75e19063820ac996b9d7c96c01845a22bc9f873e3bf9a87d5e73e",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-26.json",
+     "bytes": 9901,
+     "sha256": "e01002d0735a0fd2f504a156a90564b9a332076b1cc192fc2c406e2d992126c9",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-27.json",
+     "bytes": 9899,
+     "sha256": "5cf1054c4b7207dc1974b8c62a8d60cab440a530b0e65c81088c0ba57e663e37",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-28.json",
+     "bytes": 9906,
+     "sha256": "36bc4714ccdec55d472962ff6d670de592dd760f57b39e907da33a235378ad7b",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-29.json",
+     "bytes": 9896,
+     "sha256": "48e319736797c1dff910a27d2ba99e337c45bb7daea52e5765a06899cb318bb0",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-30.json",
+     "bytes": 9903,
+     "sha256": "f5ed8363ff32ac76a39e5d089b99cd536a6b6a5725e4ea27fdeaa6292348e44a",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-31.json",
+     "bytes": 9906,
+     "sha256": "2f60ea084593c5d185ffc522cbba55858fce11781e3ab96c1223e18abfa25587",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-32.json",
+     "bytes": 9911,
+     "sha256": "4d9532d72442f21f137fcdb481a39a18cb2ea25d778ca5f51e4710258d09b552",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-33.json",
+     "bytes": 9903,
+     "sha256": "903734699d8f2810fce749883165c385c57221758a8ada82e0cfb9d6fbb50589",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-34.json",
+     "bytes": 9907,
+     "sha256": "a66d712ea6b10d9abb941619a64d1981d9179503dfe782495d4dc51777e6e25f",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-35.json",
+     "bytes": 9902,
+     "sha256": "90e5355a965ba2caa718b6a5be6ec1ce80674782212f2f93e24fe8df0de13f99",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-36.json",
+     "bytes": 9897,
+     "sha256": "5096d140ccc9f9e54f372281c9e5c23a0d95fdb906809ba6b634acc939fba11a",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-37.json",
+     "bytes": 9900,
+     "sha256": "66fa9ae60cf241724908d7aa797280322ca883d90e2d9665227724d51b200886",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-38.json",
+     "bytes": 9889,
+     "sha256": "9d96098e91ab6eb9356b9536d32e05cd56e2d582102445c33d82082b3a3c76ef",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-39.json",
+     "bytes": 9901,
+     "sha256": "38d394c771f835a5f4cea8a0c432db33a3dfa5b60d1b9308bd050c3355726a60",
+     "maqueta": false
+    },
+    {
+     "archivo": "fichas/P-40.json",
+     "bytes": 9885,
+     "sha256": "c791e4d85772604d3d7f82df8624f75e14fbb4e33b0fc262820c6e1bbba1bd47",
+     "maqueta": false
+    },
+    {
+     "archivo": "pruebas.json",
+     "bytes": 17283,
+     "sha256": "137936ef532ffacf3b6c33c68f9255ce56368bb1d9740e8f9a006c1103eb5b60",
+     "maqueta": false
+    },
+    {
+     "archivo": "sol/luna_mons_mouton_invierno_2027.json",
+     "bytes": 11244,
+     "sha256": "00baf6579c8dfb333708d9eee0c8707a779ee3c538a88f1eeeed8b3db3e2cb96",
+     "maqueta": false
+    },
+    {
+     "archivo": "sol/luna_mons_mouton_verano_2027.json",
+     "bytes": 11453,
+     "sha256": "452da515f6ba5a33ddf3948f4c170aa1d206e82dbb2e95a5359d9de149b66f48",
+     "maqueta": false
+    },
+    {
+     "archivo": "sol/tierra_ciudad_del_este_2026-11-14.json",
+     "bytes": 2653,
+     "sha256": "ca8ec1bb5106081f24397dd2f247ba28cd20931dbb16ed111c92d813a444ba67",
+     "maqueta": false
+    }
+   ]
+  },
+  "parte4": {
+   "archivo": "C:\\Users\\mathi\\Desktop\\TERRAX\\TERRAX-claude\\datos\\distribuciones_payunia.json",
+   "sha256": "c1b5d56acb4441d4487fa3bc04750d224abd664a61caa59fff9d87448c2fa2ca",
+   "parcelas": 40,
+   "controles": 5,
+   "ndvi": true,
+   "diagnostico_recorte_3km": {
+    "id": "DIAG-MM-3KM",
+    "nombre": "Mons Mouton, recorte de 3 x 3 km del centro (diagnóstico, no puntúa)",
+    "pendiente_mediana_deg": 6.593,
+    "rugosidad_800m_mediana_m": 4.8101,
+    "luz_rasante": {
+     "e_deg": [
+      1.5,
+      2.0,
+      2.5,
+      3.0,
+      3.5,
+      4.0,
+      4.5,
+      5.0,
+      5.5,
+      6.0,
+      6.5,
+      7.0,
+      7.5,
+      8.0,
+      8.5,
+      9.0,
+      9.5,
+      10.0
+     ],
+     "f_media": [
+      0.8092,
+      0.7455,
+      0.6703,
+      0.587,
+      0.5138,
+      0.4458,
+      0.364,
+      0.295,
+      0.24,
+      0.1977,
+      0.1602,
+      0.1269,
+      0.0963,
+      0.0708,
+      0.0521,
+      0.0378,
+      0.0255,
+      0.0158
+     ]
+    },
+    "luz_rasante_referencia": [
+     0.6861,
+     0.6365,
+     0.5834,
+     0.5285,
+     0.4746,
+     0.4219,
+     0.3733,
+     0.3281,
+     0.2869,
+     0.2499,
+     0.2175,
+     0.1888,
+     0.1638,
+     0.1423,
+     0.1235,
+     0.1075,
+     0.0935,
+     0.0818
+    ],
+    "luz_rasante_media_abs_diferencia": 0.062
+   },
+   "parametros_sha256": "346a6cd22cc8cb1c75852fd8310971a78d50b2bf33d4c0710658e79e8556231c",
+   "minutos": 0.0,
+   "generado_utc": "2026-11-15T04:35:51+00:00"
+  }
+ },
+ "uso_si": "Written by motor/exportar (Part 4), drafted with Claude Code; see SI_USAGE.md."
 }

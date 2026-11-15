@@ -58,87 +58,279 @@
   },
   {
    "archivo": "fichas/CTRL-MEDANOS.json",
-   "bytes": 8251,
-   "sha256": "e9f1bf139e481b8a1adf5366099599a81cfceeb601aa21fc396aed547f8bdf24",
-   "maqueta": true
+   "bytes": 9213,
+   "sha256": "d4f8c3b288a2fe65948392f8d561aaa8f981f8298118e6029f5061dccf0c939b",
+   "maqueta": false
   },
   {
    "archivo": "fichas/CTRL-MM-R1.json",
-   "bytes": 4394,
-   "sha256": "36b98c2cf152b3d61647034b4c2b5b5944e7569cb1546263b05cfcbf722a967c",
-   "maqueta": true
+   "bytes": 5407,
+   "sha256": "9657b4b5b1547db85a2666d8240bacbbda619fc546df8a17f7a67336641fd749",
+   "maqueta": false
   },
   {
    "archivo": "fichas/CTRL-MM-R2.json",
-   "bytes": 4392,
-   "sha256": "722a3c0fcbadb932da311d16dadf03ada1578a935ae16da7ed60b12fb866ff5d",
-   "maqueta": true
+   "bytes": 5400,
+   "sha256": "cb42c152e180a481c213685a57ae7bdaca285e2f956b3fbbfd349f621acf216b",
+   "maqueta": false
   },
   {
    "archivo": "fichas/CTRL-MM-R3.json",
-   "bytes": 4389,
-   "sha256": "f334520774ad179e36ffa006b20ee33a8b0986a09f08e87fe9ae76dee06d7fdb",
-   "maqueta": true
+   "bytes": 5399,
+   "sha256": "554e530c265c5c42e3f38994cf56ea6b359619283ed265623aa4a65946520981",
+   "maqueta": false
   },
   {
    "archivo": "fichas/CTRL-MM.json",
-   "bytes": 4325,
-   "sha256": "7068ee359159a3025e18292b0eb68ac54e1a0590956e0c472d30ecf921d790c0",
-   "maqueta": true
+   "bytes": 5366,
+   "sha256": "9fc10fc8375f4459c86b3edbce86704f3b77de1e6a483a2eb654cc4fd02bea49",
+   "maqueta": false
   },
   {
    "archivo": "fichas/indice.json",
-   "bytes": 5887,
-   "sha256": "01ad09eb3ad0b25d1a5d9fd740734b1493c73c1e698c561bb1d15cb0de61feae",
-   "maqueta": true
+   "bytes": 16430,
+   "sha256": "9cd171f4e9a43b034bb951b5e30312c0864530b631236456e7a7166fc5016729",
+   "maqueta": false
   },
   {
    "archivo": "fichas/P-01.json",
-   "bytes": 8880,
-   "sha256": "29e908726f3599faa75ecc84813493b9fe16ab7a57f29d8a15a42695ab2d60de",
-   "maqueta": true
+   "bytes": 9904,
+   "sha256": "1d72c6444532303d3843035da8449959c78d9bfe7f5266cb73aa7d6d139c7d31",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-02.json",
+   "bytes": 9905,
+   "sha256": "279af9f6a8b5e92de894e310ef6617f597189f60910f1fc0ad0a68622d64d2e4",
+   "maqueta": false
   },
   {
    "archivo": "fichas/P-03.json",
-   "bytes": 8903,
-   "sha256": "e54ba1b613946c8632599fdce9c16cad601c9f061a1f483f4d22ae11ed925ada",
-   "maqueta": true
+   "bytes": 9904,
+   "sha256": "73101745098d8fee62068a9b01c1f5392fd8382f8b371e4b8e1865928926604d",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-04.json",
+   "bytes": 9901,
+   "sha256": "7d04da5c8215aa76c9efe92554e721f6fdf7929f035eddaf2297734f23c98c53",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-05.json",
+   "bytes": 9896,
+   "sha256": "ede922e7316400e2e3b8f2c03d3a4c41e6ed716d8165b4b6a2e2a5407224f26c",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-06.json",
+   "bytes": 9909,
+   "sha256": "de203559c0f5b1e5f2c7935b51216d76640f1e066c2bae2769cbce63c7c94475",
+   "maqueta": false
   },
   {
    "archivo": "fichas/P-07.json",
-   "bytes": 8930,
-   "sha256": "e7a74897368bf0e965a504f3c9e3be7360460303b94d7d711ede78cf89da81b8",
-   "maqueta": true
+   "bytes": 9906,
+   "sha256": "400eca457b44f5ae4d91c30d3cdde2cd7b7016423c10f9e232f896d89a394547",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-08.json",
+   "bytes": 9902,
+   "sha256": "22fbf8570617fdea7d11f9416483475f7b2e8dc75f3d2cffd54cd1ab9ebc91ba",
+   "maqueta": false
   },
   {
    "archivo": "fichas/P-09.json",
-   "bytes": 8903,
-   "sha256": "ad9e2b20c3854e1830d7199fe5f36cb0e66fa9f9ca4e04d9204ad172a7949c79",
-   "maqueta": true
+   "bytes": 9905,
+   "sha256": "7e42f89bf637bf131a5ff64021410fb80f38c8019f012f09f2eba82b0762c22a",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-10.json",
+   "bytes": 9906,
+   "sha256": "17040792c0cc59f65d4f86dd93c640be5b3a963d445152c171b65856c7c3a37e",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-11.json",
+   "bytes": 9895,
+   "sha256": "72a5945c1c06e1daf3699c834e25c3672cd9085696f0c4fe734e747f6b14746f",
+   "maqueta": false
   },
   {
    "archivo": "fichas/P-12.json",
-   "bytes": 8888,
-   "sha256": "780d5f2d6bd07552c68a706aa416c436e84baa5f9e8474c9e58e7b8081b28408",
-   "maqueta": true
+   "bytes": 9901,
+   "sha256": "8bb00d4600e6edd7eab05bf9f84a9ef93d3345966297f1ac4d2da01d91083932",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-13.json",
+   "bytes": 9901,
+   "sha256": "dbd472072700a7f62edc32bd1a720fb062dd01a22d8d710805b03db31bf90742",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-14.json",
+   "bytes": 9273,
+   "sha256": "e27773d4d40d41af697a081d5f505f70b41efbd7c68cd13789a4a06a54cca64c",
+   "maqueta": false
   },
   {
    "archivo": "fichas/P-15.json",
-   "bytes": 8906,
-   "sha256": "288bfcb271c0a05ead3c3754b504df5f2af2d194ec0626d18e061a5ecd5c1c1d",
-   "maqueta": true
+   "bytes": 9904,
+   "sha256": "0509c9bfe6eac740bd605b2a7c5ece8e4e0aa336ecfaab4e438e781ac842cd87",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-16.json",
+   "bytes": 9900,
+   "sha256": "7e21db5a21f3d566d0700a22522353d624b7da39f7f6cd4ca462f4ea974d6c26",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-17.json",
+   "bytes": 9907,
+   "sha256": "0463204e7e4c6944ad0a2938aa400d3ef547756c84b37c9860ec5b11a73242c5",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-18.json",
+   "bytes": 9904,
+   "sha256": "061cc1b00e718a075585417d3a8d2e2ee56aa91a27b96a370612dcff0583f618",
+   "maqueta": false
   },
   {
    "archivo": "fichas/P-19.json",
-   "bytes": 8903,
-   "sha256": "4ffb36eba358fef77ad890223da5bac13944fadcfc657accf0fbe6084a58651f",
-   "maqueta": true
+   "bytes": 9906,
+   "sha256": "230346ffd21daaa245f8e126ab64c6495b8cc45917d503b706643330adec5487",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-20.json",
+   "bytes": 9908,
+   "sha256": "766ca07ab198f97b88488b07ebf4a793d0fc60dfbd2c040bdf8deb6a1cf86235",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-21.json",
+   "bytes": 9900,
+   "sha256": "c6bbf072517cf1a80791441ccb0251f680a86cc4eb803ac7efe912a65b9b04ec",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-22.json",
+   "bytes": 9908,
+   "sha256": "005072ce27ecee6e8bebdfb5173d2b011a1f294725d271edbfc0bce6a0cf694b",
+   "maqueta": false
   },
   {
    "archivo": "fichas/P-23.json",
-   "bytes": 8905,
-   "sha256": "c8f3afd46d8351e60ea0bbb084b0fd27c4d50b9fba6ed87d9bbe43a67dbf395b",
-   "maqueta": true
+   "bytes": 9907,
+   "sha256": "73f366075203b0d066a1b6751cff1fd66c9949a26214ef7a5f87867eb9d03400",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-24.json",
+   "bytes": 9909,
+   "sha256": "2ac0cd44ecf491c6afbf47957b005e77d064656d4ae91a8e011f9f386b1db15d",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-25.json",
+   "bytes": 9903,
+   "sha256": "bf4f811765d75e19063820ac996b9d7c96c01845a22bc9f873e3bf9a87d5e73e",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-26.json",
+   "bytes": 9901,
+   "sha256": "e01002d0735a0fd2f504a156a90564b9a332076b1cc192fc2c406e2d992126c9",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-27.json",
+   "bytes": 9899,
+   "sha256": "5cf1054c4b7207dc1974b8c62a8d60cab440a530b0e65c81088c0ba57e663e37",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-28.json",
+   "bytes": 9906,
+   "sha256": "36bc4714ccdec55d472962ff6d670de592dd760f57b39e907da33a235378ad7b",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-29.json",
+   "bytes": 9896,
+   "sha256": "48e319736797c1dff910a27d2ba99e337c45bb7daea52e5765a06899cb318bb0",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-30.json",
+   "bytes": 9903,
+   "sha256": "f5ed8363ff32ac76a39e5d089b99cd536a6b6a5725e4ea27fdeaa6292348e44a",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-31.json",
+   "bytes": 9906,
+   "sha256": "2f60ea084593c5d185ffc522cbba55858fce11781e3ab96c1223e18abfa25587",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-32.json",
+   "bytes": 9911,
+   "sha256": "4d9532d72442f21f137fcdb481a39a18cb2ea25d778ca5f51e4710258d09b552",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-33.json",
+   "bytes": 9903,
+   "sha256": "903734699d8f2810fce749883165c385c57221758a8ada82e0cfb9d6fbb50589",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-34.json",
+   "bytes": 9907,
+   "sha256": "a66d712ea6b10d9abb941619a64d1981d9179503dfe782495d4dc51777e6e25f",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-35.json",
+   "bytes": 9902,
+   "sha256": "90e5355a965ba2caa718b6a5be6ec1ce80674782212f2f93e24fe8df0de13f99",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-36.json",
+   "bytes": 9897,
+   "sha256": "5096d140ccc9f9e54f372281c9e5c23a0d95fdb906809ba6b634acc939fba11a",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-37.json",
+   "bytes": 9900,
+   "sha256": "66fa9ae60cf241724908d7aa797280322ca883d90e2d9665227724d51b200886",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-38.json",
+   "bytes": 9889,
+   "sha256": "9d96098e91ab6eb9356b9536d32e05cd56e2d582102445c33d82082b3a3c76ef",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-39.json",
+   "bytes": 9901,
+   "sha256": "38d394c771f835a5f4cea8a0c432db33a3dfa5b60d1b9308bd050c3355726a60",
+   "maqueta": false
+  },
+  {
+   "archivo": "fichas/P-40.json",
+   "bytes": 9885,
+   "sha256": "c791e4d85772604d3d7f82df8624f75e14fbb4e33b0fc262820c6e1bbba1bd47",
+   "maqueta": false
   },
   {
    "archivo": "pruebas.json",
@@ -192,7 +384,7 @@
   "version_formato": 1,
   "motor_version": "0.1.0",
   "parametros_sha256": "346a6cd22cc8cb1c75852fd8310971a78d50b2bf33d4c0710658e79e8556231c",
-  "generado_utc": "2026-11-14T18:39:37Z",
+  "generado_utc": "2026-11-15T04:37:39Z",
   "uso_si": "Código del motor físico (Parte 3) redactado con SI (Claude Code, Anthropic) a partir de los documentos 02 y 04, con pruebas de resultado conocido escritas antes del código. Los números los calcula el motor determinista con datos y parámetros publicados; ningún modelo de lenguaje interviene en el cálculo.",
   "notas": [
    "motor/exportar copia estos archivos a web/public/data y verifica cada SHA-256."
