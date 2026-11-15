@@ -35,8 +35,10 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import "./tokens.css";
+import { useMovimiento } from "./movimiento";
 import "./mvp.css";
 import "./lab.css";
+import "./movimiento.css";
 
 // The 3D screens (three.js + Blender models) load only when they are opened.
 const Laboratorio = lazy(() => import("../pantallas/operacion/Laboratorio"));
@@ -149,6 +151,8 @@ function AppContent() {
   const [paused, setPaused] = useState(false);
   const [remaining, setRemaining] = useState(15);
   const heading = useRef<HTMLHeadingElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
+  useMovimiento(mainRef, page, status === "ready");
   const firstPage = useRef(true);
   useEffect(() => {
     const change = () => {
@@ -515,6 +519,9 @@ function AppContent() {
           </div>
         </div>
       </header>
+      <div className="progreso-lectura" aria-hidden="true">
+        <i />
+      </div>
       {tour !== null && (
         <aside
           className="tour-bar"
@@ -526,6 +533,11 @@ function AppContent() {
             </strong>{" "}
             · <span role="status">{tourNotes[tour]}</span>
           </p>
+          <div className="tour-progreso" aria-hidden="true">
+            <i
+              style={{ transform: `scaleX(${Math.max(0, remaining - 1) / 15})` }}
+            />
+          </div>
           <div className="actions">
             <button className="btn sec" onClick={() => setPaused((p) => !p)}>
               {paused ? t("Resume", "Continuar") : t("Pause", "Pausar")}
@@ -551,7 +563,7 @@ function AppContent() {
           </div>
         </aside>
       )}
-      <main id="main-content" className="mvp-main">
+      <main id="main-content" className="mvp-main" ref={mainRef}>
         {page !== "home" && (
           <div className="page-title">
             <a href="#home">{t("Field atlas", "Atlas de campo")}</a>
@@ -567,9 +579,12 @@ function AppContent() {
           </div>
         )}
         {page === "card" && status === "loading" && (
-          <p role="status">
-            {t("Loading project data…", "Cargando datos del proyecto…")}
-          </p>
+          <div role="status" className="esqueleto">
+            <span className="sr-only">
+              {t("Loading project data…", "Cargando datos del proyecto…")}
+            </span>
+            <i /> <i /> <i />
+          </div>
         )}
         {["card", "checks", "explore"].includes(page) && status === "error" && (
           <div className="notice" role="alert">
@@ -885,10 +900,12 @@ function AppContent() {
                   <div>
                     <strong>{number(ficha.C)}</strong>
                     <span>{t("Compatibility (C)", "Compatibilidad (C)")}</span>
+                    <Medidor value={ficha.C} />
                   </div>
                   <div>
                     <strong>{number(ficha.E)}</strong>
                     <span>{t("Evidence (E)", "Evidencia (E)")}</span>
+                    <Medidor value={ficha.E} />
                   </div>
                 </div>
                 <p>
@@ -1209,6 +1226,16 @@ function AppContent() {
         </div>
       </footer>
     </>
+  );
+}
+/** 0–1 bar for C or E. The value is the exported one; the bar adds no information. */
+function Medidor({ value }: { value: number | null }) {
+  if (value === null || !Number.isFinite(value)) return null;
+  const v = Math.min(1, Math.max(0, value));
+  return (
+    <span className="medidor" aria-hidden="true">
+      <i style={{ width: `${v * 100}%` }} />
+    </span>
   );
 }
 export default function MvpApp() {

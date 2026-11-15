@@ -1,0 +1,139 @@
+/* TERRA-X · motion layer (Nahum). Only transform and opacity animate. mvp.css already
+   removes every transition/animation under prefers-reduced-motion. */
+
+/* Reading progress, fixed under the header, driven by scroll (GSAP ScrollTrigger). */
+.progreso-lectura {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 400;
+  pointer-events: none;
+}
+.progreso-lectura i {
+  display: block;
+  height: 100%;
+  background: var(--action);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+/* Header: nav links get an underline that grows in. */
+.mvp-header nav a { position: relative; }
+.mvp-header nav a::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 4px;
+  height: 2px;
+  background: var(--action);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mvp-header nav a:hover::after,
+.mvp-header nav a[aria-current]::after { transform: scaleX(1); }
+.mvp-header nav a:hover { text-decoration: none; }
+
+/* Brand mark: a slow glow so the page feels alive without moving anything. */
+.brand-mark {
+  animation: pulso-sol 4s ease-in-out infinite;
+}
+@keyframes pulso-sol {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.72; }
+}
+.connection .luz.vivo {
+  animation: pulso-vivo 2.4s ease-out infinite;
+}
+@keyframes pulso-vivo {
+  0% { opacity: 1; }
+  60% { opacity: 0.45; }
+  100% { opacity: 1; }
+}
+
+/* Cards respond to the pointer (composite properties only). */
+.site-list a { transition: background-color 0.2s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1); }
+.site-list a:hover { transform: translateX(4px); }
+.reference-plate { transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+.reference-plate:hover { transform: translateY(-4px); }
+
+/* Loading skeleton instead of plain text. */
+.esqueleto {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0;
+}
+.esqueleto i {
+  display: block;
+  height: 18px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--tint) 25%, var(--line) 50%, var(--tint) 75%);
+  background-size: 200% 100%;
+  animation: brillo 1.4s linear infinite;
+}
+.esqueleto i:nth-of-type(2) { width: 82%; }
+.esqueleto i:nth-of-type(3) { width: 58%; }
+@keyframes brillo {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Tour: remaining-time bar (scaleX, one second per step to stay linear). */
+.tour-bar {
+  animation: entra-tour 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes entra-tour {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: none; }
+}
+.tour-progreso {
+  height: 3px;
+  margin-top: 12px;
+  background: var(--line);
+}
+.tour-progreso i {
+  display: block;
+  height: 100%;
+  background: var(--action);
+  transform-origin: left center;
+  transition: transform 1s linear;
+}
+
+/* Compatibility / evidence meters. */
+.metrics > div {
+  flex: 1;
+}
+.medidor {
+  display: block;
+  height: 6px;
+  margin-top: 10px;
+  background: var(--tint);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.medidor i {
+  display: block;
+  height: 100%;
+  background: var(--action);
+}
+
+@media print {
+  .mvp-main *,
+  .progreso-lectura {
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+  }
+  .progreso-lectura { display: none; }
+}
