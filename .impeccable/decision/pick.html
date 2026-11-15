@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Lunar Topographic Chart</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700&family=Azeret+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+body{width:1440px;height:900px;overflow:hidden;background:#EEF0EC;color:#111;font-family:'Archivo Narrow',sans-serif}
+.sheet{position:absolute;inset:24px;border:2px solid #111}
+.map{position:absolute;left:24px;top:24px;width:980px;bottom:24px;background:repeating-radial-gradient(circle at 55% 50%,#d9d2c4 0 14px,#6B4F35 14px 15px),#cfc6b5;border:1px solid #111}
+.map:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 99px,#2F5D8A 99px 100px),repeating-linear-gradient(90deg,transparent 0 99px,#2F5D8A 99px 100px);opacity:.5}
+.legend{position:absolute;right:24px;top:24px;width:340px;bottom:24px;display:flex;flex-direction:column;gap:24px}
+h1{font-size:64px;line-height:.95;font-weight:700}
+.box{border:1px solid #111;padding:16px;font-family:'Azeret Mono';font-size:13px}
+.cta{background:#111;color:#EEF0EC;padding:20px;font-size:24px;font-weight:700}
+</style></head><body><div class="sheet">
+<div class="map"></div>
+<div class="legend"><p class="box">SHEET LTO-84 · MONS MOUTON · SCALE 60 m/px</p><h1>Practice on Earth. Prepare for the Moon.</h1><p class="box">Legend · relief LOLA · sun JPL · candidates Copernicus GLO-30</p><a class="cta">Explore a candidate →</a></div>
+</div></body></html>

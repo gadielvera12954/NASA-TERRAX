@@ -106,7 +106,7 @@ function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: Props
   renderer.toneMapping = THREE.ReinhardToneMapping;
   renderer.toneMappingExposure = 1.15;
   const escena = new THREE.Scene();
-  escena.background = new THREE.Color(0x030a1c);
+  escena.background = new THREE.Color(0x1f1f1e);
   const camara = new THREE.PerspectiveCamera(36, 1, 0.1, 400);
   camara.position.set(14, 12, 22);
   const controles = new OrbitControls(camara, lienzo);
@@ -124,7 +124,7 @@ function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: Props
   const sol = new THREE.DirectionalLight(0xffffff, 10);
   escena.add(sol, sol.target);
   escena.add(new THREE.AmbientLight(0x8fa6d8, 0.1));
-  const disco = new THREE.Mesh(new THREE.SphereGeometry(0.55, 24, 12), new THREE.MeshBasicMaterial({ color: 0xe7f434 }));
+  const disco = new THREE.Mesh(new THREE.SphereGeometry(0.55, 24, 12), new THREE.MeshBasicMaterial({ color: 0xf2b33d }));
   escena.add(disco);
 
   // Texture painted from horizontes.bin: one texel per 60 m pixel, row 0 = grid north.
@@ -147,7 +147,7 @@ function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: Props
   // Marker of the parked rover
   const marca = new THREE.Group();
   marca.visible = false;
-  const amarillo = new THREE.MeshBasicMaterial({ color: 0xe7f434 });
+  const amarillo = new THREE.MeshBasicMaterial({ color: 0xf2b33d });
   const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 2.6, 8), amarillo);
   pin.position.y = 2.3;
   const aro = new THREE.Mesh(new THREE.TorusGeometry(0.75, 0.035, 8, 48), amarillo);
@@ -162,7 +162,7 @@ function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: Props
   const matMejor = new THREE.MeshBasicMaterial({ color: 0xffffff });
 
   // Geographic north arrow at the south-west corner of the map (grid north is −Z)
-  const norte = new THREE.ArrowHelper(new THREE.Vector3(0, 0, -1), new THREE.Vector3(-14.2, 0.2, 14.2), 3.2, 0xc0cad8, 0.7, 0.35);
+  const norte = new THREE.ArrowHelper(new THREE.Vector3(0, 0, -1), new THREE.Vector3(-14.2, 0.2, 14.2), 3.2, 0xbdbab3, 0.7, 0.35);
   escena.add(norte);
 
   const rayo = new THREE.Raycaster();

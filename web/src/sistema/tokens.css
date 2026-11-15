@@ -1,220 +1,268 @@
 /* ==========================================================================
-   TERRA-X · DESIGN TOKENS & SYSTEM STYLES
-   According to TERRA-X Team Method & doc03_diseno
-   - Instrument typography (Fira Sans / Overpass / Overpass Mono)
-   - 2px corners, 1px lines
-   - Physically projected shadows from dynamic Sol variables
+   TERRA-X · Meridian Wall
+   The page is a sunlit wall. The Sun (SolContext) drives every cast shadow:
+   --sombra-x / --sombra-y come from its elevation and azimuth. Earth surfaces
+   (the wall) get a soft penumbra; lunar plates (basalt) get hard vacuum shadows.
    ========================================================================== */
 
 :root {
-  /* Core Color Tokens */
-  --noche: #07173F;
-  --noche-panel: #0C1E4D;
-  --noche-card: #11255B;
-  --azul-electrico: #0042A6;
-  --sol: #E7F434;
-  --sol-glow: rgba(231, 244, 52, 0.25);
-  --tierra: #C2410C;
-  --tierra-bg: rgba(194, 65, 12, 0.15);
-  --luna: #F4F6FB;
-  --luna-bg: rgba(244, 246, 251, 0.12);
-  --dato: #2491FF;
-  --alerta: #8B0A03;
-  --alerta-bg: rgba(139, 10, 3, 0.25);
-  --pizarra: #3D4551;
-  --sec-dark: #8F9CAE;
-  --borde-dark: #1E3160;
-  --borde-light: #324779;
-  --texto: #FFFFFF;
-  --texto-sec: #C0CAD8;
+  /* Wall (Earth, sunlit plaster) */
+  --muro: #e4e2dc;
+  --muro-luz: #eeece7;
+  --muro-hundido: #d6d3cb;
+  --ocre: #c98f55;
+  --ocre-hondo: #9c6532;
+  --tinta: #141414;
+  --tinta-2: #45423d;
+  --tinta-3: #5e5a53;
+  --oxido: #a8321e;
+  --oxido-hondo: #84230f;
+  --regla: rgba(20, 20, 20, 0.88);
+  --regla-suave: rgba(20, 20, 20, 0.16);
 
-  /* Verdict Label Colors */
-  --sost: #10B981;
-  --huec: #E7F434;
-  --noal: #F59E0B;
-  --nopo: #8F9CAE;
-  --inco: #EF4444;
+  /* Plate (Moon, basalt) */
+  --basalto: #1f1f1e;
+  --basalto-2: #2a2a28;
+  --regolito: #8a8a86;
+  --luz-solar: #f2b33d;
 
-  /* Typography */
-  --tit: 'Fira Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --txt: 'Overpass', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --mono: 'Overpass Mono', monospace;
+  /* Shadows: the wall's penumbra (atmosphere) vs the plate's hard edge (vacuum) */
+  --sombra-muro: rgba(58, 44, 30, 0.26);
+  --sombra-placa: rgba(10, 8, 6, 0.55);
 
-  /* Dynamic Physical Sun & Shadow variables (updated by Erwan's useSol engine) */
-  --sol-el: 3.0deg;
-  --sol-az: 250.0deg;
+  /* Legacy names used across the screens, mapped onto the wall */
+  --noche: var(--muro);
+  --noche-panel: var(--muro-luz);
+  --noche-card: var(--muro-luz);
+  --sol: var(--oxido);
+  --sol-glow: rgba(168, 50, 30, 0.18);
+  --tierra: var(--ocre-hondo);
+  --tierra-bg: rgba(201, 143, 85, 0.2);
+  --luna: #3a3a37;
+  --luna-bg: rgba(31, 31, 30, 0.08);
+  --dato: #24578f;
+  --alerta: var(--oxido);
+  --alerta-bg: rgba(168, 50, 30, 0.12);
+  --pizarra: var(--tinta-2);
+  --sec-dark: var(--tinta-3);
+  --borde-dark: var(--regla-suave);
+  --borde-light: rgba(20, 20, 20, 0.32);
+  --texto: var(--tinta);
+  --texto-sec: var(--tinta-2);
+
+  /* Verdicts, mixed for a light ground (each ≥4.5:1 on the wall) */
+  --sost: #2f6b3a;
+  --huec: #7a5a12;
+  --noal: #8a4a0c;
+  --nopo: var(--tinta-3);
+  --inco: var(--oxido);
+
+  /* Type */
+  --tit: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --txt: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "Azeret Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  /* Sun (overwritten live by SolContext) */
+  --sol-el: 3deg;
+  --sol-az: 250deg;
   --sombra-x: -35px;
   --sombra-y: 12px;
   --sombra-blur: 0px;
-  --sombra-color: rgba(0, 0, 0, 0.82);
+  --sombra-color: var(--sombra-placa);
+  /* Cast-shadow length on the wall: 2 px / tan(Sun elevation), set live by the Sun scale.
+     Light comes from the upper left, so shadows fall to the lower right. */
+  --sombra-l: 38px;
+  --sx: var(--sombra-l);
+  --sy: calc(var(--sombra-l) * 0.3);
+  --sombra-letra: rgba(58, 44, 30, 0.13);
 
-  /* Geometry & Rhythm */
-  --radius: 2px;
+  /* Geometry and motion */
+  --radius: 0px;
   --border-w: 1px;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --gutter: clamp(16px, 4vw, 56px);
+  --ancho: 1320px;
 }
 
-/* Base Reset & Instrument Feel */
-* {
+/* A basalt plate: everything lunar renders here, light on dark. */
+.placa,
+.escena,
+.panel.reloj,
+.panel.comparador,
+.comparison.mundos,
+.campo-resultado {
+  --texto: #eceae4;
+  --texto-sec: #b3b0a8;
+  --sec-dark: #9a978f;
+  --noche: var(--basalto);
+  --noche-panel: var(--basalto-2);
+  --noche-card: var(--basalto-2);
+  --borde-dark: rgba(236, 234, 228, 0.14);
+  --borde-light: rgba(236, 234, 228, 0.3);
+  --sol: var(--luz-solar);
+  --luna: #eceae4;
+  --dato: #7fb2ff;
+  --sost: #5fbf73;
+  --inco: #ff7a5c;
+  --huec: var(--luz-solar);
+  color: var(--texto);
+}
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+html {
+  scrollbar-color: var(--tinta-3) var(--muro-hundido);
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
-  background-color: var(--noche);
-  color: var(--texto);
+  background-color: var(--muro);
+  color: var(--tinta);
   font-family: var(--txt);
-  font-size: 14px;
-  line-height: 1.45;
+  font-size: 16px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   overflow-x: hidden;
+  caret-color: var(--oxido);
 }
 
-/* Headings */
-h1, h2, h3, h4, h5, h6 {
+::selection {
+  background: var(--oxido);
+  color: var(--muro-luz);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--tit);
-  font-weight: 900;
+  font-weight: 800;
+  font-stretch: 112%;
   color: var(--texto);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
 }
 
-h1 { font-size: 32px; line-height: 1.15; }
-h2 { font-size: 24px; line-height: 1.2; }
+h1 { font-size: 40px; line-height: 1.02; }
+h2 { font-size: 24px; line-height: 1.15; }
 h3 { font-size: 19px; line-height: 1.25; }
 h4 { font-size: 16px; line-height: 1.3; }
-h5 { font-size: 14px; line-height: 1.35; text-transform: uppercase; letter-spacing: 0.04em; }
+h5 { font-size: 14px; line-height: 1.35; }
 
-/* Fixed Navigation Bar */
-.terra-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 52px;
-  padding: 0 24px;
-  background-color: #05102D;
-  border-bottom: var(--border-w) solid var(--borde-dark);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.terra-nav .logo {
-  font-family: var(--tit);
-  font-weight: 900;
-  font-size: 17px;
-  letter-spacing: 0.08em;
-  color: var(--texto);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.terra-nav .logo .symbol {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 1.5px solid var(--sol);
-  background: linear-gradient(90deg, #8E9BAE 50%, var(--tierra) 50%);
-  display: inline-block;
-}
-
-.terra-nav .nav-links {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.terra-nav .nav-link {
-  font-family: var(--txt);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--texto-sec);
-  text-decoration: none;
-  padding: 6px 12px;
-  border-radius: var(--radius);
-  border: 1px solid transparent;
-  transition: all 0.15s ease;
-  cursor: pointer;
-}
-
-.terra-nav .nav-link:hover {
-  color: var(--texto);
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-.terra-nav .nav-link.active {
-  color: var(--noche);
-  background-color: var(--sol);
-  font-weight: 700;
-  border-color: var(--sol);
-}
-
-/* Top Banner for Mock Data */
-.banner-mock {
-  background-color: #F59E0B;
-  color: #07173F;
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  padding: 4px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  z-index: 105;
-}
-
-/* Panels with Real Physical Shadows */
+/* ---------------------------------------------------------------- plates on the wall */
 .panel {
   background-color: var(--noche-panel);
-  border: var(--border-w) solid var(--borde-dark);
-  border-radius: var(--radius);
-  padding: 16px;
+  border: 1px solid var(--regla);
+  padding: 24px;
   position: relative;
-  transition: box-shadow 0.2s ease;
-  box-shadow: var(--sombra-x) var(--sombra-y) var(--sombra-blur) var(--sombra-color);
+  box-shadow: calc(var(--sx) * 0.5) calc(var(--sy) * 0.5) 6px var(--sombra-muro);
 }
 
-.panel:hover {
+.placa.panel,
+.panel.reloj,
+.panel.comparador {
+  border-color: #000;
+  box-shadow: calc(var(--sx) * 0.6) calc(var(--sy) * 0.6) 0 var(--sombra-placa);
+}
+
+/* ---------------------------------------------------------------- buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 12px 22px;
+  font-family: var(--tit);
+  font-size: 16px;
+  font-weight: 750;
+  font-stretch: 112%;
+  letter-spacing: 0.005em;
+  border: 1px solid var(--tinta);
+  background-color: var(--tinta);
+  color: var(--muro-luz);
+  box-shadow: inset 0 -3px 0 var(--oxido), calc(var(--sx) * 0.35) calc(var(--sy) * 0.35) 4px var(--sombra-muro);
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 160ms var(--ease-out), background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn.sec {
+  background-color: transparent;
+  color: var(--texto);
+  border-color: currentColor;
+  box-shadow: none;
+}
+
+.btn.tierra {
+  background-color: var(--ocre);
+  border-color: var(--ocre-hondo);
+  color: var(--tinta);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    background-color: #000;
+  }
+  .btn.sec:hover {
+    background-color: var(--regla-suave);
+  }
+}
+
+.placa .btn,
+.escena .btn,
+.panel.reloj .btn,
+.panel.comparador .btn {
+  background-color: var(--luz-solar);
+  border-color: var(--luz-solar);
+  color: var(--tinta);
+  box-shadow: none;
+}
+
+.placa .btn.sec,
+.panel.reloj .btn.sec,
+.panel.comparador .btn.sec {
+  background-color: transparent;
   border-color: var(--borde-light);
+  color: var(--texto);
 }
 
-.panel-lit {
-  border-color: var(--sol);
-  box-shadow: 0 0 12px var(--sol-glow), var(--sombra-x) var(--sombra-y) var(--sombra-blur) var(--sombra-color);
-}
-
-/* Key Metrics & Cifras */
+/* ---------------------------------------------------------------- data rows and tags */
 .cifra-grande {
   font-family: var(--tit);
-  font-weight: 900;
-  font-size: 28px;
+  font-weight: 800;
+  font-size: 32px;
   line-height: 1.05;
-  color: var(--sol);
 }
 
 .cifra-label {
-  font-size: 11px;
-  color: var(--sec-dark);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 13px;
+  color: var(--texto-sec);
   margin-top: 4px;
 }
 
-/* Data Rows */
 .fila-dato {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  padding: 6px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  font-size: 13px;
-}
-
-.fila-dato:last-child {
-  border-bottom: none;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--borde-dark);
 }
 
 .fila-dato .label {
@@ -223,92 +271,47 @@ h5 { font-size: 14px; line-height: 1.35; text-transform: uppercase; letter-spaci
 
 .fila-dato .val {
   font-family: var(--mono);
-  font-weight: 600;
-  color: var(--texto);
+  font-weight: 500;
 }
 
-/* Buttons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-family: var(--tit);
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  padding: 8px 16px;
-  border-radius: var(--radius);
-  border: 1px solid var(--sol);
-  background-color: var(--sol);
-  color: var(--noche);
-  cursor: pointer;
-  text-decoration: none;
-  transition: background-color 0.15s ease, transform 0.1s ease;
-}
-
-.btn:hover {
-  background-color: #f7ff55;
-}
-
-.btn:active {
-  transform: translateY(1px);
-}
-
-.btn.sec {
-  background-color: transparent;
-  color: var(--texto);
-  border-color: var(--borde-light);
-}
-
-.btn.sec:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-  border-color: var(--texto);
-}
-
-.btn.tierra {
-  background-color: var(--tierra);
-  border-color: var(--tierra);
-  color: #FFFFFF;
-}
-
-/* Verdict Tags */
 .etq {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 3px 8px;
-  border-radius: var(--radius);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  border: 1px solid currentColor;
 }
 
-.etq.sost { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid #10B981; }
-.etq.huec { background: rgba(231, 244, 52, 0.15); color: #E7F434; border: 1px solid #E7F434; }
-.etq.noal { background: rgba(245, 158, 11, 0.15); color: #FBBF24; border: 1px solid #F59E0B; }
-.etq.nopo { background: rgba(143, 156, 174, 0.15); color: #CBD5E1; border: 1px solid #8F9CAE; }
-.etq.inco { background: rgba(239, 68, 68, 0.15); color: #F87171; border: 1px solid #EF4444; }
+.etq.sost { color: var(--sost); }
+.etq.huec { color: var(--huec); }
+.etq.noal { color: var(--noal); }
+.etq.nopo { color: var(--nopo); }
+.etq.inco { color: var(--inco); }
 
-/* Subtext / Tags */
 .et {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--sec-dark);
+  color: var(--texto-sec);
 }
 
-/* Bottom Horizon Bar Container */
+.banner-mock {
+  background-color: var(--ocre);
+  color: var(--tinta);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 6px 16px;
+}
+
 .horizonte-bar-fixed {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   height: 48px;
-  background-color: #050E28;
-  border-top: 1px solid var(--borde-dark);
+  background-color: var(--muro-luz);
+  border-top: 1px solid var(--regla);
   z-index: 100;
   display: flex;
   align-items: center;

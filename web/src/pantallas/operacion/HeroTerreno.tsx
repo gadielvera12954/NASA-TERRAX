@@ -64,6 +64,7 @@ export default function HeroTerreno({ motor, onAbrir }: { motor: EstadoMotor | n
 
   return (
     <div className="hero-3d">
+      <div style={{ position: "relative" }}>
       <TerrenoLunar
         azimut={serie ? serie.azimut_deg[i] : 90}
         elevacion={serie ? serie.elevacion_deg[i] : 5}
@@ -81,6 +82,11 @@ export default function HeroTerreno({ motor, onAbrir }: { motor: EstadoMotor | n
           "Ilustración sintética · El 3D no está disponible en este navegador",
         )}
       />
+        <div className="etiquetas-placa" aria-hidden="true">
+          <span className="nw">Mons Mouton · LOLA 60 m</span>
+          <span className="sw">84.60°S · 31.00°E</span>
+        </div>
+      </div>
       <div className="hero-mandos">
         <button className="btn sec chico" onClick={() => setAndando((a) => !a)} aria-pressed={andando}>
           {andando ? t("❚❚ Pause the Sun", "❚❚ Pausar el Sol") : t("▶ Move the Sun", "▶ Mover el Sol")}
