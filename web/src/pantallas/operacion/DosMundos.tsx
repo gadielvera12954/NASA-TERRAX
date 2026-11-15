@@ -2,9 +2,14 @@
  * Earth / Moon comparison in 3D: one stage, one curtain, live readouts.
  * Each readout names its formula; anything that is not physics is labelled as illustration.
  */
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { KeyboardEvent, lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../i18n/Language";
 import { useSol } from "../../luz/SolContext";
+import BotonSI from "../../luz/BotonSI";
+import EscenarioCortina, { escribiendoEnCampo } from "../../luz/EscenarioCortina";
+import TarjetaCuerpos from "../dos-mundos/TarjetaCuerpos";
+import type { EstadoTerreno, ModoTerreno } from "../../escena3d/DosMundos3D";
+import { NOMBRES, PARES, type Par } from "../../escena3d/mundos";
 import {
   IndiceLab,
   leerIndiceLab,
@@ -13,9 +18,6 @@ import {
   potenciaPaneles,
   refraccionDeg,
 } from "../../datos/laboratorio";
-import type { EstadoTerreno, ModoTerreno } from "../../escena3d/DosMundos3D";
-import FichaMundos from "../../escena3d/FichaMundos";
-import { NOMBRES, PARES, type Par } from "../../escena3d/mundos";
 
 const DosMundos3D = lazy(() => import("../../escena3d/DosMundos3D"));
 
@@ -23,6 +25,8 @@ const DosMundos3D = lazy(() => import("../../escena3d/DosMundos3D"));
 const G = { luna: 1.62, tierra: 9.8 };
 const MASTIL_M = 2.5; // public VIPER height
 const RAD = Math.PI / 180;
+const MIN_H = 0.05;
+const MAX_H = 10;
 
 export default function DosMundos({
   minutosTierra,
@@ -36,8 +40,15 @@ export default function DosMundos({
   const { t, language } = useLanguage();
   const sol = useSol();
   const [topic, setTopic] = useState("shadow");
-  // The 3D stage is open from the start: every option is on screen (Jean, real relief).
+  // The 3D stage is open from the start, on the real relief: every option is on screen (Jean).
   const [scene, setScene] = useState(true);
+  // Real relief (Jean): Mons Mouton (Moon), Payunia P-27 (Earth) and Jezero (Mars), 30 × 30 km each.
+  const [terreno, setTerreno] = useState<ModoTerreno>("real");
+  const [par, setPar] = useState<Par>("luna-tierra");
+  const [exageracion, setExageracion] = useState(1);
+  const [estadoTerreno, setEstadoTerreno] = useState<EstadoTerreno | null>(null);
+  const [textoH, setTextoH] = useState("0.50");
+  const [altura, setAltura] = useState(0.5);
   const [minutes, setMinutes] = useState(false);
   const [sceneKey, setSceneKey] = useState(0);
   const [corte, setCorte] = useState(50);
@@ -49,11 +60,6 @@ export default function DosMundos({
     tierra: number | null;
   } | null>(null);
   const [attempt, retry] = useState(0);
-  // Real relief (Jean): Mons Mouton vs Payunia P-27, 30 × 30 km each.
-  const [terreno, setTerreno] = useState<ModoTerreno>("real");
-  const [par, setPar] = useState<Par>("luna-tierra");
-  const [exageracion, setExageracion] = useState(1);
-  const [estadoTerreno, setEstadoTerreno] = useState<EstadoTerreno | null>(null);
   const [failed, setFailed] = useState(false);
   const [idx, setIdx] = useState<IndiceLab>();
   const [horasLuna, setHorasLuna] = useState<number | null>(null);
@@ -65,7 +71,12 @@ export default function DosMundos({
   useEffect(() => {
     setFailed(false);
     leerIndiceLab()
-      .then(setIdx)
+      .then((i) => {
+        setIdx(i);
+        const h0 = i.campo?.tablita_alto_m ?? 0.5;
+        setAltura(h0);
+        setTextoH(h0.toFixed(2));
+      })
       .catch(() => setFailed(true));
     // Hours of one real lunation with the Sun inside the rehearsal band (1.5° to 7°).
     leerSerieSol("verano")
@@ -79,6 +90,13 @@ export default function DosMundos({
       .catch(() => setFailed(true));
   }, [attempt]);
 
+  const crudoH = Number(textoH.replace(",", "."));
+  const hValido =
+    textoH.trim() !== "" &&
+    Number.isFinite(crudoH) &&
+    crudoH >= MIN_H &&
+    crudoH <= MAX_H;
+
   const e = sol.elevacion;
   const rumboReal = esquina ? (sol.azimut - 45 + 360) % 360 : rumbo;
   const lados = idx?.vehiculo.lados_deg ?? [0, 90, 180];
@@ -90,6 +108,9 @@ export default function DosMundos({
   const total = watts.reduce((a, b) => a + b, 0);
   const sombra = (h: number, el: number) => h / Math.tan(el * RAD);
   const refr = refraccionDeg(e);
+  const sombraLuna = sombra(altura, e);
+  const sombraTierra = sombra(altura, e + refr);
+  const penumbra = penumbraM(altura, e, rho);
   const num = (v: number, d = 1) =>
     new Intl.NumberFormat(language, {
       maximumFractionDigits: d,
@@ -102,8 +123,81 @@ export default function DosMundos({
   ];
   const tCaida = (g: number) => Math.sqrt((2 * MASTIL_M) / g);
 
+  const teclaVista = (ev: KeyboardEvent<HTMLDivElement>) => {
+    if (ev.defaultPrevented || ev.altKey || ev.ctrlKey || ev.metaKey || ev.nativeEvent.isComposing) return;
+    if (escribiendoEnCampo(ev.target)) return;
+    const enRangoAjeno =
+      ev.target instanceof HTMLInputElement &&
+      ev.target.type === "range" &&
+      ev.target.id !== "curtain";
+    if (ev.key === "l" || ev.key === "L") {
+      ev.preventDefault();
+      setCorte(95);
+    } else if (ev.key === "t" || ev.key === "T") {
+      ev.preventDefault();
+      setCorte(5);
+    } else if (!enRangoAjeno) {
+      const paso = ev.shiftKey ? 10 : 1;
+      if (ev.key === "ArrowLeft") {
+        ev.preventDefault();
+        setCorte((c) => Math.max(5, c - paso));
+      } else if (ev.key === "ArrowRight") {
+        ev.preventDefault();
+        setCorte((c) => Math.min(95, c + paso));
+      } else if (ev.key === "Home") {
+        ev.preventDefault();
+        setCorte(5);
+      } else if (ev.key === "End") {
+        ev.preventDefault();
+        setCorte(95);
+      }
+    }
+  };
+
+  const preguntaSI = () => {
+    if (topic === "energy") {
+      return t(
+        `In Two Worlds (Energy), with the Sun at ${num(e, 1)}° elevation and ${num(sol.azimut, 0)}° azimuth, rover heading ${num(rumboReal, 0)}°, the three vertical ${panelW} W panels generate ${num(total, 0)} W on the Moon (${lados.map((_, k) => `${nombresPanel[k]} ${num(watts[k], 0)} W`).join(", ")}). Why does this solar power budget not transfer directly to ${site} on Earth?`,
+        `En Dos Mundos (Energía), con el Sol a ${num(e, 1)}° de elevación y ${num(sol.azimut, 0)}° de azimut, rumbo del rover ${num(rumboReal, 0)}°, los tres paneles verticales de ${panelW} W generan ${num(total, 0)} W en la Luna (${lados.map((_, k) => `${nombresPanel[k]} ${num(watts[k], 0)} W`).join(", ")}). ¿Por qué este balance de potencia solar no se transfiere directamente a ${site} en la Tierra?`,
+      );
+    }
+    if (topic === "gravity") {
+      return t(
+        `In Two Worlds (Gravity), a drop from ${num(MASTIL_M, 1)} m takes ${num(tCaida(G.luna), 2)} s on the Moon (${num(G.luna, 2)} m/s²) and ${num(tCaida(G.tierra), 2)} s on Earth (${num(G.tierra, 2)} m/s²). How does this gravity difference affect rover mobility and dust rehearsals at ${site}?`,
+        `En Dos Mundos (Gravedad), una caída desde ${num(MASTIL_M, 1)} m tarda ${num(tCaida(G.luna), 2)} s en la Luna (${num(G.luna, 2)} m/s²) y ${num(tCaida(G.tierra), 2)} s en la Tierra (${num(G.tierra, 2)} m/s²). ¿Cómo afecta esta diferencia de gravedad a los ensayos de movilidad y polvo en ${site}?`,
+      );
+    }
+    if (topic === "time") {
+      return t(
+        `In Two Worlds (Time), the grazing Sun (1.5° to 7°) lasts ${horasLuna !== null ? `${num(horasLuna, 0)} h` : "hundreds of hours"} per summer lunation on the Moon vs ${minutosTierra !== null ? `${num(minutosTierra, 0)} min` : "minutes"} per sunset window at ${site}. How should a field team plan rehearsals around that window?`,
+        `En Dos Mundos (Tiempo), el Sol rasante (1,5° a 7°) dura ${horasLuna !== null ? `${num(horasLuna, 0)} h` : "cientos de horas"} por lunación de verano en la Luna frente a ${minutosTierra !== null ? `${num(minutosTierra, 0)} min` : "minutos"} por ventana en ${site}. ¿Cómo conviene planificar el ensayo de campo en esa ventana?`,
+      );
+    }
+    return t(
+      `In Two Worlds (Shadows), with object height h = ${num(altura, 2)} m and the Sun at ${num(e, 1)}°, the shadow is ${num(sombraLuna, 2)} m on the Moon and ${num(sombraTierra, 2)} m on Earth (refraction +${num(refr, 2)}°), with a ${num(penumbra, 2)} m penumbra tip. Explain what transfers between Mons Mouton, ${site} and Mars.`,
+      `En Dos Mundos (Sombras), con altura h = ${num(altura, 2)} m y el Sol a ${num(e, 1)}°, la sombra mide ${num(sombraLuna, 2)} m en la Luna y ${num(sombraTierra, 2)} m en la Tierra (refracción +${num(refr, 2)}°), con ${num(penumbra, 2)} m de penumbra. Explicame qué se transfiere entre Mons Mouton, ${site} y Marte.`,
+    );
+  };
+
+  const contextoSI = () => ({
+    pantalla: "worlds",
+    fenomeno: topic,
+    sitio: site,
+    elevacion_sol_deg: e,
+    azimut_sol_deg: sol.azimut,
+    altura_objeto_m: altura,
+    sombra_luna_m: Number(sombraLuna.toFixed(2)),
+    sombra_tierra_m: Number(sombraTierra.toFixed(2)),
+    refraccion_deg: Number(refr.toFixed(3)),
+    penumbra_m: Number(penumbra.toFixed(2)),
+    potencia_total_w: Math.round(total),
+    corte_cortina_pct: corte,
+    terreno_3d: terreno,
+    exageracion_vertical: exageracion,
+  });
+
   return (
-    <>
+    <div className="dos-mundos-vista" onKeyDown={teclaVista}>
       <h2>
         {t(
           "What can we reproduce on Earth, and what stays different?",
@@ -162,6 +256,46 @@ export default function DosMundos({
               value={e}
               onChange={(ev) => sol.setElevacion(Number(ev.target.value))}
             />
+          </div>
+        )}
+        {topic === "shadow" && (
+          <div>
+            <label htmlFor="mundos-h">
+              {t("Object height h (m)", "Altura del objeto h (m)")}:{" "}
+              <strong>{num(altura, 2)} m</strong>
+            </label>
+            <input
+              id="mundos-h"
+              type="number"
+              min={MIN_H}
+              max={MAX_H}
+              step="0.05"
+              inputMode="decimal"
+              value={textoH}
+              aria-invalid={!hValido}
+              aria-describedby={!hValido ? "mundos-h-aviso" : undefined}
+              onChange={(ev) => {
+                const v = ev.target.value;
+                setTextoH(v);
+                const n = Number(v.replace(",", "."));
+                if (
+                  v.trim() !== "" &&
+                  Number.isFinite(n) &&
+                  n >= MIN_H &&
+                  n <= MAX_H
+                ) {
+                  setAltura(Math.round(n * 100) / 100);
+                }
+              }}
+            />
+            {!hValido && (
+              <small id="mundos-h-aviso" className="muted" role="alert">
+                {t(
+                  `Valid range: ${num(MIN_H, 2)} to ${num(MAX_H, 0)} m (default 0.50 m).`,
+                  `Rango válido: ${num(MIN_H, 2)} a ${num(MAX_H, 0)} m (por defecto 0,50 m).`,
+                )}
+              </small>
+            )}
           </div>
         )}
         {topic === "energy" && (
@@ -231,24 +365,31 @@ export default function DosMundos({
           <section className="panel">
             <h2>
               {t(
-                "Shadow of the 0.50 m board",
-                "Sombra de la tablita de 0,50 m",
+                `Shadow of the ${num(altura, 2)} m board`,
+                `Sombra de la tablita de ${num(altura, 2)} m`,
               )}
             </h2>
             <dl className="par">
               <div>
                 <dt>{t("Moon", "Luna")}</dt>
-                <dd>{num(sombra(0.5, e), 2)} m</dd>
+                <dd>{num(sombraLuna, 2)} m</dd>
               </div>
               <div>
                 <dt>{t("Earth", "Tierra")}</dt>
-                <dd>{num(sombra(0.5, e + refr), 2)} m</dd>
+                <dd>{num(sombraTierra, 2)} m</dd>
               </div>
             </dl>
+            <p className="mono" data-testid="formula-sombra">
+              L = h ÷ tan(e) = {num(altura, 2)} m ÷ tan({num(e, 1)}°) ={" "}
+              {num(sombraLuna, 2)} m ({t("Moon", "Luna")}) ·{" "}
+              {num(altura, 2)} m ÷ tan({num(e + refr, 2)}°) ={" "}
+              {num(sombraTierra, 2)} m ({t("Earth", "Tierra")}) ·{" "}
+              {t("penumbra", "penumbra")} = {num(penumbra, 2)} m
+            </p>
             <p>
               {t(
-                `Same rule on both: height ÷ tan(Sun elevation). On Earth the air bends the light and lifts the Sun ${num(refr, 2)}°, so the shadow is ${num(100 * (1 - sombra(0.5, e + refr) / sombra(0.5, e)), 1)} % shorter. The fuzzy tip is ${num(penumbraM(0.5, e, rho), 2)} m long in both worlds; on the Moon the shadow itself is black because no sky lights it.`,
-                `La misma regla en ambos: altura ÷ tan(altura del Sol). En la Tierra el aire curva la luz y levanta el Sol ${num(refr, 2)}°, así que la sombra es ${num(100 * (1 - sombra(0.5, e + refr) / sombra(0.5, e)), 1)} % más corta. La punta difusa mide ${num(penumbraM(0.5, e, rho), 2)} m en los dos mundos; en la Luna la sombra es negra porque no hay cielo que la ilumine.`,
+                `Same rule on both: height ÷ tan(Sun elevation). On Earth the air bends the light and lifts the Sun ${num(refr, 2)}°, so the shadow is ${num(100 * (1 - sombraTierra / sombraLuna), 1)} % shorter. The fuzzy tip is ${num(penumbra, 2)} m long in both worlds; on the Moon the shadow itself is black because no sky lights it.`,
+                `La misma regla en ambos: altura ÷ tan(altura del Sol). En la Tierra el aire curva la luz y levanta el Sol ${num(refr, 2)}°, así que la sombra es ${num(100 * (1 - sombraTierra / sombraLuna), 1)} % más corta. La punta difusa mide ${num(penumbra, 2)} m en los dos mundos; en la Luna la sombra es negra porque no hay cielo que la ilumine.`,
               )}
             </p>
             <p className="mono">F14 · F15 (Sæmundsson) · F19</p>
@@ -393,89 +534,99 @@ export default function DosMundos({
             </p>
           </section>
         )}
+        <TarjetaCuerpos altura={altura} elevacion={e} radioSolDeg={rho} />
       </div>
-      {(
-        <div className="scene-tools">
-          <button
-            className="btn sec"
-            aria-expanded={scene}
-            onClick={() => setScene((v) => !v)}
-          >
-            {scene
-              ? t("Hide the 3D view", "Ocultar la vista 3D")
-              : t("Show the 3D view", "Mostrar la vista 3D")}
-          </button>
-          {scene && (
-            <div
-              className="segmento"
-              role="group"
-              aria-label={t("Worlds compared", "Mundos comparados")}
+      <div className="scene-tools">
+        {topic !== "time" && (
+          <>
+            <button
+              className="btn sec"
+              aria-expanded={scene}
+              onClick={() => setScene((v) => !v)}
             >
-              {(Object.keys(PARES) as Par[]).map((k) => (
-                <button
-                  key={k}
-                  type="button"
-                  aria-pressed={par === k}
-                  onClick={() => setPar(k)}
-                >
-                  {PARES[k].map((m) => t(NOMBRES[m].en, NOMBRES[m].es)).join(" | ")}
-                </button>
-              ))}
-            </div>
-          )}
-          {scene && (
-            <div
-              className="segmento"
-              role="group"
-              aria-label={t("Ground in the 3D view", "Suelo de la vista 3D")}
-            >
-              <button
-                type="button"
-                aria-pressed={terreno === "plano" && par === "luna-tierra"}
-                disabled={par !== "luna-tierra"}
-                title={par !== "luna-tierra" ? t("The close-up stage and its readouts are Moon | Earth", "El primer plano y sus lecturas son Luna | Tierra") : undefined}
-                onClick={() => setTerreno("plano")}
+              {scene
+                ? t("Hide the 3D view", "Ocultar la vista 3D")
+                : t("Show the 3D view", "Mostrar la vista 3D")}
+            </button>
+            {scene && (
+              <div
+                className="segmento"
+                role="group"
+                aria-label={t("Worlds compared", "Mundos comparados")}
               >
-                {t("Close-up, flat ground", "Primer plano, suelo plano")}
-              </button>
-              <button
-                type="button"
-                aria-pressed={terreno === "real" || par !== "luna-tierra"}
-                onClick={() => setTerreno("real")}
+                {(Object.keys(PARES) as Par[]).map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    aria-pressed={par === k}
+                    onClick={() => setPar(k)}
+                  >
+                    {PARES[k].map((m) => t(NOMBRES[m].en, NOMBRES[m].es)).join(" | ")}
+                  </button>
+                ))}
+              </div>
+            )}
+            {scene && (
+              <div
+                className="segmento"
+                role="group"
+                aria-label={t("Ground in the 3D view", "Suelo de la vista 3D")}
               >
-                {t("Real relief, 30 × 30 km", "Relieve real, 30 × 30 km")}
-              </button>
-            </div>
-          )}
-          {scene && (
-            <div
-              className="segmento"
-              role="group"
-              aria-label={t("Vertical exaggeration", "Exageración vertical")}
-            >
-              {[1, 2, 4].map((k) => (
                 <button
-                  key={k}
                   type="button"
-                  aria-pressed={exageracion === k}
-                  disabled={terreno === "plano" && par === "luna-tierra"}
-                  onClick={() => setExageracion(k)}
+                  aria-pressed={terreno === "plano" && par === "luna-tierra"}
+                  disabled={par !== "luna-tierra"}
+                  title={par !== "luna-tierra" ? t("The close-up stage and its readouts are Moon | Earth", "El primer plano y sus lecturas son Luna | Tierra") : undefined}
+                  onClick={() => setTerreno("plano")}
                 >
-                  {t(`Vertical ×${k}`, `Vertical ×${k}`)}
+                  {t("Close-up, flat ground", "Primer plano, suelo plano")}
                 </button>
-              ))}
-            </div>
-          )}
-          {scene && (terreno === "real" || par !== "luna-tierra") && estadoTerreno !== "listo" && (
-            <span className="muted" role="status">
-              {estadoTerreno === "sin-datos"
-                ? t(
-                    "Real relief unavailable: showing the close-up.",
-                    "Relieve real no disponible: se muestra el primer plano.",
-                  )
-                : t("Loading the real relief…", "Cargando el relieve real…")}
-            </span>
-          )}
+                <button
+                  type="button"
+                  aria-pressed={terreno === "real" || par !== "luna-tierra"}
+                  onClick={() => setTerreno("real")}
+                >
+                  {t("Real relief, 30 × 30 km", "Relieve real, 30 × 30 km")}
+                </button>
+              </div>
+            )}
+            {scene && (
+              <div
+                className="segmento"
+                role="group"
+                aria-label={t("Vertical exaggeration", "Exageración vertical")}
+              >
+                {[1, 2, 4].map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    aria-pressed={exageracion === k}
+                    disabled={terreno === "plano" && par === "luna-tierra"}
+                    onClick={() => setExageracion(k)}
+                  >
+                    {t(`Vertical ×${k}`, `Vertical ×${k}`)}
+                  </button>
+                ))}
+              </div>
+            )}
+            {scene && (terreno === "real" || par !== "luna-tierra") && estadoTerreno !== "listo" && (
+              <span className="muted" role="status">
+                {estadoTerreno === "sin-datos"
+                  ? t(
+                      "Real relief unavailable: showing the close-up.",
+                      "Relieve real no disponible: se muestra el primer plano.",
+                    )
+                  : t("Loading the real relief…", "Cargando el relieve real…")}
+              </span>
+            )}
+          </>
+        )}
+        <BotonSI
+          texto={t("Explain with SI", "Explicar con SI")}
+          pregunta={preguntaSI}
+          contexto={contextoSI}
+        />
+        {topic !== "time" && (
           <button
             className="text-btn"
             onClick={() => {
@@ -485,6 +636,9 @@ export default function DosMundos({
               setPar("luna-tierra");
               setExageracion(1);
               setCorte(50);
+              const h0 = idx?.campo?.tablita_alto_m ?? 0.5;
+              setAltura(h0);
+              setTextoH(h0.toFixed(2));
               setTiempos(null);
               setCaida(0);
               setSceneKey((k) => k + 1);
@@ -492,12 +646,18 @@ export default function DosMundos({
           >
             {t("Reset view and settings", "Restablecer vista y valores")}
           </button>
-        </div>
-      )}
-      {scene && idx && (
+        )}
+      </div>
+      {scene && idx && topic !== "time" && (
         <>
-          {" "}
-          <div className="comparison mundos">
+          <EscenarioCortina
+            corte={corte}
+            onCorte={setCorte}
+            etiqueta={t(
+              "Moon and Earth comparison stage. Drag the curtain or use Left and Right arrows, Home, End, L for Moon and T for Earth.",
+              "Escenario de comparación Luna y Tierra. Arrastra la cortina o usa las flechas izquierda y derecha, Inicio, Fin, L para Luna y T para Tierra.",
+            )}
+          >
             <Suspense
               fallback={
                 <div className="escena escena-mundos cargando">
@@ -521,6 +681,7 @@ export default function DosMundos({
                 animar={animar}
                 onCaida={setTiempos}
                 terreno={terreno}
+                alturaObjetoM={altura}
                 exageracion={exageracion}
                 onTerrenoEstado={setEstadoTerreno}
                 textoAcercar={t("Zoom in", "Acercar")}
@@ -536,23 +697,18 @@ export default function DosMundos({
               style={{ clipPath: `inset(0 ${100 - corte}% 0 0)` }}
               aria-hidden="true"
             />
-            <div
-              className="curtain"
-              style={{ left: `${corte}%` }}
-              aria-hidden="true"
-            />
             <span className="world-label moon-label">
               {t(NOMBRES[PARES[par][0]].en, NOMBRES[PARES[par][0]].es)}
             </span>
             <span className="world-label earth-label">
               {t(NOMBRES[PARES[par][1]].en, NOMBRES[PARES[par][1]].es)}
             </span>
-          </div>
+          </EscenarioCortina>
           <p className="muted">
             {terreno === "real" || par !== "luna-tierra"
               ? t(
-                  "Real relief from the source grids (Moon and Earth 60 m, Mars 200 m native), drawn with display meshes. Both worlds share the same local Sun angle; the drawn shadows are the renderer's, the Sun disc has its true size for each world, and the sky colours are illustration. Use the readings and the table below for numbers.",
-                  "Relieve real de las grillas de origen (Luna y Tierra 60 m, Marte 200 m nativos), dibujado con mallas de exhibición. Los dos mundos comparten el mismo ángulo local del Sol; las sombras dibujadas son del renderizador, el disco solar tiene su tamaño real en cada mundo y los colores del cielo son ilustración. Usa las lecturas y la tabla de abajo para los números.",
+                  "Real relief from the source grids (Moon and Earth 60 m, Mars 200 m native), drawn with display meshes. Both worlds share the same local Sun angle; the drawn shadows are the renderer's, the Sun disc has its true size for each world, and the sky colours are illustration. Use the readings and the Moon · Earth · Mars card for numbers.",
+                  "Relieve real de las grillas de origen (Luna y Tierra 60 m, Marte 200 m nativos), dibujado con mallas de exhibición. Los dos mundos comparten el mismo ángulo local del Sol; las sombras dibujadas son del renderizador, el disco solar tiene su tamaño real en cada mundo y los colores del cielo son ilustración. Usa las lecturas y la tarjeta Luna · Tierra · Marte para los números.",
                 )
               : t(
                   "Illustrative flat ground and generic rover geometry. Use the paired readings for numerical comparisons.",
@@ -561,7 +717,8 @@ export default function DosMundos({
           </p>
           <div>
             <label htmlFor="curtain">
-              {t("Comparison divider", "Divisor de comparación")}
+              {t("Comparison divider", "Divisor de comparación")}:{" "}
+              <strong className="mono">{corte} % {t("Moon", "Luna")}</strong>
             </label>
             <input
               id="curtain"
@@ -574,10 +731,9 @@ export default function DosMundos({
           </div>
         </>
       )}
-      <FichaMundos elevacion={e} />
       <a className="text-link" href="#card">
         {t("Return to site record", "Volver a la ficha")} · {site}
       </a>
-    </>
+    </div>
   );
 }

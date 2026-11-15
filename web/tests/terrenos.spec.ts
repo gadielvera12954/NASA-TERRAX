@@ -43,10 +43,10 @@ test("two worlds opens on the real relief with every option visible, and compare
   await expect(page.getByRole("button", { name: "Close-up, flat ground" })).toBeDisabled();
   await expect(page.locator(".world-label.moon-label")).toHaveText("Mars");
 
-  // Moon, Earth and Mars side by side, from the NASA fact sheets.
-  const tabla = page.locator(".ficha-mundos table");
-  await expect(tabla).toContainText("3.71 m/s²");
-  await expect(tabla).toContainText("1.62 m/s²");
+  // Moon, Earth and Mars side by side, from the NASA fact sheets (Erwan's card).
+  const tabla = page.locator(".tarjeta-cuerpos");
+  await expect(tabla).toContainText("3.7 m/s²");
+  await expect(tabla).toContainText("1.6 m/s²");
 
   await page.getByRole("button", { name: "Moon | Earth" }).click();
   await page.getByRole("button", { name: "Close-up, flat ground" }).click();

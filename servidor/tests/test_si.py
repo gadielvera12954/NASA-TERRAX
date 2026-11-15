@@ -12,6 +12,13 @@ H = {"X-TerraX": "1"}
 PEDIDO = {"contents": [{"role": "user", "parts": [{"text": "hola"}]}]}
 
 
+def test_clave_vacia_no_anuncia_conexion(monkeypatch):
+    monkeypatch.setenv("TERRAX_GEMINI_KEY", "   ")
+    c = app.test_client()
+    assert c.get("/api/si/estado").get_json()["disponible"] is False
+    assert c.post("/api/si/chat", json=PEDIDO, headers=H).status_code == 503
+
+
 def test_sin_clave_responde_503_y_lo_dice(monkeypatch):
     monkeypatch.delenv("TERRAX_GEMINI_KEY", raising=False)
     c = app.test_client()

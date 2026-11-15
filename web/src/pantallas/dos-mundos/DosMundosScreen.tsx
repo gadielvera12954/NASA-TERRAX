@@ -2,6 +2,10 @@ import React, { useState, useRef, useCallback, lazy, Suspense } from 'react';
 import { useSol } from '../../luz/SolContext';
 import { LanguageProvider } from '../../i18n/Language';
 import { CONSTANTES, NOMBRES, PARES, type Mundo, type Par } from '../../escena3d/mundos';
+import { TerrainShadowCanvas } from '../../luz/TerrainShadowCanvas';
+import BotonSI from '../../luz/BotonSI';
+import { escribiendoEnCampo } from '../../luz/EscenarioCortina';
+import { Split, ArrowLeftRight, CheckCircle2, ShieldAlert } from 'lucide-react';
 
 /** What each world's corner badge says (gravity: NASA NSSDCA fact sheets). */
 const ESPEC: Record<Mundo, { titulo: string; color: string; linea: [string, string]; g: string }> = {
@@ -9,8 +13,6 @@ const ESPEC: Record<Mundo, { titulo: string; color: string; linea: [string, stri
   tierra: { titulo: 'ATMOSPHERIC OPTICS', color: 'var(--tierra)', linea: ['Atmospheric diffusion', 'Penumbra gradient'], g: '9.81 m/s² (1 g)' },
   marte: { titulo: 'THIN DUSTY AIR', color: '#E0875A', linea: ['Surface pressure', `${CONSTANTES.marte.presionHpa} hPa (0.6 % of Earth)`], g: `${CONSTANTES.marte.gravedad} m/s² (0.38 g)` },
 };
-import { TerrainShadowCanvas } from '../../luz/TerrainShadowCanvas';
-import { Split, ArrowLeftRight, CheckCircle2, ShieldAlert } from 'lucide-react';
 
 // Real relief, built in Blender from the 60 m grids (modelos/construir_modelos.py), under the same Sun.
 const DosMundos3D = lazy(() => import('../../escena3d/DosMundos3D'));
@@ -28,11 +30,12 @@ export const DosMundosScreen: React.FC = () => {
   // Dragging the vertical curtain separator
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     if (!containerRef.current) return;
+    containerRef.current.focus({ preventScroll: true });
     const rect = containerRef.current.getBoundingClientRect();
     const updatePos = (clientX: number) => {
       const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
       const pct = (x / rect.width) * 100;
-      setCortinaPos(Math.round(pct * 10) / 10);
+      setCortinaPos(Math.max(5, Math.min(95, Math.round(pct))));
     };
 
     updatePos(e.clientX);
@@ -49,31 +52,68 @@ export const DosMundosScreen: React.FC = () => {
     window.addEventListener('pointerup', onPointerUp);
   }, []);
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (escribiendoEnCampo(e.target)) return;
+    const step = e.shiftKey ? 10 : 1;
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setCortinaPos((c) => Math.max(5, c - step));
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setCortinaPos((c) => Math.min(95, c + step));
+    } else if (e.key === 'Home' || e.key === 't' || e.key === 'T') {
+      e.preventDefault();
+      setCortinaPos(5);
+    } else if (e.key === 'End' || e.key === 'l' || e.key === 'L') {
+      e.preventDefault();
+      setCortinaPos(95);
+    }
+  };
+
   return (
-    <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px 20px 80px' }}>
+    <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px 20px 80px' }} onKeyDown={handleKeyDown}>
       {/* Title & Core Project Statement */}
-      <div style={{ marginBottom: '20px' }}>
-        <div className="et" style={{ marginBottom: '4px' }}>
-          Comparative Engine · Same Code on Two Worlds
+      <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '12px' }}>
+        <div>
+          <div className="et" style={{ marginBottom: '4px' }}>
+            Comparative Engine · Same Code on Two Worlds
+          </div>
+          <h1 style={{ fontSize: '32px', fontWeight: 600 }}>
+            Same Sun height. Same shadows. <span style={{ color: 'var(--sol)' }}>Two worlds.</span>
+          </h1>
+          <p style={{ color: 'var(--texto-sec)', fontSize: '14px', marginTop: '4px' }}>
+            Sun: <b style={{ color: 'var(--sol)' }}>{elevacion.toFixed(2)}°</b> @ <b style={{ color: 'var(--dato)' }}>{azimut.toFixed(0)}°</b>. Drag the yellow curtain (or use ←/→, Home/End, L/T) to compare real relief, 30 × 30 km each: Mons Mouton (NASA LOLA, 60 m), Payunia around candidate P-27 (Copernicus GLO-30, 60 m) and Jezero crater on Mars (USGS HRSC + MOLA, 200 m). Drag the scene to turn the camera; the wheel zooms.
+          </p>
+          <div role="group" aria-label="Worlds compared" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
+            {(Object.keys(PARES) as Par[]).map((k) => (
+              <button key={k} type="button" className={par === k ? 'btn' : 'btn sec'} aria-pressed={par === k} onClick={() => setPar(k)}>
+                {PARES[k].map((m) => NOMBRES[m].en).join(' | ')}
+              </button>
+            ))}
+          </div>
         </div>
-        <h1 style={{ fontSize: '32px', fontWeight: 600 }}>
-          Same Sun height. Same shadows. <span style={{ color: 'var(--sol)' }}>Two worlds.</span>
-        </h1>
-        <p style={{ color: 'var(--texto-sec)', fontSize: '14px', marginTop: '4px' }}>
-          Sun: <b style={{ color: 'var(--sol)' }}>{elevacion.toFixed(2)}°</b> @ <b style={{ color: 'var(--dato)' }}>{azimut.toFixed(0)}°</b>. Drag the yellow curtain to compare real relief, 30 × 30 km each: Mons Mouton (NASA LOLA, 60 m), Payunia around candidate P-27 (Copernicus GLO-30, 60 m) and Jezero crater on Mars (USGS HRSC + MOLA, 200 m). Drag the scene to turn the camera; the wheel zooms.
-        </p>
-        <div role="group" aria-label="Worlds compared" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
-          {(Object.keys(PARES) as Par[]).map((k) => (
-            <button key={k} type="button" className={par === k ? 'btn' : 'btn sec'} aria-pressed={par === k} onClick={() => setPar(k)}>
-              {PARES[k].map((m) => NOMBRES[m].en).join(' | ')}
-            </button>
-          ))}
-        </div>
+        <BotonSI
+          texto="Explain with SI"
+          pregunta={() =>
+            `In Two Worlds with the Sun at ${elevacion.toFixed(2)}° elevation and ${azimut.toFixed(0)}° azimuth, Mons Mouton has ${lunaStats.shadowPercent}% shadow coverage vs ${tierraStats.shadowPercent}% on Payunia P-07. Explain what transfers and what does not.`
+          }
+          contexto={() => ({
+            pantalla: 'two worlds',
+            elevacion_sol_deg: elevacion,
+            azimut_sol_deg: azimut,
+            sombra_luna_pct: lunaStats.shadowPercent,
+            sombra_tierra_pct: tierraStats.shadowPercent,
+          })}
+        />
       </div>
 
       {/* Flagship Split Screen Viewport */}
       <div
         ref={containerRef}
+        tabIndex={0}
+        role="group"
+        aria-label={`Two Worlds comparison stage, ${NOMBRES[izq].en} | ${NOMBRES[der].en}. Use Left and Right arrows, Home, End, L for the left world and T for the right world.`}
         style={{
           position: 'relative',
           height: '420px',
@@ -232,8 +272,9 @@ export const DosMundosScreen: React.FC = () => {
             bottom: 0,
             left: `${cortinaPos}%`,
             transform: 'translateX(-50%)',
-            width: '24px',
+            width: '44px',
             cursor: 'ew-resize',
+            touchAction: 'none',
             zIndex: 30,
             display: 'flex',
             alignItems: 'center',

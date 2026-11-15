@@ -3,6 +3,7 @@ import { useSol } from '../../luz/SolContext';
 import { PerfilHorizonte } from '../../graficos/PerfilHorizonte';
 import { RecorridoSolLunacion } from '../../graficos/RecorridoSolLunacion';
 import { TerrainShadowCanvas } from '../../luz/TerrainShadowCanvas';
+import BotonSI from '../../luz/BotonSI';
 import { AlertTriangle, BatteryCharging, Clock, MapPin, Sun } from 'lucide-react';
 
 export const DestinationScreen: React.FC = () => {
@@ -46,22 +47,35 @@ export const DestinationScreen: React.FC = () => {
   return (
     <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px 20px 80px' }}>
       {/* Screen Title & First Verdict Header */}
-      <div style={{ marginBottom: '20px' }}>
-        <div className="et" style={{ marginBottom: '4px' }}>
-          Destination · Lunar South Pole (Mons Mouton · 84.60°S, 31.00°E)
+      <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '12px' }}>
+        <div>
+          <div className="et" style={{ marginBottom: '4px' }}>
+            Destination · Lunar South Pole (Mons Mouton · 84.60°S, 31.00°E)
+          </div>
+          <h1 style={{ fontSize: '30px', fontWeight: 600 }}>
+            {datosEstacion.supervivenciaPct === null ? (
+              <>On flat ground, a parked rover <span style={{ color: 'var(--sol)' }}>does not survive</span> the lunar night.</>
+            ) : datosEstacion.supervivenciaPct === 0 ? (
+              <>No point of this 30 × 30 km area <span style={{ color: 'var(--sol)' }}>survives the lunar night</span>.</>
+            ) : (
+              <>The mission survives on <span style={{ color: 'var(--sol)' }}>{datosEstacion.supervivenciaPct} %</span> of this terrain.</>
+            )}
+          </h1>
+          <p style={{ color: 'var(--texto-sec)', fontSize: '14px', marginTop: '4px' }}>
+            Current Grazing Sun: <b style={{ color: 'var(--sol)' }}>{elevacion.toFixed(2)}°</b> @ <b style={{ color: 'var(--dato)' }}>{azimut.toFixed(0)}°</b>. Elsewhere, darkness exceeds the 50 h VIPER battery survival limit.
+          </p>
         </div>
-        <h1 style={{ fontSize: '30px', fontWeight: 600 }}>
-          {datosEstacion.supervivenciaPct === null ? (
-            <>On flat ground, a parked rover <span style={{ color: 'var(--sol)' }}>does not survive</span> the lunar night.</>
-          ) : datosEstacion.supervivenciaPct === 0 ? (
-            <>No point of this 30 × 30 km area <span style={{ color: 'var(--sol)' }}>survives the lunar night</span>.</>
-          ) : (
-            <>The mission survives on <span style={{ color: 'var(--sol)' }}>{datosEstacion.supervivenciaPct} %</span> of this terrain.</>
-          )}
-        </h1>
-        <p style={{ color: 'var(--texto-sec)', fontSize: '14px', marginTop: '4px' }}>
-          Current Grazing Sun: <b style={{ color: 'var(--sol)' }}>{elevacion.toFixed(2)}°</b> @ <b style={{ color: 'var(--dato)' }}>{azimut.toFixed(0)}°</b>. Elsewhere, darkness exceeds the 50 h VIPER battery survival limit.
-        </p>
+        <BotonSI
+          texto="Explain with SI: analyze this point"
+          pregunta={() =>
+            `At Mons Mouton (84.60°S, 31.00°E) in ${estacion} lunation, Sun on panels is ${datosEstacion.solEnPaneles}, longest dark stretch is ${datosEstacion.tramoOscuroMax}, and lowest battery reserve is ${datosEstacion.bateriaMin}. Analyze why this point does or does not meet the 50 h NASA VIPER survival limit.`
+          }
+          contexto={() => ({
+            pantalla: 'destination',
+            estacion,
+            ficha: f,
+          })}
+        />
       </div>
 
       {/* Main 2-column layout */}
