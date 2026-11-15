@@ -16,7 +16,16 @@ The comparison uses synthetic illustrative images, a keyboard-accessible divider
 
 Production builds generate a content-versioned service worker that precaches the local app, data and images. Wait for the offline-ready message before disconnecting. Remote fonts and external pages are optional and are not cached. Deployment currently assumes the root of a domain (Vercel); a GitHub Pages subdirectory needs base-path support.
 
+## 3D lab, Two Worlds and comparator
+
+The shell now has a seventh view, `#lab`, and the Home and Compare views are interactive 3D scenes (three.js, loaded on demand; the models come from `modelos/construir_modelos.py`). `src/datos/laboratorio.ts` talks to the optional live engine (`/api`, see `servidor/LEEME.md`) and, when it is not reachable, runs the same formulas in the browser over `horizontes.bin` and `/laboratorio/sol_*.json`. The page states which path produced each result. The Compare view keeps its divider and adds live readouts plus a side-by-side comparator of exported cards, which lays out their values without rescoring them. The Guide adds a field kit for the shadow measurement. If WebGL is missing, the 3D views fall back to the previous illustrative images.
+
+Scroll wheel and vertical swipes are left to the page; the 3D views zoom with their + / − buttons. The six-step tour is unchanged and does not include the lab.
+
 ## Validation
+
+`tests/lab.spec.ts` cuts `/api` and checks that the lab computes in the browser within 5 % of the exported engine card, that parking with the keyboard fields and changing season work, the Two Worlds readouts, the field kit geometry, automated WCAG A/AA scans of the lab and comparator in Spanish, and that these views fit a 375 px phone.
+
 
 `npm run test:e2e` builds and previews the production app (or reuses a running preview), then checks bilingual navigation, language persistence, candidate download, empty search, mobile width, keyboard access, comparison, the complete 90-second tour, reduced-motion behavior, invalid-file recovery and offline reload. It also scans all six Spanish views for automated WCAG A/AA violations with axe; this is not a substitute for manual accessibility review. Microsoft Edge is used by default; set `PLAYWRIGHT_CHANNEL=chrome` for Chrome, or install another supported browser and update the configuration.
 

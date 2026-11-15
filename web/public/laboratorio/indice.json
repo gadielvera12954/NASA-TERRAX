@@ -1,0 +1,57 @@
+{
+ "series": {
+  "verano": {
+   "archivo": "sol_verano.json",
+   "sha256": "c6d65712c3b701cd187bc46fcf687196e98881a4c38b98513e135fbece695e50",
+   "n": 1489
+  },
+  "invierno": {
+   "archivo": "sol_invierno.json",
+   "sha256": "a15279490c5679ac06b8b3e50d505c153a4c67a120f62a65388230b73a424936",
+   "n": 1465
+  }
+ },
+ "vehiculo": {
+  "plantilla": "viper-publico",
+  "panel_w": 320,
+  "lados_deg": [
+   0,
+   90,
+   180
+  ],
+  "bateria_wh": 5420,
+  "supervivencia_h": 50,
+  "p_surv_w": 108.4,
+  "consumo_w": 60,
+  "consumo_sensibilidad_w": [
+   50,
+   60,
+   80,
+   95,
+   108.4
+  ],
+  "reserva_frac": 0.2,
+  "bateria_inicial_frac": 1.0,
+  "pendiente_max_deg": 15
+ },
+ "limite_refugio_h": 50,
+ "rumbo": "sol-en-esquina",
+ "radio_angular_sol_deg": 0.267,
+ "altura_observador_m": 1.0,
+ "campo": {
+  "lugar": {
+   "nombre": "Ciudad del Este",
+   "lat": -25.51,
+   "lon": -54.61,
+   "alt_m": 200
+  },
+  "fecha": "2026-11-14",
+  "tablita_alto_m": 0.5,
+  "tablita_ancho_min_m": 0.1,
+  "e_min_deg": 5.0,
+  "e_max_deg": 15.0,
+  "meta_error_frac": 0.05
+ },
+ "parametros_sha256": "346a6cd22cc8cb1c75852fd8310971a78d50b2bf33d4c0710658e79e8556231c",
+ "maqueta": false
+}
