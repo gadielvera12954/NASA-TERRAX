@@ -143,7 +143,7 @@ test("Community, accounts, integrity verification and the SI guide remain reacha
   await page.getByRole("button", {name: "Check every file now"}).click();
   await expect(page.getByText(manifest.archivos.length + " of " + manifest.archivos.length + " files match", {exact: true})).toBeVisible();
   await page.keyboard.press("Control+k");
-  await expect(page.getByRole("region", {name: "TERRA-X guide (SI)"})).toBeVisible();
+  await expect(page.getByRole("dialog", {name: "TERRA-X SI assistant"})).toBeVisible();
   await page.keyboard.press("Escape");
-  await expect(page.getByRole("region", {name: "TERRA-X guide (SI)"})).toBeHidden();
+  await expect(page.getByRole("dialog", {name: "TERRA-X SI assistant"})).toBeHidden();
 });

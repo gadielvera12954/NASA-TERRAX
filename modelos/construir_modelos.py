@@ -1,6 +1,9 @@
 """TERRA-X · modelos 3D construidos en Blender (sin interfaz, reproducible).
 
     blender --background --factory-startup --python modelos/construir_modelos.py
+    blender --background --factory-startup --python modelos/construir_modelos.py -- --solo-tierra
+
+(El segundo arma solo el terreno terrestre `payunia.glb` y lo suma a modelos.json sin tocar lo demás.)
 
 Produce, a partir de los parámetros congelados y de la grilla real de LOLA:
 
@@ -46,6 +49,9 @@ RAIZ = pathlib.Path(__file__).resolve().parents[1]
 AQUI = RAIZ / "modelos"
 SALIDA = RAIZ / "web" / "public" / "modelos"
 GRILLA = RAIZ / "datos" / "grillas" / "mons_mouton_60m"
+# Terreno terrestre de "Dos mundos": Copernicus GLO-30 -> UTM 19S a 60 m alrededor de P-27, la misma
+# extensión que Mons Mouton (500 × 500). Se arma con `python -m modelos.grilla_tierra`.
+GRILLA_TIERRA = RAIZ / "datos" / "grillas" / "payunia_p27_60m"
 
 # Medidas con fuente (ver el encabezado)
 ROVER_LADO_M = 1.5
@@ -262,9 +268,11 @@ def construir_tablita(col, M):
 # ------------------------------------------------------------------------------------------------
 # Terreno real de Mons Mouton
 # ------------------------------------------------------------------------------------------------
-def construir_terreno(col, M):
-    z = np.load(str(GRILLA) + ".npy").astype(np.float64)
-    meta = json.loads(pathlib.Path(str(GRILLA) + ".json").read_text(encoding="utf-8"))
+def construir_terreno(col, M, grilla=GRILLA, nombre="mons_mouton", mat="regolito"):
+    z = np.load(str(grilla) + ".npy").astype(np.float64)
+    meta = json.loads(pathlib.Path(str(grilla) + ".json").read_text(encoding="utf-8"))
+    if not np.isfinite(z).all():
+        raise ValueError(f"{meta['nombre']} tiene celdas sin dato: la malla de exhibición no las rellena")
     alto, ancho = z.shape
     px = float(meta["pixel_m"])
     z_min = float(np.nanmin(z))
@@ -275,7 +283,7 @@ def construir_terreno(col, M):
     n = np.stack([-dzdx, -dzdy, np.ones_like(z)], axis=-1)
     n /= np.linalg.norm(n, axis=-1, keepdims=True)
     gl = np.stack([n[..., 0], n[..., 2], -n[..., 1]], axis=-1)
-    png_rgb(SALIDA / "mons_mouton_normales.png", np.clip(np.rint((gl * 0.5 + 0.5) * 255.0), 0, 255).astype(np.uint8))
+    png_rgb(SALIDA / f"{nombre}_normales.png", np.clip(np.rint((gl * 0.5 + 0.5) * 255.0), 0, 255).astype(np.uint8))
 
     # Malla de exhibición: promedio de bloques de 2 × 2 (120 m). Cada vértice queda en el centro de su bloque.
     H, W = alto // BLOQUE, ancho // BLOQUE
@@ -290,7 +298,7 @@ def construir_terreno(col, M):
     a = (filas[:-1, :-1] * W + cols[:-1, :-1]).reshape(-1)
     caras = np.stack([a + W, a + W + 1, a + 1, a], axis=-1)
 
-    me = bpy.data.meshes.new("mons_mouton")
+    me = bpy.data.meshes.new(nombre)
     me.from_pydata(verts.tolist(), [], caras.tolist())
     me.update()
     uv = me.uv_layers.new(name="UVMap")
@@ -301,10 +309,10 @@ def construir_terreno(col, M):
     me.loops.foreach_get("vertex_index", idx)
     uv.data.foreach_set("uv", uvs[idx].reshape(-1))
     me.polygons.foreach_set("use_smooth", np.ones(len(me.polygons), dtype=bool))
-    me.materials.append(M["regolito"])
+    me.materials.append(M[mat])
     me.update()
 
-    ob = bpy.data.objects.new("mons_mouton", me)
+    ob = bpy.data.objects.new(nombre, me)
     col.objects.link(ob)
     fuente = meta["fuentes"][0]
     ob["grilla"] = meta["nombre"]
@@ -323,8 +331,44 @@ def construir_terreno(col, M):
     info = {"grilla": meta["nombre"], "pixel_m": px, "pixel_malla_m": px * BLOQUE, "filas": alto, "columnas": ancho,
             "z_min_m": z_min, "z_max_m": float(np.nanmax(z)), "x0_m": float(meta["x0_m"]), "y0_m": float(meta["y0_m"]),
             "proyeccion": meta["proyeccion"], "unidad_malla": "km", "exageracion_vertical": 1.0,
-            "vertices": int(len(verts)), "fuentes": meta["fuentes"]}
+            "vertices": int(len(verts)), "fuentes": meta["fuentes"], "cuerpo": meta["cuerpo"]}
+    if "candidata" in meta:
+        info["candidata"] = meta["candidata"]
     return ob, info
+
+
+def registro_terreno(nombre: str, info: dict) -> dict:
+    return {"archivo": f"{nombre}.glb", "sha256": sha256(SALIDA / f"{nombre}.glb"),
+            "normales": f"{nombre}_normales.png", "normales_sha256": sha256(SALIDA / f"{nombre}_normales.png"), **info}
+
+
+def materiales_terreno():
+    return {"regolito": material("regolito", (0.46, 0.46, 0.47), rugosidad=1.0),
+            # Color de exhibición (basalto); la web pinta su propio material: no es una medición.
+            "basalto": material("basalto", (0.30, 0.26, 0.23), rugosidad=1.0)}
+
+
+def principal_tierra():
+    """Solo el terreno terrestre: no vuelve a exportar rover, tablita ni Mons Mouton (sus huellas no cambian)."""
+    SALIDA.mkdir(parents=True, exist_ok=True)
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    bpy.context.scene.unit_settings.system = "METRIC"
+    M = materiales_terreno()
+    M["piso"] = material("piso_vista", (0.33, 0.33, 0.34), rugosidad=1.0)
+    c_terr = coleccion("TerrenoTierra")
+    terreno, info = construir_terreno(c_terr, M, GRILLA_TIERRA, "payunia", "basalto")
+    bpy.context.view_layer.update()
+    exportar([terreno], SALIDA / "payunia.glb")
+    ok = render(AQUI / "vista_previa_payunia.png", (22, -30, 16), (0, 0, 1.2),
+                (math.radians(83), 0, math.radians(60)), energia=5.0, lente=40)
+    ruta = SALIDA / "modelos.json"
+    registro = json.loads(ruta.read_text(encoding="utf-8"))
+    terrenos = registro.get("terrenos") or {"mons_mouton": dict(registro["terreno"])}
+    terrenos["payunia"] = registro_terreno("payunia", info)
+    registro["terrenos"] = terrenos
+    registro.setdefault("vistas_previas", {})["payunia"] = ok
+    ruta.write_text(json.dumps(registro, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print("TERRENO TIERRA LISTO:", terrenos["payunia"]["sha256"][:12])
 
 
 # ------------------------------------------------------------------------------------------------
@@ -412,7 +456,7 @@ def principal():
         "lente": material("lente", (0.01, 0.02, 0.05), metal=0.9, rugosidad=0.08),
         "luz": material("faro", (0.95, 0.95, 0.85), emision=(1.0, 0.98, 0.85), fuerza=1.5),
         "sol": material("amarillo_sol", (0.906, 0.957, 0.204), rugosidad=0.6),
-        "regolito": material("regolito", (0.46, 0.46, 0.47), rugosidad=1.0),
+        **materiales_terreno(),
         "piso": material("piso_vista", (0.33, 0.33, 0.34), rugosidad=1.0),
     }
 
@@ -431,6 +475,12 @@ def principal():
     exportar(descendientes(tablita), SALIDA / "tablita.glb")
     tablita.location = lugar
     exportar([terreno], SALIDA / "mons_mouton.glb")
+    tierra = None
+    if pathlib.Path(str(GRILLA_TIERRA) + ".npy").exists():
+        tierra, info_tierra = construir_terreno(c_terr, M, GRILLA_TIERRA, "payunia", "basalto")
+        exportar([tierra], SALIDA / "payunia.glb")
+        tierra.hide_render = True
+        tierra.location = (40.0, 60.0, 0.0)
 
     # Vistas previas de control
     piso = Malla("piso_vista")
@@ -464,13 +514,17 @@ def principal():
         "vistas_previas": {"rover": ok1, "terreno": ok2},
         "maqueta": False,
     }
+    registro["terrenos"] = {"mons_mouton": dict(registro["terreno"])}
+    if tierra is not None:
+        registro["terrenos"]["payunia"] = registro_terreno("payunia", info_tierra)
     (SALIDA / "modelos.json").write_text(json.dumps(registro, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print("MODELOS LISTOS:", json.dumps({k: v.get("sha256", "")[:12] for k, v in registro.items() if isinstance(v, dict) and "sha256" in v}))
 
 
 if __name__ == "__main__":
     try:
-        principal()
+        extra = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+        principal_tierra() if "--solo-tierra" in extra else principal()
     except Exception:
         import traceback
         traceback.print_exc()

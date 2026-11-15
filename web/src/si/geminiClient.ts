@@ -8,7 +8,8 @@
  * is shown and labelled as such.
  */
 import { EntradaRanking } from "../datos/ranking";
-import { CLAVE_GEMINI } from "./clave";
+import type { ResultadoMotorSI } from "../datos/siMotor";
+import { explicarMotorSI } from "./motorSI";
 import {
   AccionRapidaSI,
   ContextoSI,
@@ -20,19 +21,15 @@ import {
 export const MODELO = "gemini-3.5-flash";
 export const NOMBRE_MODELO = "Gemini 3.5 Flash";
 
-export function claveGemini(): string {
-  const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env?.VITE_GEMINI_API_KEY;
-  return (env?.trim() || CLAVE_GEMINI).trim();
-}
-
 export interface RespuestaChatSI {
   texto: string;
-  origen: "gemini" | "local";
+  origen: "gemini" | "local" | "motor";
   modeloUsado: string;
   latenciaMs: number;
   verificacion: ResultadoVerificacionSI;
   acciones: AccionRapidaSI[];
   aviso?: string;
+  resultadosMotor?: ResultadoMotorSI[];
 }
 
 const NOMBRES: Record<string, [string, string]> = {
@@ -57,7 +54,8 @@ export function instruccionSistema(ctx: ContextoSI, lang: "en" | "es"): string {
   const f = ctx.ficha;
   const det = extraerDetalleFuente(f);
   const ranking = ctx.ranking ?? [];
-  const sombra = (0.5 / Math.tan((ctx.elevacionSolDeg * Math.PI) / 180)).toFixed(2);
+  const altura = ctx.alturaObjetoM ?? 0.5;
+  const sombra = ctx.elevacionSolDeg > 0 ? (altura / Math.tan((ctx.elevacionSolDeg * Math.PI) / 180)).toFixed(2) : null;
   const tarjeta = f
     ? JSON.stringify(
         {
@@ -107,7 +105,7 @@ export function instruccionSistema(ctx: ContextoSI, lang: "en" | "es"): string {
     "FACTS (published by the engine)",
     "- Destination: Mons Mouton, 84.6°S 31.0°E, lunar south pole. The Sun never rises above about 7° there (6.96° at most in the 2027 lunations). On a flat horizon the night lasts 289 to 418 h per lunation; in the central 30 x 30 km crop the shortest continuous night is 424 h in summer and 622 h in winter.",
     "- Rover template (public VIPER figures): 320 W of panels on three sides, 5420 Wh battery, survives 50 h of darkness, which implies a 108.4 W survival draw. Only relief (parking on a ridge) can shorten the night; the 3D lab lets the visitor try.",
-    "- Grid: 60 m per pixel for both worlds, never interpolated to a finer resolution. Shadow of a vertical board = height / tan(Sun elevation); a 0.50 m board at " + ctx.elevacionSolDeg + "° casts " + sombra + " m.",
+    "- Grid: 60 m per pixel for both worlds, never interpolated to a finer resolution. Shadow of a vertical board = height / tan(Sun elevation). " + (sombra === null ? "There is no finite illuminated shadow at this elevation." : `With the chosen height ${altura} m at ${ctx.elevacionSolDeg}° the flat-plane geometric shadow is ${sombra} m.`),
     "- Earth candidates: 40 parcels of 3 x 3 km in Payunia (Mendoza, Argentina), with 30 km of relief around each. Hard requirements: vegetation NDVI p90 below 0.20 and median slope below 15°; a parcel that fails one is 'incompatible'.",
     "- Scores: C = compatibility of the terrain footprint (slope, roughness at 200 to 1600 m, grazing-light shadow fraction from 1.5° to 10°); E = how much evidence exists (0.8 means two properties, material and fine traversability, were never measured). Bounds L = C x E and U = L + (1 - E). Verdicts: supported analog (L above 0.70), with gaps, insufficient, cannot conclude, incompatible.",
     "- Controls: CTRL-MM is Mons Mouton itself and must rank first; CTRL-MM-R1..R3 are copies with 2, 5 and 10 m of noise and must rank in that order; CTRL-MEDANOS (Médanos del Chaco, Paraguay, vegetated) must be rejected. All three checks pass in the published data.",
@@ -120,6 +118,20 @@ export function instruccionSistema(ctx: ContextoSI, lang: "en" | "es"): string {
     incompatibles.length ? `- Incompatible (fail a hard requirement): ${incompatibles.join(", ")}` : "",
     "",
     `CURRENT SCREEN: ${ctx.pagina} · Sun slider ${ctx.elevacionSolDeg}° · live engine ${ctx.motorEnVivo ? "connected" : "off (browser calculation)"}`,
+    ctx.instante ? `DISPLAY TIME (screen parameter, not an additional engine calculation): ${ctx.instante}` : "",
+    ...(ctx.fichasComparacion?.length ? [
+      "COMPARED SOURCE RECORDS (loaded from the published files, not from the caller's numbers)",
+      JSON.stringify(ctx.fichasComparacion.map(f => ({ id: f.id, nombre: f.lugar.nombre, C: f.C, E: f.E, L: f.L, U: f.U,
+        etiqueta: f.etiqueta, medir_primero: f.medir_primero }))),
+    ] : []),
+    ...(ctx.resultadosMotor?.length ? [
+      "VERIFIED ENGINE RESULTS (authoritative; each result retains its own inputs and units)",
+      JSON.stringify(ctx.resultadosMotor.map(r => r.escenario ? {
+        punto: r.escenario.punto, periodo: r.escenario.periodo, resultado: r.escenario.resultado,
+        scenario_id: r.escenario.scenario_id, meta: r.escenario.meta,
+      } : { error: "No verified result for this scenario" })),
+      "Explain these results qualitatively, WITHOUT writing any numbers. Refer to the verified engine readout for numerical values. Do not replace or recalculate that readout. Distinguish geometric night, terrain darkness and battery energy.",
+    ] : []),
     "ACTIVE CARD",
     tarjeta,
   ].join("\n");
@@ -129,6 +141,12 @@ export function instruccionSistema(ctx: ContextoSI, lang: "en" | "es"): string {
 export function respuestaLocal(ctx: ContextoSI, lang: "en" | "es"): string {
   const f = ctx.ficha;
   const es = lang === "es";
+  if (ctx.fichasComparacion?.length) return ctx.fichasComparacion.map(f =>
+    `${f.id} (${f.lugar.nombre}): C = ${f.C === null ? (es ? "desconocido" : "unknown") : f.C.toFixed(2)}, E = ${f.E.toFixed(2)}, L–U = ${f.L.toFixed(2)}–${f.U.toFixed(2)}. ${es ? "Medir primero" : "Measure first"}: ${f.medir_primero}.`,
+  ).join("\n");
+  if (ctx.pagina === "lab") return es
+    ? "Usá Analizar este punto para ejecutar el motor con los parámetros del laboratorio. El resultado verificado se mostrará aquí. Si faltan parámetros, abrí el laboratorio y usá Explicar con SI desde un punto."
+    : "Use Analyze this point to run the engine with the laboratory parameters. The verified result will appear here. If parameters are missing, open the lab and use Explain with SI from a point.";
   if (!f) return es ? "No hay una candidata abierta. Abrí una desde Explorar y te la explico." : "No candidate is open. Pick one on Explore and I will walk you through it.";
   const c = f.C === null ? "—" : f.C.toFixed(2);
   const pos = ctx.ranking?.find((e) => e.id === f.id)?.orden;
@@ -167,12 +185,13 @@ async function llamarServidor(
   instruccion: string,
   historial: { rol: "user" | "model"; texto: string }[],
   pregunta: string,
-  onDelta?: (acumulado: string) => void,
 ): Promise<string> {
-  const r = await fetch("/api/si/chat", {
+  const base = ((import.meta.env.VITE_MOTOR_URL as string | undefined) ?? "").replace(/\/$/, "");
+  const r = await fetch(base + "/api/si/chat", {
     method: "POST",
     credentials: "same-origin",
     headers: { "Content-Type": "application/json", "X-TerraX": "1" },
+    signal: AbortSignal.timeout(30000),
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: instruccion }] },
       contents: [...historial.slice(-8).map((h) => ({ role: h.rol, parts: [{ text: h.texto }] })), { role: "user", parts: [{ text: pregunta }] }],
@@ -185,59 +204,7 @@ async function llamarServidor(
     // proxy error page: no server behind /api
   }
   if (!r.ok || !j.texto) throw new Error(j.error || `HTTP ${r.status}`);
-  onDelta?.(j.texto);
   return j.texto;
-}
-
-async function llamar(
-  apiKey: string,
-  instruccion: string,
-  historial: { rol: "user" | "model"; texto: string }[],
-  pregunta: string,
-  onDelta?: (acumulado: string) => void,
-): Promise<string> {
-  if (!apiKey) return llamarServidor(instruccion, historial, pregunta, onDelta);
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:streamGenerateContent?alt=sse`;
-  const r = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: instruccion }] },
-      contents: [...historial.slice(-8).map((h) => ({ role: h.rol, parts: [{ text: h.texto }] })), { role: "user", parts: [{ text: pregunta }] }],
-      // Gemini 3.x counts its internal reasoning against maxOutputTokens: a low budget cut answers mid-word.
-      generationConfig: { temperature: 0.3, maxOutputTokens: 4096, thinkingConfig: { thinkingLevel: "low" } },
-    }),
-  });
-  if (!r.ok || !r.body) throw new Error(`HTTP ${r.status}`);
-  const reader = r.body.getReader();
-  const dec = new TextDecoder();
-  let buffer = "";
-  let texto = "";
-  const procesar = (l: string) => {
-    if (!l.startsWith("data:")) return;
-    const cuerpo = l.slice(5).trim();
-    if (!cuerpo || cuerpo === "[DONE]") return;
-    try {
-      const j = JSON.parse(cuerpo);
-      const partes = j?.candidates?.[0]?.content?.parts ?? [];
-      for (const p of partes) if (typeof p.text === "string") texto += p.text;
-      onDelta?.(texto);
-    } catch {
-      // a partial JSON line: wait for the rest
-    }
-  };
-  for (;;) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buffer += dec.decode(value, { stream: true });
-    const lineas = buffer.split("\n");
-    buffer = lineas.pop() ?? "";
-    lineas.forEach(procesar);
-  }
-  buffer += dec.decode();
-  buffer.split("\n").forEach(procesar);                 // the last event may arrive without a trailing newline
-  if (!texto.trim()) throw new Error("empty answer");
-  return texto;
 }
 
 export async function consultarSI(
@@ -245,18 +212,20 @@ export async function consultarSI(
   ctx: ContextoSI,
   lang: "en" | "es",
   historial: { rol: "user" | "model"; texto: string }[],
-  onDelta?: (parcial: string) => void,
 ): Promise<RespuestaChatSI> {
   const t0 = performance.now();
-  // With a key in this build (local .env.local): call Gemini directly. Without one: through the server.
-  const apiKey = claveGemini();
   const local = (aviso?: string): RespuestaChatSI => {
-    const texto = respuestaLocal(ctx, lang);
+    if (ctx.resultadosMotor?.length) return { ...explicarMotorSI(ctx.resultadosMotor, lang), aviso };
+    const candidata = respuestaLocal(ctx, lang);
+    const verificacion = verificarRespuestaSI(candidata, ctx);
+    const texto = verificacion.valido ? candidata : (lang === "es"
+      ? "No puedo mostrar cifras verificadas con los datos disponibles. Abrí la ficha fuente para revisar el resultado."
+      : "I cannot show verified figures from the available data. Open the source card to inspect the result.");
     return { texto, origen: "local", modeloUsado: "card only", latenciaMs: Math.round(performance.now() - t0), verificacion: verificarRespuestaSI(texto, ctx), acciones: [], aviso };
   };
   const instruccion = instruccionSistema(ctx, lang);
   try {
-    let crudo = await llamar(apiKey, instruccion, historial, pregunta, onDelta);
+    let crudo = await llamarServidor(instruccion, historial, pregunta);
     let { textoLimpio, acciones } = extraerAcciones(crudo);
     let verif = verificarRespuestaSI(textoLimpio, ctx);
     if (!verif.valido) {
@@ -264,7 +233,7 @@ export async function consultarSI(
       const pedido = lang === "es"
         ? `Reescribí tu última respuesta sin usar estas cifras, que no están en los datos publicados: ${verif.numerosNoVerificados.join(", ")}. Si hace falta, decí en palabras que ese dato no está publicado.`
         : `Rewrite your last answer without these figures, which are not in the published data: ${verif.numerosNoVerificados.join(", ")}. If needed, say in words that the figure is not published.`;
-      crudo = await llamar(apiKey, instruccion, [...historial, { rol: "user", texto: pregunta }, { rol: "model", texto: crudo }], pedido, onDelta);
+      crudo = await llamarServidor(instruccion, [...historial, { rol: "user", texto: pregunta }, { rol: "model", texto: crudo }], pedido);
       ({ textoLimpio, acciones } = extraerAcciones(crudo));
       verif = verificarRespuestaSI(textoLimpio, ctx);
       if (!verif.valido) {
@@ -274,14 +243,9 @@ export async function consultarSI(
       }
     }
     return { texto: textoLimpio, origen: "gemini", modeloUsado: NOMBRE_MODELO, latenciaMs: Math.round(performance.now() - t0), verificacion: verif, acciones };
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    return local(
-      apiKey
-        ? lang === "es" ? `Sin conexión con Gemini (${msg}). Se muestra lo que dice la ficha.` : `Gemini is unreachable (${msg}). Showing what the card says.`
-        : lang === "es"
-          ? "La guía SI con Gemini funciona cuando el servidor de TERRA-X está publicado. Mientras tanto, esto es lo que dice la ficha."
-          : "The Gemini SI guide works once the TERRA-X server is published. Meanwhile, this is what the card says.",
-    );
+  } catch {
+    return local(lang === "es"
+      ? "Sin conexión con la SI. Se muestran los datos locales disponibles."
+      : "SI connection unavailable. Showing the available local data.");
   }
 }

@@ -2,13 +2,13 @@
  * Earth / Moon comparison in 3D: one stage, one curtain, live readouts.
  * Each readout names its formula; anything that is not physics is labelled as illustration.
  */
-import { ComponentType, KeyboardEvent, lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { KeyboardEvent, lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../i18n/Language";
 import { useSol } from "../../luz/SolContext";
 import BotonSI from "../../luz/BotonSI";
 import EscenarioCortina, { escribiendoEnCampo } from "../../luz/EscenarioCortina";
 import TarjetaCuerpos from "../dos-mundos/TarjetaCuerpos";
-import type { PropsMundos } from "../../escena3d/DosMundos3D";
+import type { EstadoTerreno, ModoTerreno } from "../../escena3d/DosMundos3D";
 import {
   IndiceLab,
   leerIndiceLab,
@@ -18,16 +18,7 @@ import {
   refraccionDeg,
 } from "../../datos/laboratorio";
 
-/** Contract with Jean (000-entrega-hoy, J2–J3): additive props on DosMundos3D. */
-type PropsMundosContrato = PropsMundos & {
-  terreno?: "plano" | "real";
-  alturaObjetoM?: number;
-  exageracion?: number;
-};
-
-const DosMundos3D = lazy(
-  () => import("../../escena3d/DosMundos3D") as Promise<{ default: ComponentType<PropsMundosContrato> }>,
-);
+const DosMundos3D = lazy(() => import("../../escena3d/DosMundos3D"));
 
 /** Surface gravity, m/s² (NASA NSSDCA Moon Fact Sheet: Moon 1.62, Earth 9.80). */
 const G = { luna: 1.62, tierra: 9.8 };
@@ -49,8 +40,10 @@ export default function DosMundos({
   const sol = useSol();
   const [topic, setTopic] = useState("shadow");
   const [scene, setScene] = useState(false);
-  const [terreno, setTerreno] = useState<"plano" | "real">("plano");
+  // Real relief (Jean): Mons Mouton vs Payunia P-27, 30 × 30 km each.
+  const [terreno, setTerreno] = useState<ModoTerreno>("plano");
   const [exageracion, setExageracion] = useState(1);
+  const [estadoTerreno, setEstadoTerreno] = useState<EstadoTerreno | null>(null);
   const [textoH, setTextoH] = useState("0.50");
   const [altura, setAltura] = useState(0.5);
   const [minutes, setMinutes] = useState(false);
@@ -540,58 +533,67 @@ export default function DosMundos({
       </div>
       <div className="scene-tools">
         {topic !== "time" && (
-          <button
-            className="btn sec"
-            aria-expanded={scene}
-            onClick={() => setScene((v) => !v)}
-          >
-            {scene
-              ? t("Close illustrative 3D view", "Cerrar vista 3D ilustrativa")
-              : t("Open illustrative 3D view", "Abrir vista 3D ilustrativa")}
-          </button>
-        )}
-        {scene && topic !== "time" && (
-          <div
-            className="segmento"
-            role="group"
-            aria-label={t("3D terrain", "Terreno 3D")}
-          >
+          <>
             <button
-              type="button"
-              aria-pressed={terreno === "plano"}
-              onClick={() => setTerreno("plano")}
+              className="btn sec"
+              aria-expanded={scene}
+              onClick={() => setScene((v) => !v)}
             >
-              {t("Flat stage", "Suelo plano")}
+              {scene
+                ? t("Close illustrative 3D view", "Cerrar vista 3D ilustrativa")
+                : t("Open illustrative 3D view", "Abrir vista 3D ilustrativa")}
             </button>
-            <button
-              type="button"
-              aria-pressed={terreno === "real"}
-              onClick={() => setTerreno("real")}
-            >
-              {t("Real relief", "Relieve real")}
-            </button>
-          </div>
-        )}
-        {scene && topic !== "time" && terreno === "real" && (
-          <div
-            className="segmento"
-            role="group"
-            aria-label={t(
-              "Vertical exaggeration",
-              "Exageración vertical",
-            )}
-          >
-            {[1, 2, 3].map((x) => (
-              <button
-                key={x}
-                type="button"
-                aria-pressed={exageracion === x}
-                onClick={() => setExageracion(x)}
+            {scene && (
+              <div
+                className="segmento"
+                role="group"
+                aria-label={t("Ground in the 3D view", "Suelo de la vista 3D")}
               >
-                {t(`Vertical exaggeration ×${x}`, `Exageración vertical ×${x}`)}
-              </button>
-            ))}
-          </div>
+                <button
+                  type="button"
+                  aria-pressed={terreno === "plano"}
+                  onClick={() => setTerreno("plano")}
+                >
+                  {t("Close-up, flat ground", "Primer plano, suelo plano")}
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={terreno === "real"}
+                  onClick={() => setTerreno("real")}
+                >
+                  {t("Real relief, 30 × 30 km", "Relieve real, 30 × 30 km")}
+                </button>
+              </div>
+            )}
+            {scene && terreno === "real" && (
+              <div
+                className="segmento"
+                role="group"
+                aria-label={t("Vertical exaggeration", "Exageración vertical")}
+              >
+                {[1, 2, 4].map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    aria-pressed={exageracion === k}
+                    onClick={() => setExageracion(k)}
+                  >
+                    {t(`Vertical ×${k}`, `Vertical ×${k}`)}
+                  </button>
+                ))}
+              </div>
+            )}
+            {scene && terreno === "real" && estadoTerreno !== "listo" && (
+              <span className="muted" role="status">
+                {estadoTerreno === "sin-datos"
+                  ? t(
+                      "Real relief unavailable: showing the close-up.",
+                      "Relieve real no disponible: se muestra el primer plano.",
+                    )
+                  : t("Loading the real relief…", "Cargando el relieve real…")}
+              </span>
+            )}
+          </>
         )}
         <BotonSI
           texto={t("Explain with SI", "Explicar con SI")}
@@ -604,9 +606,9 @@ export default function DosMundos({
             onClick={() => {
               sol.resetSol();
               setEsquina(true);
-              setCorte(50);
               setTerreno("plano");
               setExageracion(1);
+              setCorte(50);
               const h0 = idx?.campo?.tablita_alto_m ?? 0.5;
               setAltura(h0);
               setTextoH(h0.toFixed(2));
@@ -653,6 +655,7 @@ export default function DosMundos({
                 terreno={terreno}
                 alturaObjetoM={altura}
                 exageracion={exageracion}
+                onTerrenoEstado={setEstadoTerreno}
                 textoAcercar={t("Zoom in", "Acercar")}
                 textoAlejar={t("Zoom out", "Alejar")}
                 etiqueta={t(
@@ -674,8 +677,8 @@ export default function DosMundos({
           <p className="muted">
             {terreno === "real"
               ? t(
-                  `Real 60 m relief (Mons Mouton LOLA on the left, Payunia Copernicus GLO-30 on the right) · vertical exaggeration ×${exageracion}.`,
-                  `Relieve real a 60 m (Mons Mouton LOLA a la izquierda, Payunia Copernicus GLO-30 a la derecha) · exageración vertical ×${exageracion}.`,
+                  "Real relief from the 60 m grids, drawn with a 120 m display mesh. Both worlds share the same local Sun angle; the drawn shadows are the renderer's. Use the paired readings for numerical comparisons.",
+                  "Relieve real de las grillas de 60 m, dibujado con una malla de exhibición de 120 m. Los dos mundos comparten el mismo ángulo local del Sol; las sombras dibujadas son del renderizador. Usa las lecturas por mundo para comparar los valores.",
                 )
               : t(
                   "Illustrative flat ground and generic rover geometry. Use the paired readings for numerical comparisons.",

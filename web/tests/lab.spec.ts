@@ -105,7 +105,7 @@ test("two worlds: readouts follow the Sun, doubling h doubles the shadow, curtai
 
   // E1 & E7: Open 3D view, check terrain selector, drag curtain with mouse and touch, and test keyboard shortcuts.
   await page.getByRole("button", { name: "Open illustrative 3D view" }).click();
-  await expect(page.getByRole("button", { name: "Real relief" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Real relief, 30 × 30 km" })).toBeVisible();
   const escenario = page.locator(".comparison.mundos");
   const cortina = page.locator(".comparison.mundos .curtain");
   const rango = page.locator("#curtain");
