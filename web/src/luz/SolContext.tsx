@@ -51,6 +51,7 @@ export const SolProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setElevacionState(3.0);
     setAzimutState(250.0);
     setMundo('luna');
+    setIsAnimando(false);
   }, []);
 
   const toggleAnimando = useCallback(() => {

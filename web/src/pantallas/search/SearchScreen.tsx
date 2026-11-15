@@ -65,7 +65,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ onSeleccionarParcela
         <div className="et" style={{ marginBottom: '4px' }}>
           Candidate Search · Argentina (Payunia Volcanic Field, Mendoza)
         </div>
-        <h1 style={{ fontSize: '30px', fontWeight: 900 }}>
+        <h1 style={{ fontSize: '30px', fontWeight: 600 }}>
           Scanned 40 parcels at 60 m resolution.
         </h1>
         <p style={{ color: 'var(--texto-sec)', fontSize: '14px', marginTop: '4px' }}>
@@ -96,14 +96,14 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ onSeleccionarParcela
               }}
             >
               {/* Highlight bounding boxes */}
-              <g fill="none" stroke="#E7F434" strokeWidth="1.8">
+              <g fill="none" stroke="var(--action)" strokeWidth="1.8">
                 <rect x="120" y="70" width="36" height="36" />
                 <rect x="240" y="150" width="36" height="36" />
                 <rect x="310" y="60" width="36" height="36" />
               </g>
 
               {/* Labels */}
-              <g fill="#07173F" stroke="#E7F434" strokeWidth="1">
+              <g fill="var(--ink)" stroke="var(--action)" strokeWidth="1">
                 <rect x="108" y="46" width="60" height="19" rx="2" />
                 <rect x="228" y="126" width="60" height="19" rx="2" />
                 <rect x="298" y="36" width="60" height="19" rx="2" />
@@ -121,7 +121,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ onSeleccionarParcela
                 position: 'absolute',
                 bottom: '12px',
                 left: '12px',
-                background: 'rgba(7, 23, 63, 0.90)',
+                background: 'var(--surface)',
                 border: '1px solid var(--borde-dark)',
                 borderRadius: '2px',
                 padding: '4px 8px',

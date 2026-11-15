@@ -19,7 +19,7 @@ export const FieldScreen: React.FC = () => {
         <div className="et" style={{ marginBottom: '4px' }}>
           Ground Calibration & Field Kit
         </div>
-        <h1 style={{ fontSize: '30px', fontWeight: 900 }}>
+        <h1 style={{ fontSize: '30px', fontWeight: 600 }}>
           Sunset Shadow Ground Measurement Protocol
         </h1>
         <p style={{ color: 'var(--texto-sec)', fontSize: '14px', marginTop: '4px' }}>
@@ -79,7 +79,7 @@ export const FieldScreen: React.FC = () => {
               onChange={(e) => setMedidaIngresada(e.target.value)}
               style={{
                 flex: 1,
-                background: '#07173F',
+                background: 'var(--paper)',
                 border: '1px solid var(--borde-light)',
                 borderRadius: '2px',
                 color: 'var(--texto)',
@@ -97,7 +97,7 @@ export const FieldScreen: React.FC = () => {
           {resultadoCalc && (
             <div
               style={{
-                background: '#05102D',
+                background: 'var(--paper)',
                 border: '1px solid var(--sol)',
                 padding: '12px',
                 borderRadius: '2px',

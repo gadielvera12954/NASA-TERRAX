@@ -10,8 +10,8 @@
    - `motor/ingest`, `motor/escala`, `motor/huella`, `motor/exportar`, `esquemas/`, `api/`: Owned by Mathias.
 4. **Visual Rules**:
    - No generic component kits (Tailwind, shadcn, Bootstrap).
-   - 2px corners (`border-radius: 2px`), 1px borders (`border: 1px solid`).
-   - Instrument typography (Fira Sans, Overpass, Overpass Mono).
-   - Primary background `#07173F`, single accent `#E7F434` (grazing Sun).
-   - Physical dynamic shadows cast via `--sombra-x`, `--sombra-y` derived from `--sol-el` and `--sol-az`.
+   - Use the field atlas design documented in `web/MVP.md` and the semantic tokens in `web/src/sistema/tokens.css`.
+   - Default to the dark field atlas theme with an optional persistent light theme. Use semantic colors for reading surfaces, teal actions and ochre solar annotations. Pair data colors with labels, patterns or symbols.
+   - Use local IBM Plex Sans for interface text and a monospace face for technical readings.
+   - Limit physical solar shadows to the scientific visualizations. Scope controls to the view they affect.
 5. **Language**: English by default. In NASA-facing documents, write "SI" (Super Intelligence), not "AI".

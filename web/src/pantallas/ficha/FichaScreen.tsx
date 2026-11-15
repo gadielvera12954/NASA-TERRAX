@@ -27,7 +27,7 @@ export const FichaScreen: React.FC<FichaScreenProps> = ({
         <div className="et" style={{ marginBottom: '4px' }}>
           Open Analog Card · Evaluation Model
         </div>
-        <h1 style={{ fontSize: '30px', fontWeight: 900 }}>
+        <h1 style={{ fontSize: '30px', fontWeight: 600 }}>
           Candidate <span style={{ color: 'var(--sol)' }}>{candidataId}</span> · Payunia Volcanic Field
         </h1>
         <p style={{ color: 'var(--texto-sec)', fontSize: '14px', marginTop: '4px' }}>
@@ -119,7 +119,7 @@ export const FichaScreen: React.FC<FichaScreenProps> = ({
             </div>
 
             <div style={{ borderTop: '1px solid var(--borde-dark)', paddingTop: '12px', marginBottom: '12px' }}>
-              <span className="et" style={{ color: '#F87171' }}>
+              <span className="et" style={{ color: 'var(--error)' }}>
                 Does Not Transfer to Earth
               </span>
               <p style={{ fontSize: '12px', color: 'var(--texto-sec)', marginTop: '4px', lineHeight: 1.4 }}>

@@ -180,11 +180,11 @@ export const Recorrido90Segundos: React.FC<Recorrido90SegundosProps> = ({ onCerr
           justifyContent: 'space-between',
           padding: '16px 24px',
           borderBottom: '1px solid var(--borde-dark)',
-          background: '#07173F',
+          background: 'var(--paper)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <span style={{ fontFamily: 'var(--tit)', fontWeight: 900, color: 'var(--sol)', fontSize: '18px' }}>
+          <span style={{ fontFamily: 'var(--tit)', fontWeight: 600, color: 'var(--sol)', fontSize: '18px' }}>
             TERRA-X · 90-SECOND JURY TOUR
           </span>
           <span
@@ -193,7 +193,7 @@ export const Recorrido90Segundos: React.FC<Recorrido90SegundosProps> = ({ onCerr
               fontSize: '13px',
               padding: '2px 8px',
               borderRadius: '2px',
-              background: '#05102D',
+              background: 'var(--paper)',
               border: '1px solid var(--sol)',
               color: 'var(--sol)',
             }}
@@ -281,7 +281,7 @@ export const Recorrido90Segundos: React.FC<Recorrido90SegundosProps> = ({ onCerr
                 position: 'absolute',
                 top: '16px',
                 left: '16px',
-                background: 'rgba(7, 23, 63, 0.90)',
+                background: 'var(--surface)',
                 border: '1px solid var(--sol)',
                 padding: '4px 10px',
                 borderRadius: '2px',
@@ -374,7 +374,7 @@ export const Recorrido90Segundos: React.FC<Recorrido90SegundosProps> = ({ onCerr
           gap: '16px',
           padding: '16px 24px',
           borderTop: '1px solid var(--borde-dark)',
-          background: '#07173F',
+          background: 'var(--paper)',
         }}
       >
         <button

@@ -1,0 +1,15 @@
+{
+  "errors": [],
+  "contrast": [],
+  "widths": [],
+  "print": {
+    "background": "rgb(255, 255, 255)",
+    "text": "rgb(0, 0, 0)",
+    "scheme": "light",
+    "selectedTheme": "dark"
+  },
+  "synced": "light",
+  "storageBlocked": "light",
+  "viewportChecks": 64,
+  "accessibilityViews": 16
+}

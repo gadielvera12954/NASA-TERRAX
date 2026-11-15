@@ -18,15 +18,16 @@ Built during the NASA Space Apps Challenge 2026 (Ciudad del Este, Paraguay). Eve
 
 ## Five minutes for the jury
 
-1. **Home.** Drag the shadow of the 0.50 m board along the ground: the Sun follows (shadow = 0.50 / tan e). Below the horizon line, the real relief of Mons Mouton (84.60°S, 31.00°E) under the Sun of a real 2027 lunation.
-2. **3D lab** (`/#lab`). Click anywhere on the relief to park a solar rover, pick the season and the power it needs, and follow Sun, panel power and battery hour by hour. On flat ground the night lasts 289–418 h; VIPER's battery lasts 50 h. Only relief can save it, and the lab shows where.
-3. **Explore → candidate card** (`/#explore`). Forty 3 × 3 km parcels in Payunia (Mendoza, Argentina) plus the controls. Each card shows compatibility **C** and evidence **E** separately, the model bounds **L–U**, what does not transfer (vacuum, gravity, dust, time scales) and what to measure first.
-4. **Two worlds** (`/#compare`). The same rover and the same board under the same Sun angle on the Moon and on Earth: shadow length, panel power, a gravity drop test, how long a grazing Sun lasts.
-5. **Verification** (`/#checks`). The scientific test report with pending tests shown as pending, the fourteen declared sources with licence and SHA-256, and a button that re-hashes every published data file in your own browser.
+1. **Home.** Inspect the Mons Mouton terrain plate and open the site catalogue. The 3D view and guided tour start on request. Dark is the initial appearance, and the header stores a light/dark choice.
+2. **Explore and site record** (`/#explore`). Search the forty Payunia parcels. Reference controls have their own group. Read the exported verdict, compatibility C, evidence E, model bounds L–U and field measurement priorities.
+3. **Compare sites** (`/#compare`). Read up to three records together. The selected practice goal highlights an existing dimension and the detailed charts follow the summary.
+4. **Earth and Moon** (`/#worlds`). Study shadows, energy, gravity and time one at a time. Paired results can be read before opening the illustrative 3D curtain.
+5. **Lunar terrain laboratory** (`/#lab`). Park a rover on Mons Mouton, choose a season and vehicle settings, and read Sun, power and battery by hour.
+6. **Sources and verification** (`/#checks`). Inspect the scientific report, pending tests, declared sources and hashes. Re-hash every published data file in the browser.
 
 Press **Ctrl K** anywhere for the SI console: it explains the active card in plain language, and every number it says is checked against the card before it is shown.
 
-6. **Community** (`/#community`, needs `python -m servidor`). Science outreach written by people the admins verified: anyone reads, verified authors write, every article is reviewed before it is published. The admin panel (`/#admin`) verifies people, reviews articles, manages roles and keeps an audit log. The public static site itself never stores personal data.
+7. **Community** (`/#community`, needs `python -m servidor`). Science outreach written by people the admins verified: anyone reads, verified authors write, every article is reviewed before it is published. The admin panel (`/#admin`) verifies people, reviews articles, manages roles and keeps an audit log. The public static site itself never stores personal data.
 
 ## What is real and what is illustrative
 
@@ -36,10 +37,12 @@ Press **Ctrl K** anywhere for the SI console: it explains the active card in pla
 | The 40 Payunia parcels and the controls (C, E, L, U, slope, roughness, grazing-light factor, NDVI) | Real: Copernicus DEM GLO-30 at 60 m, Sentinel-2 L2A NDVI (annual 90th percentile), scored by `motor/puntaje` with frozen parameters |
 | Positive and negative controls | Mons Mouton itself must rank first and does; three noise copies must rank in order and do; Médanos del Chaco (vegetated) must be rejected and is |
 | Rover 3D model | Generic shape with public VIPER dimensions, not an official model |
-| Ground and sky colours of the Two Worlds stage, the terrain photograph on Explore | Illustrative, labelled as such on screen |
+| Ground and sky colours of the Earth/Moon stage | Illustrative, labelled as such on screen |
 | Earth terrain in 3D | Not available yet |
 
-If any published file were ever marked as demonstration data, a banner would appear at the top of every page. Today none is.
+Demonstration records carry a contextual label. The current terrestrial dataset declares `maqueta: false`. Consult the source of each product and the source registry.
+
+The implemented design and navigation are documented in [web/MVP.md](web/MVP.md).
 
 ## Data sources
 

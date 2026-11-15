@@ -1,3 +1,4 @@
+import { CameraActions, CameraControls, turnCamera } from "./CameraControls";
 /**
  * Real Mons Mouton relief in 3D (LOLA, built in Blender) with the engine's shadow rule on top.
  *
@@ -6,6 +7,7 @@
  * The mesh is only the display surface (120 m); numbers never come from it.
  */
 import { useEffect, useRef, useState } from "react";
+import { useLanguage } from "../i18n/Language";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Horizontes, indiceAzimut, leerHorizontes } from "../datos/laboratorio";
@@ -29,6 +31,7 @@ export interface PropsTerreno {
   onSobre?: (p: (PuntoGrilla & { alturaKm: number }) | null) => void;
   etiqueta: string;
   textoSinWebgl: string;
+  onStatic?: (value: boolean) => void;
   textoAcercar: string;
   textoAlejar: string;
   girar?: boolean;
@@ -39,9 +42,8 @@ const LADO = 500;
 const PX_KM = 0.06;
 const ROVER_ESCALA = 0.36; // 1 m of rover → 0.36 km on the map (×360), only to make it visible
 
-interface Motor {
+interface Motor extends CameraActions {
   actualizar: (p: PropsTerreno) => void;
-  acercar: (factor: number) => void;
   destruir: () => void;
 }
 
@@ -87,12 +89,12 @@ function rampaHoras(h: number, min: number, max: number, limite: number, out: [n
     return;
   }
   const t = Math.min(1, Math.max(0, (h - min) / Math.max(1, max - min)));
-  out[0] = 231 + (26 - 231) * t;
-  out[1] = 244 + (44 - 244) * t;
-  out[2] = 52 + (110 - 52) * t;
+  out[0] = 213 + (48 - 213) * t;
+  out[1] = 170 + (73 - 170) * t;
+  out[2] = 101 + (83 - 101) * t;
 }
 
-function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: PropsTerreno): Motor {
+function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: PropsTerreno, onUnavailable: () => void): Motor {
   let props = inicial;
   let vivo = true;
   let hz: Horizontes | null = null;
@@ -118,13 +120,15 @@ function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: Props
   controles.maxDistance = 75;
   controles.maxPolarAngle = Math.PI * 0.49;
   controles.enablePan = false;
+  controles.update();
+  controles.saveState();
   controles.autoRotateSpeed = 0.45;
   controles.addEventListener("change", () => (pendiente = true));
 
   const sol = new THREE.DirectionalLight(0xffffff, 10);
   escena.add(sol, sol.target);
   escena.add(new THREE.AmbientLight(0x8fa6d8, 0.1));
-  const disco = new THREE.Mesh(new THREE.SphereGeometry(0.55, 24, 12), new THREE.MeshBasicMaterial({ color: 0xf2b33d }));
+  const disco = new THREE.Mesh(new THREE.SphereGeometry(0.55, 24, 12), new THREE.MeshBasicMaterial({ color: 0xb98539 }));
   escena.add(disco);
 
   // Texture painted from horizontes.bin: one texel per 60 m pixel, row 0 = grid north.
@@ -147,7 +151,7 @@ function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: Props
   // Marker of the parked rover
   const marca = new THREE.Group();
   marca.visible = false;
-  const amarillo = new THREE.MeshBasicMaterial({ color: 0xf2b33d });
+  const amarillo = new THREE.MeshBasicMaterial({ color: 0xb98539 });
   const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 2.6, 8), amarillo);
   pin.position.y = 2.3;
   const aro = new THREE.Mesh(new THREE.TorusGeometry(0.75, 0.035, 8, 48), amarillo);
@@ -274,7 +278,7 @@ function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: Props
       pintar();
       pintarMarcas();
     })
-    .catch(() => {});
+    .catch(() => { if (vivo) onUnavailable(); });
   cargarModelo("rover")
     .then((g) => {
       if (!vivo) return;
@@ -283,14 +287,14 @@ function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: Props
       marca.add(g);
       pintar();
     })
-    .catch(() => {});
+    .catch(() => { if (vivo) onUnavailable(); });
   leerHorizontes()
     .then((h) => {
       if (!vivo) return;
       hz = h;
       pintar();
     })
-    .catch(() => {});
+    .catch(() => { if (vivo) onUnavailable(); });
 
   // Picking
   const puntero = new THREE.Vector2();
@@ -360,6 +364,8 @@ function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: Props
   ciclo();
 
   return {
+    restablecer() { controles.reset(); pendiente = true; },
+    girar(direction) { turnCamera(camara, controles, direction); pendiente = true; },
     acercar(factor) {
       acercarCamara(camara, controles, factor);
       pendiente = true;
@@ -390,6 +396,7 @@ function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: Props
 }
 
 export default function TerrenoLunar(props: PropsTerreno) {
+  const { t } = useLanguage();
   const caja = useRef<HTMLDivElement>(null);
   const lienzo = useRef<HTMLCanvasElement>(null);
   const motor = useRef<Motor | null>(null);
@@ -400,7 +407,7 @@ export default function TerrenoLunar(props: PropsTerreno) {
   useEffect(() => {
     if (sinWebgl || !lienzo.current || !caja.current) return;
     try {
-      motor.current = crearMotor(lienzo.current, caja.current, ultimas.current);
+      motor.current = crearMotor(lienzo.current, caja.current, ultimas.current, () => setSinWebgl(true));
     } catch {
       setSinWebgl(true);
       return;
@@ -415,24 +422,19 @@ export default function TerrenoLunar(props: PropsTerreno) {
     motor.current?.actualizar(props);
   });
 
+  useEffect(() => { props.onStatic?.(sinWebgl); }, [sinWebgl, props.onStatic]);
+
   if (sinWebgl)
     return (
       <figure className="escena escena-plana" style={{ height: "auto" }}>
-        <img src="/img/ui_luna_top.png" alt={props.etiqueta} />
+        <img src="/img/mons-mouton-atlas.webp" alt={t("Static relief map of Mons Mouton", "Mapa estático del relieve de Mons Mouton")} />
         <figcaption>{props.textoSinWebgl}</figcaption>
       </figure>
     );
   return (
     <div className="escena" ref={caja} style={{ height: props.alto }}>
       <canvas ref={lienzo} role="img" aria-label={props.etiqueta} className={props.onElegir ? "elegible" : undefined} />
-      <div className="zoom">
-        <button type="button" onClick={() => motor.current?.acercar(0.8)} aria-label={props.textoAcercar}>
-          +
-        </button>
-        <button type="button" onClick={() => motor.current?.acercar(1.25)} aria-label={props.textoAlejar}>
-          −
-        </button>
-      </div>
+      <CameraControls camera={motor} zoomIn={props.textoAcercar} zoomOut={props.textoAlejar} />
     </div>
   );
 }

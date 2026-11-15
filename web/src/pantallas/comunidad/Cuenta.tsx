@@ -77,11 +77,11 @@ export default function Cuenta({
 
   return (
     <div className="cuenta-panel">
-      <div className="segmento pestanas" role="tablist">
-        <button role="tab" aria-selected={modo === "entrar"} aria-pressed={modo === "entrar"} onClick={() => setModo("entrar")}>
+      <div className="segmento pestanas" role="group" aria-label={t("Account action", "Acción de la cuenta")}>
+        <button aria-pressed={modo === "entrar"} onClick={() => setModo("entrar")}>
           <LogIn aria-hidden="true" size={16} /> {t("Sign in", "Entrar")}
         </button>
-        <button role="tab" aria-selected={modo === "registro"} aria-pressed={modo === "registro"} onClick={() => setModo("registro")}>
+        <button aria-pressed={modo === "registro"} onClick={() => setModo("registro")}>
           <UserPlus aria-hidden="true" size={16} /> {t("Create an account", "Crear una cuenta")}
         </button>
       </div>

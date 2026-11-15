@@ -1,37 +1,47 @@
-# Bilingual MVP
+# TERRA-X field atlas
 
-## Integration with main
+Run `npm ci` and `npm run dev` in `web/`. For the offline build, run `npm run build` followed by `npm run preview`. Open the printed localhost address and wait for “Saved for offline use” in the footer before disconnecting. The service worker caches the local fonts, terrain plate, models, code and scientific exports. Deployments currently use the domain root.
 
-The merge keeps Nahum's bilingual shell as the default entry and preserves its CSS, language context, Sun controls, tour and offline behavior. `src/datos/integration.ts` accepts the legacy mock shape and the current engine exports, normalizing copies for presentation. It reads the candidate index, supports each candidate/control including null compatibility, and downloads the original JSON unchanged. Verification reads `pruebas.json` in both languages. The original upstream App is preserved separately in `src/sistema/TeamApp.tsx` with only relative imports adjusted, and built as `/team.html`; its existing specialist features and limitations remain accessible through Guide. All engine modules, schemas, specialist components and scientific exports match upstream main.
+## Navigation and reading order
 
-The additional integration browser checks open all indexed cards, compare displayed compatibility to the source, verify original downloads and all 31 recorded hashes, and open Destination in the preserved team workspace. The original six MVP scenarios continue to run with their original explicitly mock fixtures. The historical scope notes below describe the initial MVP before integration.
+| View | Primary task |
+| --- | --- |
+| `#home` | Understand the purpose, inspect the lunar reference map and open the terrestrial catalogue. The 3D scene and timed tour start on request. |
+| `#explore` | Search the full candidate index. Terrestrial records and scientific reference controls have separate lists. |
+| `?candidate=P-07#card` | Read the exported verdict, evidence, limits, measurement priorities and dated rehearsal windows. Download the source record or print the sheet. |
+| `#compare` | Read up to three named records together. The practice goal highlights a dimension. Detailed property scores, requirements, bounds and grazing-light curves follow the summary. |
+| `#worlds` | Select shadows, energy, gravity or time. Read the results before opening the illustrative 3D curtain. |
+| `#community`, `#account`, `#admin` | Read Community articles and use the server-backed accounts, author verification and moderation. |
+| `#guide` | Learn the method and use the field shadow kit. |
+| `#checks` | Inspect the test report, pending results, source registry and available hashes. |
+| `#lab` | Examine a rover scenario at a grid point on Mons Mouton. Use the terrain or enter a row and column. |
 
-Run `npm install` then `npm run dev`. For offline support use `npm run build` and `npm run preview` (localhost or HTTPS).
+The query parameters `candidate`, `goal` and `sites` carry the record, reading goal and comparison slots. Hash links keep those parameters. English is the default. English and Spanish are available throughout the atlas and the chosen language persists locally. The original English specialist workspace is accessible from How it works at `/team.html`.
 
-The default language is English. English/Spanish selection persists locally. Four main sections lead from an introduction to the available candidate, its limitations and the source registry. Direct hash links and browser back/forward work. The optional six-step tour lasts 90 seconds, supports pause/exit, and starts paused when reduced motion is requested.
+## Design
 
-The current MVP consumes the existing `manifest.json` and `fichas/P-07.json`; it validates their shape and numeric ranges before rendering. It does not edit the exporter's files or add invented candidates. Scientific test results and source hashes are explicitly unverified. The practice goal explains suitability limits; it does not rerank or recompute scores. Source JSON export and browser print-to-PDF are available.
+The identity uses a contour-line mark and a map of the actual lunar reference site. The first screen pairs a left-aligned introduction with the terrain plate. Below it, a compact site list opens individual records and a smaller tools list leads to the lab and Earth/Moon experiments. On a phone the introduction, plate and lists follow in that order.
 
-The comparison uses synthetic illustrative images, a keyboard-accessible divider and the existing Sun provider for panel shadows. It does not claim terrain simulation or shadow-coverage measurements. Existing specialist screens and Erwan's modules remain in the repository; the MVP presents a simpler bilingual shell pending validated data integration.
+`src/sistema/tokens.css` defines the palette, typography, spacing, corners and semantic colors. The default dark theme uses #101C22 for the page, #18272E for surfaces, #E4EDF1 for text, #A7B9C3 for secondary text and #80CBD1 for teal actions. The header appearance button switches to the light palette with #F3F6F8 paper, white surfaces, #172B35 text and #176B78 actions. The selected theme is saved locally and shared with the specialist workspace. It is applied before the interface loads and remains available offline. Print uses the light palette. Solar annotations, status labels and chart series have theme-specific accessible colors. Use labels and symbols with verdict colors and letter labels with comparison series. IBM Plex Sans is bundled locally under the SIL Open Font License. Technical numbers use IBM Plex Mono where installed and a local monospace fallback elsewhere.
 
-Production builds generate a content-versioned service worker that precaches the local app, data and images. Wait for the offline-ready message before disconnecting. Remote fonts and external pages are optional and are not cached. Deployment currently assumes the root of a domain (Vercel); a GitHub Pages subdirectory needs base-path support.
+Solar controls belong with their visualization. The main interface uses ordinary document scrolling. Numerical readouts, the hashed source files and the parameters of the physical models remain authoritative.
 
-## 3D lab, Two Worlds and comparator
+### Terrain plate
 
-The shell now has a seventh view, `#lab`, and the Home and Compare views are interactive 3D scenes (three.js, loaded on demand; the models come from `modelos/construir_modelos.py`). `src/datos/laboratorio.ts` talks to the optional live engine (`/api`, see `servidor/LEEME.md`) and, when it is not reachable, runs the same formulas in the browser over `horizontes.bin` and `/laboratorio/sol_*.json`. The page states which path produced each result. The Compare view keeps its divider and adds live readouts plus a side-by-side comparator of exported cards, which lays out their values without rescoring them. The Guide adds a field kit for the shadow measurement. If WebGL is missing, the 3D views fall back to the previous illustrative images.
+`public/img/mons-mouton-atlas.webp` is a static cartographic rendering of the existing NASA LOLA export. Shading comes from the supplied 60 m normal map, using a fixed map light. Elevation contours at 100 m intervals come from the existing 120 m display mesh in `mons_mouton.glb`, restoring the exported vertical offset in `modelos.json`. The plate is a central 30 km × 17.5 km crop in projected coordinates with a 3 km scale. Values in the simulation continue to use their original scientific inputs. The cartographic illumination is independent of the ephemeris-driven shadow view.
 
-Scroll wheel and vertical swipes are left to the page; the 3D views zoom with their + / − buttons. The six-step tour is unchanged and does not include the lab.
+### Data status
 
-## Validation
+The current terrestrial export declares real data from Copernicus and Sentinel-2. Legacy demonstration records remain supported and labelled according to their files. The reference controls check the method. LOLA relief, JPL solar series and live or browser computations have their own provenance. Earth/Moon uses a flat illustrative stage. C describes fit over known properties. E is the weighted evidence coverage. L–U are model bounds. A missing C is shown as unknown. Changing the reading goal leaves exported scores intact.
 
-`tests/lab.spec.ts` cuts `/api` and checks that the lab computes in the browser within 5 % of the exported engine card, that parking with the keyboard fields and changing season work, the Two Worlds readouts, the field kit geometry, automated WCAG A/AA scans of the lab and comparator in Spanish, and that these views fit a 375 px phone.
+## Review
 
+The before screenshots in `../output/playwright/rebranding/` record the initial state. The global mock banner appeared on the LOLA view, the solar bar occupied the bottom of every view, the search only checked the selected candidate and the comparator followed the Earth/Moon experiment. Confusing a control with a field site or mistaking evidence coverage for certainty were usability hypotheses. This project review did not involve participant testing.
 
-`npm run test:e2e` builds and previews the production app (or reuses a running preview), then checks bilingual navigation, language persistence, candidate download, empty search, mobile width, keyboard access, comparison, the complete 90-second tour, reduced-motion behavior, invalid-file recovery and offline reload. It also scans all six Spanish views for automated WCAG A/AA violations with axe; this is not a substitute for manual accessibility review. Microsoft Edge is used by default; set `PLAYWRIGHT_CHANNEL=chrome` for Chrome, or install another supported browser and update the configuration.
+Run `npm run test:e2e` in `web/` for the integrated browser suite. It uses local Edge by default. Set `PLAYWRIGHT_CHANNEL=chrome` to select Chrome and `PLAYWRIGHT_PORT` to choose an isolated preview port. The suite covers legacy and current records, original JSON downloads, verification hashes, selection history, language, the tour, failure recovery, accessibility checks and offline scenarios.
 
-## Remaining team integration
+The original project design PDFs and their source material in `web/docs/` describe earlier proposals. This document and the shared tokens describe the implemented atlas.
 
-- Mathias: final schemas, candidate index, scientific test export, reproducible source files and validated hashes.
-- Jean: measured/validated scientific results and real candidate calculations.
-- Erwan: integrate the bilingual shell with validated destination maps and the physical Two Worlds engine.
-- Team: review, CI, deployment and public URL. No deployment or merge is performed by this local change.
+## Integration with current main
+
+The atlas retains the published forty-parcel dataset, the existing account and Community flows, the SI assistant and the in-browser file-integrity check. The default candidate follows the first eligible record in the published ranking when the URL has no explicit candidate. The optional Python server continues to control account sessions and moderation. The static exploration and the laboratory also run from the exported data without that server.

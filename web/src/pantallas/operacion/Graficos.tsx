@@ -2,19 +2,18 @@
  * Charts of the 3D lab. Plain SVG, one y-axis per chart (small multiples share the time axis),
  * the cursor is the lab's clock: hovering a chart moves the Sun in the 3D scene.
  */
-import { PointerEvent, ReactNode, RefObject, useEffect, useMemo, useRef, useState } from "react";
+import { PointerEvent, ReactNode, useEffect, useMemo, useState } from "react";
 
-export function useAncho<T extends HTMLElement>(): [RefObject<T>, number] {
-  const ref = useRef<T>(null);
-  // Starts narrow: a chart wider than its box would stretch the page and never shrink back.
+export function useAncho<T extends HTMLElement>(): [(element: T | null) => void, number] {
+  const [element, setElement] = useState<T | null>(null);
   const [ancho, setAncho] = useState(280);
   useEffect(() => {
-    if (!ref.current) return;
-    const o = new ResizeObserver(([e]) => setAncho(Math.max(240, Math.round(e.contentRect.width))));
-    o.observe(ref.current);
-    return () => o.disconnect();
-  }, []);
-  return [ref, ancho];
+    if (!element) return;
+    const observer = new ResizeObserver(([entry]) => setAncho(Math.max(120, Math.round(entry.contentRect.width))));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [element]);
+  return [setElement, ancho];
 }
 
 const M = { izq: 44, der: 12, arriba: 8, abajo: 4 };

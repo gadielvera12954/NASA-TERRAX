@@ -1,341 +1,141 @@
-/* ==========================================================================
-   TERRA-X · Meridian Wall
-   The page is a sunlit wall. The Sun (SolContext) drives every cast shadow:
-   --sombra-x / --sombra-y come from its elevation and azimuth. Earth surfaces
-   (the wall) get a soft penumbra; lunar plates (basalt) get hard vacuum shadows.
-   ========================================================================== */
-
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/ibm-plex-sans-latin-wght-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: swap;
+}
 :root {
-  /* Wall (Earth, sunlit plaster) */
-  --muro: #e4e2dc;
-  --muro-luz: #eeece7;
-  --muro-hundido: #d6d3cb;
-  --ocre: #c98f55;
-  --ocre-hondo: #9c6532;
-  --tinta: #141414;
-  --tinta-2: #45423d;
-  --tinta-3: #5e5a53;
-  --oxido: #a8321e;
-  --oxido-hondo: #84230f;
-  --regla: rgba(20, 20, 20, 0.88);
-  --regla-suave: rgba(20, 20, 20, 0.16);
-
-  /* Plate (Moon, basalt) */
-  --basalto: #1f1f1e;
-  --basalto-2: #2a2a28;
-  --regolito: #8a8a86;
-  --luz-solar: #f2b33d;
-
-  /* Shadows: the wall's penumbra (atmosphere) vs the plate's hard edge (vacuum) */
-  --sombra-muro: rgba(58, 44, 30, 0.26);
-  --sombra-placa: rgba(10, 8, 6, 0.55);
-
-  /* Legacy names used across the screens, mapped onto the wall */
-  --noche: var(--muro);
-  --noche-panel: var(--muro-luz);
-  --noche-card: var(--muro-luz);
-  --sol: var(--oxido);
-  --sol-glow: rgba(168, 50, 30, 0.18);
-  --tierra: var(--ocre-hondo);
-  --tierra-bg: rgba(201, 143, 85, 0.2);
-  --luna: #3a3a37;
-  --luna-bg: rgba(31, 31, 30, 0.08);
-  --dato: #24578f;
-  --alerta: var(--oxido);
-  --alerta-bg: rgba(168, 50, 30, 0.12);
-  --pizarra: var(--tinta-2);
-  --sec-dark: var(--tinta-3);
-  --borde-dark: var(--regla-suave);
-  --borde-light: rgba(20, 20, 20, 0.32);
-  --texto: var(--tinta);
-  --texto-sec: var(--tinta-2);
-
-  /* Verdicts, mixed for a light ground (each ≥4.5:1 on the wall) */
-  --sost: #2f6b3a;
-  --huec: #7a5a12;
-  --noal: #8a4a0c;
-  --nopo: var(--tinta-3);
-  --inco: var(--oxido);
-
-  /* Type */
-  /* Self-hosted (@fontsource, OFL): the display voice survives an offline venue laptop */
-  --tit: "Archivo Variable", "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --txt: "Public Sans Variable", "Public Sans", "Helvetica Neue", Arial, sans-serif;
-  --mono: "Azeret Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
-
-  /* Sun (overwritten live by SolContext) */
-  --sol-el: 3deg;
-  --sol-az: 250deg;
-  --sombra-x: -35px;
-  --sombra-y: 12px;
-  --sombra-blur: 0px;
-  --sombra-color: var(--sombra-placa);
-  /* Cast-shadow length on the wall: 2 px / tan(Sun elevation), set live by the Sun scale.
-     Light comes from the upper left, so shadows fall to the lower right. */
-  --sombra-l: 38px;
-  --sx: var(--sombra-l);
-  --sy: calc(var(--sombra-l) * 0.3);
-  --sombra-letra: rgba(58, 44, 30, 0.13);
-
-  /* Geometry and motion */
-  --radius: 0px;
+  color-scheme: light;
+  --paper: #f3f6f8;
+  --surface: #fff;
+  --ink: #172b35;
+  --muted: #536773;
+  --action: #176b78;
+  --action-hover: #105361;
+  --on-action: #fff;
+  --tint: #e5f0ef;
+  --amber: #b98539;
+  --ochre-ink: #755018;
+  --ochre-bg: #fcf2df;
+  --line: #d7e0e5;
+  --input-line: #798e99;
+  --success: #24644d;
+  --success-bg: #e8f3ea;
+  --error: #963d39;
+  --error-bg: #faebe9;
+  --series-a: #176b78;
+  --series-b: #814d80;
+  --series-c: #955521;
+  --dark-plate: #253e45;
+  --on-dark-plate: #fff;
+  --plate-shadow: 0 6px 20px #172b3509;
+  --radius: 8px;
+  --small-radius: 5px;
   --border-w: 1px;
-  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
-  --gutter: clamp(16px, 4vw, 56px);
-  --ancho: 1320px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --gutter: clamp(18px, 4vw, 64px);
+  --txt: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+  --tit: var(--txt);
+  --mono: "IBM Plex Mono", Consolas, ui-monospace, monospace;
+  --muro: var(--paper); --muro-luz: var(--surface); --muro-hundido: var(--tint);
+  --tinta: var(--ink); --tinta-2: var(--muted); --tinta-3: var(--muted);
+  --regla: var(--line); --regla-suave: var(--line); --oxido: var(--action);
+  --oxido-hondo: var(--action-hover); --ocre: var(--series-c); --basalto: var(--dark-plate);
+  --basalto-2: var(--dark-plate); --luz-solar: var(--amber);
+  /* Shared names consumed by the existing scientific views. */
+  --noche: var(--paper); --noche-panel: var(--surface); --noche-card: var(--tint);
+  --azul-electrico: var(--action); --sol: var(--action); --sol-glow: var(--tint);
+  --tierra: var(--series-c); --tierra-bg: var(--ochre-bg);
+  --luna: var(--ink); --luna-bg: var(--paper); --dato: var(--series-b);
+  --alerta: var(--error); --alerta-bg: var(--error-bg); --pizarra: var(--muted);
+  --sec-dark: var(--muted); --borde-dark: var(--line); --borde-light: var(--line);
+  --texto: var(--ink); --texto-sec: var(--muted);
+  --sost: var(--success); --huec: var(--ochre-ink); --noal: var(--ochre-ink);
+  --nopo: var(--muted); --inco: var(--error);
 }
-
-/* A basalt plate: everything lunar renders here, light on dark. */
-.placa,
-.noche-lunar,
-.escena,
-.panel.reloj,
-.panel.comparador,
-.comparison.mundos,
-.campo-resultado {
-  --texto: #eceae4;
-  --texto-sec: #b3b0a8;
-  --sec-dark: #9a978f;
-  --noche: var(--basalto);
-  --noche-panel: var(--basalto-2);
-  --noche-card: var(--basalto-2);
-  --borde-dark: rgba(236, 234, 228, 0.14);
-  --borde-light: rgba(236, 234, 228, 0.3);
-  --sol: var(--luz-solar);
-  --luna: #eceae4;
-  --dato: #7fb2ff;
-  --sost: #5fbf73;
-  --inco: #ff7a5c;
-  --huec: var(--luz-solar);
-  color: var(--texto);
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  scrollbar-color: var(--tinta-3) var(--muro-hundido);
-  -webkit-text-size-adjust: 100%;
-}
-
-body {
-  background-color: var(--muro);
-  color: var(--tinta);
-  font-family: var(--txt);
-  font-size: 16px;
-  line-height: 1.55;
-  font-variant-numeric: tabular-nums;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  min-height: 100vh;
-  overflow-x: hidden;
-  caret-color: var(--oxido);
-}
-
-::selection {
-  background: var(--oxido);
-  color: var(--muro-luz);
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--tit);
-  font-weight: 800;
-  font-stretch: 112%;
-  color: var(--texto);
-  letter-spacing: -0.015em;
-  text-wrap: balance;
-}
-
-h1 { font-size: 40px; line-height: 1.02; }
-h2 { font-size: 24px; line-height: 1.15; }
-h3 { font-size: 19px; line-height: 1.25; }
-h4 { font-size: 16px; line-height: 1.3; }
-h5 { font-size: 14px; line-height: 1.35; }
-
-/* ---------------------------------------------------------------- plates on the wall */
-.panel {
-  background-color: var(--noche-panel);
-  border: 1px solid var(--regla);
-  padding: 24px;
-  position: relative;
-  box-shadow: calc(var(--sx) * 0.5) calc(var(--sy) * 0.5) 6px var(--sombra-muro);
-}
-
-.placa.panel,
-.panel.reloj,
-.panel.comparador {
-  border-color: #000;
-  box-shadow: calc(var(--sx) * 0.6) calc(var(--sy) * 0.6) 0 var(--sombra-placa);
-}
-
-/* ---------------------------------------------------------------- buttons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 48px;
-  padding: 12px 22px;
-  font-family: var(--tit);
-  font-size: 16px;
-  font-weight: 750;
-  font-stretch: 112%;
-  letter-spacing: 0.005em;
-  border: 1px solid var(--tinta);
-  background-color: var(--tinta);
-  color: var(--muro-luz);
-  box-shadow: inset 0 -3px 0 var(--oxido), calc(var(--sx) * 0.35) calc(var(--sy) * 0.35) 4px var(--sombra-muro);
-  cursor: pointer;
-  text-decoration: none;
-  transition: transform 160ms var(--ease-out), background-color 160ms ease, box-shadow 160ms ease;
-}
-
-.btn:active {
-  transform: scale(0.97);
-}
-
-.btn.sec {
-  background-color: transparent;
-  color: var(--texto);
-  border-color: currentColor;
-  box-shadow: none;
-}
-
-.btn.tierra {
-  background-color: var(--ocre);
-  border-color: var(--ocre-hondo);
-  color: var(--tinta);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .btn:hover {
-    background-color: #000;
-  }
-  .btn.sec:hover {
-    background-color: var(--regla-suave);
+/* Dark is the screen default. Print uses the light palette above in either theme. */
+@media screen {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #101c22;
+    --surface: #18272e;
+    --ink: #e4edf1;
+    --muted: #a7b9c3;
+    --action: #80cbd1;
+    --action-hover: #a2e0e3;
+    --on-action: #10252b;
+    --tint: #223b40;
+    --amber: #d5aa65;
+    --ochre-ink: #e4bf83;
+    --ochre-bg: #362c1f;
+    --line: #31464f;
+    --input-line: #6e858f;
+    --success: #9bd1b5;
+    --success-bg: #1b342c;
+    --error: #efaaa2;
+    --error-bg: #3a2425;
+    --series-a: #80cbd1;
+    --series-b: #d1a5d3;
+    --series-c: #dfb188;
+    --plate-shadow: 0 6px 20px #00000024;
   }
 }
-
-/* On basalt the plaque inverts: plaster ink on night, the same oxide rule.
-   Sunlight yellow stays reserved for the Sun in data (chart lines, markers). */
-.placa .btn,
-.noche-lunar .btn,
-.escena .btn,
-.panel.reloj .btn,
-.panel.comparador .btn {
-  background-color: #eceae4;
-  border-color: #eceae4;
-  color: var(--tinta);
-  box-shadow: inset 0 -3px 0 var(--oxido);
+* { box-sizing: border-box; }
+body, h1, h2, h3, h4, h5, p, figure, ul, dl, dd { margin: 0; }
+body { min-height: 100vh; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--txt); -webkit-font-smoothing: antialiased; }
+h1,h2,h3,h4,h5 { font-family: var(--tit); line-height: 1.16; font-weight: 550; letter-spacing: -.03em; }
+button,input,select { font: inherit; color: inherit; }
+button,summary,select { cursor: pointer; }
+a { color: var(--action); text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--action); outline-offset: 3px; }
+button:disabled { cursor: not-allowed; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 10px 19px; border: 1px solid var(--action); border-radius: var(--small-radius); color: var(--on-action); background: var(--action); font-size: 15px; font-weight: 550; text-decoration: none; }
+.btn:hover { background: var(--action-hover); }
+.btn.sec { color: var(--action); background: var(--surface); border-color: var(--input-line); }
+.btn.sec:hover { background: var(--tint); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: var(--space-6); min-width: 0; }
+.etq,.et { font-size: 13px; font-weight: 600; }
+.etq { padding: 4px 9px; border-radius: var(--small-radius); }
+.etq.sost { color: var(--success); background: var(--success-bg); }
+.etq.huec,.etq.noal { color: var(--ochre-ink); background: var(--ochre-bg); }
+.etq.inco { color: var(--error); background: var(--error-bg); }
+.etq.nopo { color: var(--muted); background: var(--paper); }
+.cifra-grande { font-size: 28px; color: var(--action); }
+.cifra-label,.fila-dato .label { color: var(--muted); }
+.fila-dato { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--line); }
+.fila-dato .val { font-family: var(--mono); }
+.terra-nav,.terra-nav .logo,.terra-nav .nav-links,.banner-mock,.horizonte-bar-fixed { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.terra-nav,.banner-mock,.horizonte-bar-fixed { padding: 12px var(--gutter); justify-content: space-between; }
+.terra-nav,.horizonte-bar-fixed { background: var(--surface); border-block: 1px solid var(--line); }
+.terra-nav .logo { font-weight: 650; letter-spacing: .08em; }
+.terra-nav .symbol { background: url('/terra-x.svg') center / contain; width: 28px; height: 28px; }
+.nav-link { background: transparent; border: 0; border-radius: var(--small-radius); padding: 8px; color: var(--muted); }
+.nav-link.active { background: var(--tint); color: var(--action); }
+.banner-mock { background: var(--ochre-bg); color: var(--ochre-ink); font-size: 13px; }
+.theme-toggle { display: inline-grid; place-items: center; flex: none; width: 44px; height: 44px; border: 1px solid var(--input-line); border-radius: var(--small-radius); background: var(--surface); color: var(--ink); }
+.theme-toggle:hover { background: var(--tint); border-color: var(--action); }
+.theme-toggle:active { background: var(--paper); }
+@media print {
+  :root { --paper: #fff; }
+  .theme-toggle { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,*::before,*::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
 
-.placa .btn.sec,
-.noche-lunar .btn.sec,
-.panel.reloj .btn.sec,
-.panel.comparador .btn.sec {
-  background-color: transparent;
-  border-color: var(--borde-light);
-  color: var(--texto);
-  box-shadow: none;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .placa .btn:hover,
-  .noche-lunar .btn:hover,
-  .panel.reloj .btn:hover,
-  .panel.comparador .btn:hover {
-    background-color: #fff;
-  }
-  .placa .btn.sec:hover,
-  .noche-lunar .btn.sec:hover,
-  .panel.reloj .btn.sec:hover,
-  .panel.comparador .btn.sec:hover {
-    background-color: rgba(236, 234, 228, 0.1);
-  }
-}
-
-/* ---------------------------------------------------------------- data rows and tags */
-.cifra-grande {
-  font-family: var(--tit);
-  font-weight: 800;
-  font-size: 32px;
-  line-height: 1.05;
-}
-
-.cifra-label {
-  font-size: 13px;
-  color: var(--texto-sec);
-  margin-top: 4px;
-}
-
-.fila-dato {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--borde-dark);
-}
-
-.fila-dato .label {
-  color: var(--texto-sec);
-}
-
-.fila-dato .val {
-  font-family: var(--mono);
-  font-weight: 500;
-}
-
-.etq {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 8px;
-  font-size: 12px;
-  font-weight: 700;
-  border: 1px solid currentColor;
-}
-
-.etq.sost { color: var(--sost); }
-.etq.huec { color: var(--huec); }
-.etq.noal { color: var(--noal); }
-.etq.nopo { color: var(--nopo); }
-.etq.inco { color: var(--inco); }
-
-.et {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--texto-sec);
-}
-
-.banner-mock {
-  background-color: var(--ocre);
-  color: var(--tinta);
-  font-family: var(--mono);
-  font-size: 12px;
-  padding: 6px 16px;
-}
-
-.horizonte-bar-fixed {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 48px;
-  background-color: var(--muro-luz);
-  border-top: 1px solid var(--regla);
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
+.team-workspace .logo { color: var(--ink); text-decoration: none; }
+.team-workspace main > div { max-width: 100%; }
+.specialist-sun { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 12px var(--gutter); background: var(--surface); border-bottom: 1px solid var(--line); }
+.specialist-sun h2 { font-size: 17px; }
+.specialist-sun label { display: grid; font-size: 13px; color: var(--muted); }
+.specialist-sun input,.specialist-sun select { min-height: 44px; accent-color: var(--action); }
+@media (max-width: 780px) {
+  .team-workspace main [style*="grid-template-columns"] { grid-template-columns: minmax(0,1fr) !important; }
+  .team-workspace main .panel { overflow-wrap: anywhere; }
 }

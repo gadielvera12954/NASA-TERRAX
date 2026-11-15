@@ -1,4 +1,4 @@
-/* Community, Account and Admin screens on the Meridian Wall */
+/* Community, Account and Admin screens use the shared atlas tokens. */
 .sin-servidor {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -307,7 +307,7 @@
   color: var(--muro-luz);
 }
 .admin-tarjeta.activa span {
-  color: #b3b0a8;
+  color: inherit;
 }
 .admin-lista {
   list-style: none;

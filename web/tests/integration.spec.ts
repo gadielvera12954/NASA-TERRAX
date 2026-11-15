@@ -15,6 +15,8 @@ test("the original main scientific workspace remains reachable", async ({
 test("main index: every candidate opens its own exported values and original JSON", async ({
   page,
 }) => {
+  // Each of the forty parcels and five controls is opened, downloaded and reloaded.
+  test.setTimeout(120_000);
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   const index = await (
@@ -22,19 +24,10 @@ test("main index: every candidate opens its own exported values and original JSO
   ).json();
   await page.goto("/#explore");
   for (const candidate of index.candidatas) {
-    await page
-      .getByLabel("Available candidates and controls")
-      .selectOption(candidate.id);
-    const raw = await (
-      await page.request.get("/data/fichas/" + candidate.id + ".json")
-    ).json();
-    await expect(
-      page.getByRole("heading", {
-        name: raw.id + " · " + raw.nombre,
-        exact: true,
-      }),
-    ).toBeVisible();
-    await page.getByRole("button", { name: "Open candidate card →" }).click();
+    await page.getByRole("searchbox").fill(candidate.id);
+    await page.locator(`a[href*="candidate=${candidate.id}#card"]`).click();
+    const raw = await (await page.request.get("/data/fichas/" + candidate.id + ".json", { maxRetries: 2 })).json();
+    await expect(page.locator(".record-meta")).toContainText(raw.id);
     await expect(page.locator(".metrics strong").nth(0)).toHaveText(
       raw.C === null
         ? "Unknown"
@@ -49,12 +42,7 @@ test("main index: every candidate opens its own exported values and original JSO
     const path = await (await pending).path();
     expect(JSON.parse(readFileSync(path!, "utf8"))).toEqual(raw);
     await page.reload();
-    await expect(
-      page.getByRole("heading", {
-        name: raw.id + " · " + raw.nombre,
-        exact: true,
-      }),
-    ).toBeVisible();
+    await expect(page.locator(".record-meta")).toContainText(raw.id);
     await page
       .getByRole("link", { name: "← Back to candidates", exact: true })
       .click();

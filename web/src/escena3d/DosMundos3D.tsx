@@ -1,3 +1,4 @@
+import { CameraActions, CameraControls, turnCamera } from "./CameraControls";
 /**
  * Two worlds, one stage: the same rover and the same 0.50 m board under the same Sun angle,
  * on the Moon (left of the curtain) and on Earth (right).
@@ -7,6 +8,7 @@
  * The ground is flat on purpose: no Earth terrain has been delivered yet (NASADEM pending).
  */
 import { useEffect, useRef, useState } from "react";
+import { useLanguage } from "../i18n/Language";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { cargarModelo, direccionSol, hayWebgl, liberar, panelesDelRover, sombras } from "./modelos";
@@ -42,9 +44,8 @@ interface Mundo {
   cinta: THREE.Group;
   g: number;
 }
-interface Motor {
+interface Motor extends CameraActions {
   actualizar: (p: PropsMundos) => void;
-  acercar: (factor: number) => void;
   destruir: () => void;
 }
 
@@ -100,12 +101,12 @@ function crearMundo(esLuna: boolean): Mundo {
   return { escena, luz, rover: null, celdas: new Map(), bola, cinta, g: esLuna ? 1.62 : 9.8 };
 }
 
-function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: PropsMundos): Motor {
+function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: PropsMundos, onUnavailable: () => void): Motor {
   let props = inicial;
   let vivo = true;
   let pendiente = true;
   let cuadro = 0;
-  let caidaVista = inicial.caida;
+  let caidaVista = 0;
   let caidaInicio = 0;
 
   const renderer = new THREE.WebGLRenderer({ canvas: lienzo, antialias: true });
@@ -129,6 +130,8 @@ function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: Props
   controles.enableZoom = false;
   lienzo.style.touchAction = "pan-y";
   controles.target.set(0, 1.25, 0);
+  controles.update();
+  controles.saveState();
   controles.minDistance = 4;
   controles.maxDistance = 60;
   controles.maxPolarAngle = Math.PI * 0.495;
@@ -236,7 +239,7 @@ function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: Props
         m.escena.add(g);
         aplicar();
       })
-      .catch(() => {});
+      .catch(() => { if (vivo) onUnavailable(); });
     cargarModelo("tablita")
       .then((g) => {
         if (!vivo) return;
@@ -246,7 +249,7 @@ function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: Props
         m.escena.add(g);
         aplicar();
       })
-      .catch(() => {});
+      .catch(() => { if (vivo) onUnavailable(); });
   }
 
   const medir = () => {
@@ -280,6 +283,8 @@ function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: Props
   cuadro = requestAnimationFrame(ciclo);
 
   return {
+    restablecer() { controles.reset(); pendiente = true; },
+    girar(direction) { turnCamera(camara, controles, direction); pendiente = true; },
     acercar(factor) {
       acercarCamara(camara, controles, factor);
       pendiente = true;
@@ -313,6 +318,7 @@ function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: Props
 }
 
 export default function DosMundos3D(props: PropsMundos) {
+  const { t } = useLanguage();
   const caja = useRef<HTMLDivElement>(null);
   const lienzo = useRef<HTMLCanvasElement>(null);
   const motor = useRef<Motor | null>(null);
@@ -323,7 +329,7 @@ export default function DosMundos3D(props: PropsMundos) {
   useEffect(() => {
     if (sinWebgl || !lienzo.current || !caja.current) return;
     try {
-      motor.current = crearMotor(lienzo.current, caja.current, ultimas.current);
+      motor.current = crearMotor(lienzo.current, caja.current, ultimas.current, () => setSinWebgl(true));
     } catch {
       setSinWebgl(true);
       return;
@@ -346,21 +352,15 @@ export default function DosMundos3D(props: PropsMundos) {
           className="capa-luna-plana"
           style={{ clipPath: `inset(0 ${100 - props.corte}% 0 0)` }}
           src="/img/ui_luna_top.png"
-          alt={props.etiqueta}
+          alt={t("Static illustration of the two environments", "Ilustración estática de los dos entornos")}
         />
+        <span className="static-caption">{t("Static illustrations · 3D unavailable", "Ilustraciones estáticas · 3D no disponible")}</span>
       </>
     );
   return (
     <div className="escena escena-mundos" ref={caja}>
       <canvas ref={lienzo} role="img" aria-label={props.etiqueta} />
-      <div className="zoom">
-        <button type="button" onClick={() => motor.current?.acercar(0.8)} aria-label={props.textoAcercar}>
-          +
-        </button>
-        <button type="button" onClick={() => motor.current?.acercar(1.25)} aria-label={props.textoAlejar}>
-          −
-        </button>
-      </div>
+      <CameraControls camera={motor} zoomIn={props.textoAcercar} zoomOut={props.textoAlejar} />
     </div>
   );
 }

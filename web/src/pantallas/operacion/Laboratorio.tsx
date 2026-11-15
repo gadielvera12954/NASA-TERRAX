@@ -59,6 +59,8 @@ export default function Laboratorio({ motor, onMotorCaido }: { motor: EstadoMoto
   }, []);
   const [base, setBase] = useState<SerieSol>();
   const [estado, setEstado] = useState<"calculando" | "listo" | "error">("calculando");
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [attempt, retry] = useState(0);
   const [error, setError] = useState("");
   const [paso, setPaso] = useState(0);
   const [andando, setAndando] = useState(false);
@@ -70,6 +72,7 @@ export default function Laboratorio({ motor, onMotorCaido }: { motor: EstadoMoto
   const pedido = useRef(0);
 
   useEffect(() => {
+    setLoadFailed(false);
     leerTerrenoInfo().then(setInfo).catch(() => {});
     leerIndiceLab()
       .then((i) => {
@@ -78,12 +81,14 @@ export default function Laboratorio({ motor, onMotorCaido }: { motor: EstadoMoto
         setPanel(i.vehiculo.panel_w);
         setBateria(i.vehiculo.bateria_wh);
       })
-      .catch(() => {});
-  }, []);
+      .catch(() => setLoadFailed(true));
+  }, [attempt]);
 
   // Without the live engine only the two exported lunations exist.
   const periodoReal: Periodo = periodo === "fechas" && !motor ? "verano" : periodo;
   useEffect(() => {
+    setBase(undefined);
+    setHoras(null);
     if (periodoReal === "fechas") {
       setHoras(null);
       return;
@@ -98,7 +103,7 @@ export default function Laboratorio({ motor, onMotorCaido }: { motor: EstadoMoto
     return () => {
       vivo = false;
     };
-  }, [periodoReal]);
+  }, [periodoReal, attempt]);
 
   // Ask for the scenario (debounced): live engine first, browser as fallback.
   useEffect(() => {
@@ -162,9 +167,9 @@ export default function Laboratorio({ motor, onMotorCaido }: { motor: EstadoMoto
             ].slice(0, 12),
       );
     }, 220);
-    return () => window.clearTimeout(reloj);
+    return () => { ++pedido.current; window.clearTimeout(reloj); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idx, punto, periodoReal, desde, hasta, consumo, panel, bateria, !!motor]);
+  }, [idx, punto, periodoReal, desde, hasta, consumo, panel, bateria, !!motor, attempt]);
 
   // Clock
   const n = esc?.serie.n ?? 0;
@@ -183,7 +188,7 @@ export default function Laboratorio({ motor, onMotorCaido }: { motor: EstadoMoto
   }, [andando, esc]);
   const i = Math.min(paso, Math.max(0, n - 1));
 
-  const s = esc?.serie;
+  const s = estado === "listo" ? esc?.serie : undefined;
   const solAz = s ? s.azimut_deg[i] : (base?.azimut_deg[base.i0 + 360] ?? 90);
   const solEl = s ? s.elevacion_deg[i] : (base?.elevacion_deg[base.i0 + 360] ?? 5);
   const t0 = s ? Date.parse(s.t0_utc) : 0;
@@ -208,7 +213,7 @@ export default function Laboratorio({ motor, onMotorCaido }: { motor: EstadoMoto
 
   const aqui = sobre && info ? latLonDePixel(info, sobre.fila, sobre.col) : null;
   const horasAqui = sobre && horas ? horas[sobre.fila * 500 + sobre.col] : null;
-  const r = esc?.resultado;
+  const r = estado === "listo" ? esc?.resultado : undefined;
   const limite = esc?.limite_refugio_h ?? idx?.limite_refugio_h ?? 50;
   const mejor = intentos.length ? intentos.reduce((a, b) => (b.tramoH < a.tramoH ? b : a)) : null;
   const elegir = (p: PuntoGrilla) => {
@@ -221,12 +226,16 @@ export default function Laboratorio({ motor, onMotorCaido }: { motor: EstadoMoto
     invierno: t("Winter lunation 2027", "Lunación de invierno 2027"),
   };
 
+  if (!idx) return <div className="notice" role={loadFailed ? "alert" : "status"}>
+    {loadFailed ? t("The laboratory parameters could not be loaded. Reconnect or retry from the offline copy.", "No se pudieron cargar los parámetros del laboratorio. Recupera la conexión o reintenta desde la copia local.") : t("Loading laboratory parameters…", "Cargando parámetros del laboratorio…")}
+    {loadFailed && <button className="text-btn" onClick={() => retry(a => a+1)}>{t("Retry", "Reintentar")}</button>}
+  </div>;
   return (
     <div className="lab">
       <p className="lead">
         {t(
-          "This is the real relief of Mons Mouton, the lunar south pole site (LOLA, 60 m). Click anywhere to park a solar rover there. It is lost if it spends more than 50 hours without enough power: can you find a spot where it survives?",
-          "Este es el relieve real de Mons Mouton, el sitio del polo sur lunar (LOLA, 60 m). Haz clic en cualquier lugar para estacionar allí un rover solar. Se pierde si pasa más de 50 horas sin energía suficiente: ¿encuentras un lugar donde sobreviva?",
+          "Choose a point on Mons Mouton and examine how long a parked solar rover can operate. The model uses LOLA relief on a 60 m grid, the selected season and the vehicle settings.",
+          "Elige un punto de Mons Mouton y examina cuánto tiempo puede operar un rover solar estacionado. El modelo usa relieve LOLA en una grilla de 60 m, la estación y los parámetros del vehículo.",
         )}
       </p>
       <div className={`fuente-calculo ${motor ? "vivo" : ""}`} role="status">
@@ -234,10 +243,10 @@ export default function Laboratorio({ motor, onMotorCaido }: { motor: EstadoMoto
         {motor ? (
           <span>
             <strong>{t("Live engine connected", "Motor en vivo conectado")}</strong> ·{" "}
-            {t(
-              `each click runs the physics engine now: 360-azimuth ray-cast over relief out to ${motor.relieve.margen_km} km`,
-              `cada clic ejecuta el motor físico ahora: trazado de 360 azimutes sobre relieve hasta ${motor.relieve.margen_km} km`,
-            )}
+            {motor.relieve.grillas_reales ? t(
+              `Horizon from the relief grid out to ${motor.relieve.margen_km} km.`,
+              `Horizonte calculado sobre la grilla de relieve hasta ${motor.relieve.margen_km} km.`
+            ) : t("The server uses the exported horizon table here.", "El servidor usa aquí la tabla de horizontes exportada.")}
           </span>
         ) : (
           <span>
@@ -285,7 +294,7 @@ export default function Laboratorio({ motor, onMotorCaido }: { motor: EstadoMoto
               "3D relief of Mons Mouton with the shadows of the selected hour and the parked rover",
               "Relieve 3D de Mons Mouton con las sombras de la hora elegida y el rover estacionado",
             )}
-textoAcercar={t("Zoom in", "Acercar")}
+            textoAcercar={t("Zoom in", "Acercar")}
             textoAlejar={t("Zoom out", "Alejar")}
             textoSinWebgl={t(
               "3D is not available in this browser. Use the row and column fields to park the rover.",
@@ -443,7 +452,7 @@ textoAcercar={t("Zoom in", "Acercar")}
               t(
                 "This scenario could not be computed. Check the dates or try another point.",
                 "No se pudo calcular este escenario. Revisa las fechas o prueba otro punto.",
-              )}
+              )} <button className="text-btn" onClick={() => retry(a => a+1)}>{t("Retry calculation", "Reintentar cálculo")}</button>
           </p>
         )}
         {r && esc && estado !== "error" && (

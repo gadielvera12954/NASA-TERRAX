@@ -82,9 +82,9 @@ export const PerfilHorizonte: React.FC<PerfilHorizonteProps> = ({
             fontFamily: 'var(--mono)',
             fontSize: '11px',
             fontWeight: 700,
-            color: isSunVisible ? '#34D399' : '#F87171',
+            color: isSunVisible ? 'var(--success)' : 'var(--error)',
             background: isSunVisible ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-            border: `1px solid ${isSunVisible ? '#10B981' : '#EF4444'}`,
+            border: `1px solid ${isSunVisible ? 'var(--success)' : 'var(--error)'}`,
             padding: '2px 6px',
             borderRadius: '2px',
           }}
@@ -95,7 +95,7 @@ export const PerfilHorizonte: React.FC<PerfilHorizonteProps> = ({
 
       <svg
         viewBox={`0 0 ${ancho} ${alto}`}
-        style={{ width: '100%', height: 'auto', display: 'block', background: '#091A42', borderRadius: '2px', border: '1px solid var(--borde-dark)' }}
+        style={{ width: '100%', height: 'auto', display: 'block', background: 'var(--paper)', borderRadius: '2px', border: '1px solid var(--borde-dark)' }}
       >
         {/* Grid lines for altitude: 2°, 4°, 6°, 8° */}
         {[2, 4, 6, 8].map((deg) => (
@@ -105,7 +105,7 @@ export const PerfilHorizonte: React.FC<PerfilHorizonteProps> = ({
               y1={sy(deg)}
               x2={padLeft + graphW}
               y2={sy(deg)}
-              stroke="#1E3160"
+              stroke="var(--line)"
               strokeWidth="1"
               strokeDasharray="2,2"
             />
@@ -136,7 +136,7 @@ export const PerfilHorizonte: React.FC<PerfilHorizonteProps> = ({
               y1={padTop}
               x2={sx(tick.az)}
               y2={padTop + graphH}
-              stroke="#162955"
+              stroke="var(--line)"
               strokeWidth="1"
             />
             <text
@@ -153,7 +153,7 @@ export const PerfilHorizonte: React.FC<PerfilHorizonteProps> = ({
         ))}
 
         {/* Horizon Terrain Silhouette fill */}
-        <path d={pathD} fill="#142C66" stroke="#2491FF" strokeWidth="1.5" />
+        <path d={pathD} fill="var(--tint)" stroke="var(--series-b)" strokeWidth="1.5" />
 
         {/* Global Sun Elevation horizontal bar */}
         <line
@@ -180,7 +180,7 @@ export const PerfilHorizonte: React.FC<PerfilHorizonteProps> = ({
           cy={sunY}
           r="5"
           fill="var(--sol)"
-          stroke="#07173F"
+          stroke="var(--ink)"
           strokeWidth="1.5"
           style={{ filter: 'drop-shadow(0 0 6px var(--sol))' }}
         />

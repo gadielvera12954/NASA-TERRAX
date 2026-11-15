@@ -7,7 +7,7 @@ export const LearnScreen: React.FC = () => {
         <div className="et" style={{ marginBottom: '4px' }}>
           Educational Outreach · Yvy ha Jasy (Earth and Moon)
         </div>
-        <h1 style={{ fontSize: '30px', fontWeight: 900 }}>
+        <h1 style={{ fontSize: '30px', fontWeight: 600 }}>
           Educational Cards in Spanish & Jopara (Guaraní)
         </h1>
         <p style={{ color: 'var(--texto-sec)', fontSize: '14px', marginTop: '4px' }}>

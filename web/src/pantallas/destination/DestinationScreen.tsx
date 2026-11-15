@@ -50,7 +50,7 @@ export const DestinationScreen: React.FC = () => {
         <div className="et" style={{ marginBottom: '4px' }}>
           Destination · Lunar South Pole (Mons Mouton · 84.60°S, 31.00°E)
         </div>
-        <h1 style={{ fontSize: '30px', fontWeight: 900 }}>
+        <h1 style={{ fontSize: '30px', fontWeight: 600 }}>
           {datosEstacion.supervivenciaPct === null ? (
             <>On flat ground, a parked rover <span style={{ color: 'var(--sol)' }}>does not survive</span> the lunar night.</>
           ) : datosEstacion.supervivenciaPct === 0 ? (
@@ -87,7 +87,7 @@ export const DestinationScreen: React.FC = () => {
             </div>
 
             {/* Summer / Winter Season Selector */}
-            <div style={{ display: 'flex', gap: '4px', background: '#07173F', padding: '2px', borderRadius: '2px', border: '1px solid var(--borde-dark)' }}>
+            <div style={{ display: 'flex', gap: '4px', background: 'var(--paper)', padding: '2px', borderRadius: '2px', border: '1px solid var(--borde-dark)' }}>
               <button
                 onClick={() => setEstacion('summer')}
                 style={{
@@ -143,7 +143,7 @@ export const DestinationScreen: React.FC = () => {
                     position: 'absolute',
                     top: '12px',
                     left: '12px',
-                    background: 'rgba(7, 23, 63, 0.90)',
+                    background: 'var(--surface)',
                     border: '1px solid var(--borde-dark)',
                     padding: '6px 10px',
                     borderRadius: '2px',
@@ -159,7 +159,7 @@ export const DestinationScreen: React.FC = () => {
                     position: 'absolute',
                     bottom: '12px',
                     right: '12px',
-                    background: 'rgba(7, 23, 63, 0.90)',
+                    background: 'var(--surface)',
                     border: '1px solid var(--borde-dark)',
                     padding: '6px 10px',
                     borderRadius: '2px',
@@ -170,9 +170,9 @@ export const DestinationScreen: React.FC = () => {
                     gap: '12px',
                   }}
                 >
-                  <span style={{ color: '#34D399' }}>● ≤ 50 h (Viable)</span>
-                  <span style={{ color: '#FBBF24' }}>● 50-100 h</span>
-                  <span style={{ color: '#F87171' }}>● &gt; 100 h (Lethal)</span>
+                  <span style={{ color: 'var(--success)' }}>● ≤ 50 h (Viable)</span>
+                  <span style={{ color: 'var(--ochre-ink)' }}>● 50-100 h</span>
+                  <span style={{ color: 'var(--error)' }}>● &gt; 100 h (Lethal)</span>
                 </div>
               </>
             ) : (
@@ -206,17 +206,17 @@ export const DestinationScreen: React.FC = () => {
             </div>
             <div className="fila-dato">
               <span className="label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Clock size={14} color="#F59E0B" /> Longest Dark Stretch
+                <Clock size={14} color="var(--ochre-ink)" /> Longest Dark Stretch
               </span>
-              <span className="val" style={{ color: estacion === 'winter' ? '#EF4444' : 'var(--texto)' }}>
+              <span className="val" style={{ color: estacion === 'winter' ? 'var(--error)' : 'var(--texto)' }}>
                 {datosEstacion.tramoOscuroMax}
               </span>
             </div>
             <div className="fila-dato">
               <span className="label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <BatteryCharging size={14} color="#10B981" /> Lowest Battery Reserve
+                <BatteryCharging size={14} color="var(--success)" /> Lowest Battery Reserve
               </span>
-              <span className="val" style={{ color: estacion === 'winter' ? '#EF4444' : '#34D399' }}>
+              <span className="val" style={{ color: estacion === 'winter' ? 'var(--error)' : 'var(--success)' }}>
                 {datosEstacion.bateriaMin}
               </span>
             </div>
@@ -236,9 +236,9 @@ export const DestinationScreen: React.FC = () => {
               background: estacion === 'winter' ? 'rgba(139, 10, 3, 0.2)' : 'var(--noche-panel)',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#F59E0B', marginBottom: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--ochre-ink)', marginBottom: '6px' }}>
               <AlertTriangle size={15} />
-              <span className="et" style={{ color: '#F59E0B' }}>Critical Condition</span>
+              <span className="et" style={{ color: 'var(--ochre-ink)' }}>Critical Condition</span>
             </div>
             <p style={{ fontFamily: 'var(--txt)', fontSize: '13px', lineHeight: 1.4, color: 'var(--texto)' }}>
               "{datosEstacion.condicionCritica}"

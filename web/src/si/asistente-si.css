@@ -6,7 +6,7 @@
   --si-texto-2: #b3b0a8;
   --si-regla: rgba(236, 234, 228, 0.16);
   --si-regla-fuerte: rgba(236, 234, 228, 0.34);
-  --si-acento: var(--oxido, #a8321e);
+  --si-acento: #80cbd1;
   font-family: var(--txt, system-ui, sans-serif);
   color: var(--si-texto);
 }
@@ -181,7 +181,7 @@
 .si-turno.usuario {
   margin-left: auto;
   background: #eceae4;
-  color: var(--tinta, #141414);
+  color: #141414;
   padding: 10px 14px;
 }
 .si-turno.guia {
@@ -265,7 +265,7 @@
   display: grid;
   place-items: center;
   background: #eceae4;
-  color: var(--tinta, #141414);
+  color: #141414;
   border: 0;
   box-shadow: inset 0 -3px 0 var(--si-acento);
   cursor: pointer;
@@ -319,3 +319,12 @@
     max-width: 100%;
   }
 }
+
+@media print { .si-raiz { display: none !important; } }
+
+/* Use the atlas appearance for the launcher while the guide keeps its dark reading surface. */
+.si-trigger { bottom: 20px; border-radius: var(--radius); background: var(--surface); color: var(--action); border-color: var(--input-line); box-shadow: var(--plate-shadow); font-weight: 550; }
+.si-trigger:hover { background: var(--tint); }
+.si-trigger-kbd { color: var(--muted); border-color: var(--input-line); }
+.si-console { bottom: 76px; border-radius: var(--radius); box-shadow: var(--plate-shadow); }
+@media (max-width: 600px) { .si-trigger { bottom: 12px; } .si-console { bottom: 0; } }

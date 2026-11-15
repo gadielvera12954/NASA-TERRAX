@@ -53,3 +53,7 @@ TERRA-X incorporates and references open scientific datasets and open-source sof
 - **License**: SIL Open Font License 1.1
 - **Copyright**: Archivo (c) Omnibus-Type; Public Sans (c) General Services Administration / Impallari Type; Azeret Mono (c) Displaay Type Foundry.
 - **Use**: display, text and tabular-number faces of the public web app and the team workspace; shipped as woff2 files inside the build so the app renders offline.
+
+## IBM Plex Sans
+
+The atlas bundles the Latin variable-weight webfont from IBM Plex Sans, distributed via Fontsource. Copyright 2019 IBM Corp. Licensed under the SIL Open Font License 1.1. The full notice is in [web/public/fonts/OFL.txt](web/public/fonts/OFL.txt).

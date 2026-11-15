@@ -1,104 +1,108 @@
-import React, { useEffect, useState } from 'react';
-import { SolProvider } from '../luz/SolContext';
-import { BarraHorizonte } from '../luz/BarraHorizonte';
-import { MissionScreen } from '../pantallas/mission/MissionScreen';
-import { DestinationScreen } from '../pantallas/destination/DestinationScreen';
-import { DosMundosScreen } from '../pantallas/dos-mundos/DosMundosScreen';
-import { SearchScreen } from '../pantallas/search/SearchScreen';
-import { FichaScreen } from '../pantallas/ficha/FichaScreen';
-import { TestsScreen } from '../pantallas/tests/TestsScreen';
-import { DataScreen } from '../pantallas/data/DataScreen';
-import { FieldScreen } from '../pantallas/field/FieldScreen';
-import { LearnScreen } from '../pantallas/learn/LearnScreen';
-import { Recorrido90Segundos } from '../recorrido/Recorrido90Segundos';
-import { Sparkles, AlertCircle } from 'lucide-react';
-import { useSol } from '../luz/SolContext';
-import AsistenteSI from '../si/AsistenteSI';
-import '../sistema/tokens-equipo.css';
+import React, { useEffect, useState } from "react";
+import AsistenteSI from "../si/AsistenteSI";
+import { SolProvider, useSol } from "../luz/SolContext";
+import { BarraHorizonte } from "../luz/BarraHorizonte";
+import { MissionScreen } from "../pantallas/mission/MissionScreen";
+import { DestinationScreen } from "../pantallas/destination/DestinationScreen";
+import { DosMundosScreen } from "../pantallas/dos-mundos/DosMundosScreen";
+import { SearchScreen } from "../pantallas/search/SearchScreen";
+import { TestsScreen } from "../pantallas/tests/TestsScreen";
+import { DataScreen } from "../pantallas/data/DataScreen";
+import { FieldScreen } from "../pantallas/field/FieldScreen";
+import { LearnScreen } from "../pantallas/learn/LearnScreen";
+import { Recorrido90Segundos } from "../recorrido/Recorrido90Segundos";
+import { Sparkles, AlertCircle } from "lucide-react";
+import ThemeToggle from "./ThemeToggle";
+import "../sistema/tokens.css";
 
 export type PantallaId =
-  | 'mission'
-  | 'destination'
-  | 'search'
-  | 'two worlds'
-  | 'ficha'
-  | 'field'
-  | 'learn'
-  | 'tests'
-  | 'data';
+  | "mission"
+  | "destination"
+  | "search"
+  | "two worlds"
+  | "ficha"
+  | "field"
+  | "learn"
+  | "tests"
+  | "data";
 
 export const AppContent: React.FC = () => {
   const sol = useSol();
-  const [pantallaActual, setPantallaActual] = useState<PantallaId>('mission');
-  const [candidataSeleccionada, setCandidataSeleccionada] = useState<string>('P-07');
-  const [idioma, setIdioma] = useState<'EN' | 'ES' | 'GN'>('EN');
+  const [pantallaActual, setPantallaActual] = useState<PantallaId>("mission");
   const [mostrarRecorrido, setMostrarRecorrido] = useState<boolean>(false);
-  // The MOCK DATA band follows manifest.json: it stays on while any data file is marked "maqueta": true.
+  // Scope the legacy manifest notice to the specialist views using example site records.
   const [isMockData, setIsMockData] = useState<boolean>(true);
   useEffect(() => {
-    fetch('/data/manifest.json')
+    fetch("/data/manifest.json")
       .then((r) => r.json())
       .then((m) => setIsMockData(Boolean(m.maqueta)))
       .catch(() => setIsMockData(true));
   }, []);
 
   const navItems: { id: PantallaId; label: string }[] = [
-    { id: 'mission', label: 'Mission' },
-    { id: 'destination', label: 'Destination' },
-    { id: 'search', label: 'Search' },
-    { id: 'two worlds', label: 'Two Worlds' },
-    { id: 'field', label: 'Field' },
-    { id: 'learn', label: 'Learn' },
-    { id: 'tests', label: 'Tests' },
-    { id: 'data', label: 'Data' },
+    { id: "mission", label: "Mission" },
+    { id: "destination", label: "Destination" },
+    { id: "search", label: "Search" },
+    { id: "two worlds", label: "Two Worlds" },
+    { id: "field", label: "Field" },
+    { id: "learn", label: "Learn" },
+    { id: "tests", label: "Tests" },
+    { id: "data", label: "Data" },
   ];
 
   const handleSeleccionarParcela = (id: string) => {
-    setCandidataSeleccionada(id);
-    setPantallaActual('ficha');
+    const url = new URL("/", location.origin);
+    url.searchParams.set("candidate", id);
+    url.hash = "card";
+    location.assign(url);
   };
 
   const handleNavegarDesdeRecorrido = (tab: string) => {
-    const matched = navItems.find((n) => n.id.toLowerCase() === tab.toLowerCase());
+    const matched = navItems.find(
+      (n) => n.id.toLowerCase() === tab.toLowerCase(),
+    );
     if (matched) {
       setPantallaActual(matched.id);
-    } else if (tab.includes('card') || tab.includes('ficha')) {
-      setPantallaActual('ficha');
+    } else if (tab.includes("card") || tab.includes("ficha")) {
+      handleSeleccionarParcela("P-07");
     }
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--noche)' }}>
+    <div
+      className="team-workspace"
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        backgroundColor: "var(--noche)",
+      }}
+    >
       {/* Top Banner for Mock Data requirement */}
-      {isMockData && (
-        <div className="banner-mock">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <AlertCircle size={13} />
-            <span>MOCK DATA ACTIVE · PRECOMPUTED HORIZON CONTRATO v1.0.0</span>
+      {isMockData &&
+        ["search", "ficha", "two worlds"].includes(pantallaActual) && (
+          <div className="banner-mock">
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <AlertCircle size={13} />
+              <span>Demonstration site records</span>
+            </div>
+            <a href="/#checks">Sources and verification</a>
           </div>
-          <span>SOME FILES ARE STILL MOCK DATA · SEE TESTS AND DATA</span>
-        </div>
-      )}
+        )}
 
       {/* Main Sticky Navigation */}
       <nav className="terra-nav">
-        {/* Brand Logo & Brand Mark (split circle: half moon grey, half earth red, yellow divider) */}
-        <div
-          className="logo"
-          onClick={() => setPantallaActual('mission')}
-          style={{ cursor: 'pointer' }}
-        >
-          <span className="symbol" />
-          <span>TERRA-X</span>
-        </div>
-
+        <a className="logo" href="/#home">
+          <span className="symbol" aria-hidden="true" />
+          TERRA-X
+        </a>
         {/* Center Route Links */}
         <div className="nav-links">
           {navItems.map((item) => (
             <button
               key={item.id}
               onClick={() => setPantallaActual(item.id)}
-              className={`nav-link ${pantallaActual === item.id ? 'active' : ''}`}
+              className={`nav-link ${pantallaActual === item.id ? "active" : ""}`}
             >
               {item.label}
             </button>
@@ -106,86 +110,61 @@ export const AppContent: React.FC = () => {
         </div>
 
         {/* Right CTA & Language Selector */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <button
             onClick={() => setMostrarRecorrido(true)}
             className="btn"
-            style={{ fontSize: '11px', padding: '5px 12px', gap: '6px' }}
+            style={{ fontSize: "11px", padding: "5px 12px", gap: "6px" }}
           >
             <Sparkles size={13} /> 90s Tour
           </button>
 
-          {/* Language Switcher: EN (Default per rules), ES, GN */}
-          <div style={{ display: 'flex', gap: '2px', background: '#07173F', padding: '2px', borderRadius: '2px', border: '1px solid var(--borde-dark)' }}>
-            {(['EN', 'ES', 'GN'] as const).map((lang) => (
-              <button
-                key={lang}
-                onClick={() => setIdioma(lang)}
-                style={{
-                  background: idioma === lang ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
-                  color: idioma === lang ? 'var(--sol)' : 'var(--sec-dark)',
-                  border: 'none',
-                  borderRadius: '2px',
-                  padding: '2px 6px',
-                  fontSize: '10px',
-                  fontFamily: 'var(--mono)',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                }}
-              >
-                {lang}
-              </button>
-            ))}
-          </div>
+          <a href="/#home">Bilingual atlas</a>
+          <ThemeToggle />
         </div>
       </nav>
 
+      {(pantallaActual === "destination" ||
+        pantallaActual === "two worlds") && <BarraHorizonte />}
       {/* Main Screen Body */}
       <main style={{ flex: 1 }}>
-        {pantallaActual === 'mission' && (
+        {pantallaActual === "mission" && (
           <MissionScreen
             onIniciarRecorrido={() => setMostrarRecorrido(true)}
             onNavegar={(tab) => setPantallaActual(tab as PantallaId)}
           />
         )}
-        {pantallaActual === 'destination' && <DestinationScreen />}
-        {pantallaActual === 'search' && <SearchScreen onSeleccionarParcela={handleSeleccionarParcela} />}
-        {pantallaActual === 'two worlds' && <DosMundosScreen />}
-        {pantallaActual === 'ficha' && (
-          <FichaScreen
-            candidataId={candidataSeleccionada}
-            onNavegarDosMundos={() => setPantallaActual('two worlds')}
-          />
+        {pantallaActual === "destination" && <DestinationScreen />}
+        {pantallaActual === "search" && (
+          <SearchScreen onSeleccionarParcela={handleSeleccionarParcela} />
         )}
-        {pantallaActual === 'field' && <FieldScreen />}
-        {pantallaActual === 'learn' && <LearnScreen />}
-        {pantallaActual === 'tests' && <TestsScreen />}
-        {pantallaActual === 'data' && <DataScreen />}
+        {pantallaActual === "two worlds" && <DosMundosScreen />}
+        {pantallaActual === "field" && <FieldScreen />}
+        {pantallaActual === "learn" && <LearnScreen />}
+        {pantallaActual === "tests" && <TestsScreen />}
+        {pantallaActual === "data" && <DataScreen />}
       </main>
 
       <AsistenteSI
         pagina={pantallaActual}
         elevacionSolDeg={sol.elevacion}
-        idioma={idioma === 'ES' ? 'es' : 'en'}
+        idioma="en"
         onNavegar={(dest) => {
-          const mapa: Record<string, PantallaId> = {
-            home: 'mission',
-            explore: 'search',
-            card: 'ficha',
-            compare: 'two worlds',
-            lab: 'destination',
-            checks: 'tests',
-            guide: 'field',
+          const mapping: Record<string, PantallaId> = {
+            home: "mission",
+            explore: "search",
+            compare: "two worlds",
+            worlds: "two worlds",
+            lab: "destination",
+            checks: "tests",
+            guide: "field",
           };
-          setPantallaActual(mapa[dest] ?? (dest as PantallaId));
+          if (dest === "card") handleSeleccionarParcela("P-07");
+          else if (mapping[dest]) setPantallaActual(mapping[dest]);
         }}
-        onSeleccionarCandidata={(id) => handleSeleccionarParcela(id)}
-        onAjustarSol={(deg) => sol.setElevacion(deg)}
+        onSeleccionarCandidata={handleSeleccionarParcela}
+        onAjustarSol={sol.setElevacion}
       />
-
-      {/* Fixed Horizon Bar at Bottom (Replaces traditional footer, controls Sol everywhere) */}
-      <BarraHorizonte />
-
       {/* 90-Second Guided Tour Modal */}
       {mostrarRecorrido && (
         <Recorrido90Segundos
