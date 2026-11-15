@@ -40,7 +40,15 @@
 - **No model computes results:** numbers come from the deterministic engine with published data and parameters; the same inputs give the same files (reproducibility test).
 - **Pending per the team method:** review by Codex and by a team member.
 
-## 5. 3D lab, Blender models and live engine server
+## 5. Part 4 · Scale and terrain footprint (Mathias)
+
+- **Tool:** Claude Code (Anthropic), model Claude Opus 5.5, on Saturday 2026-11-14.
+- **Scope:** wrote `motor/escala` (exact 3 × 3 block averaging; geographic → UTM reprojection at 60 m with average resampling), `motor/huella` (F8 Horn slope, F9 circular-window roughness, F16 grazing-light response, 101-quantile distributions) and the tests `motor/tests/test_parte4_*.py`.
+- **Control:** known-answer tests (tilted plane, plane plus white noise, constant horizon, constant and planar fields through reprojection) were written before the code and run red first. One failure exposed a real bug (a cell with no elevation received a slope) and was fixed in the code, not in the test.
+- **Metadata:** every Part 4 module states SI use in its header; commits carry a co-author trailer.
+- **Pending per the team method:** review by Codex and by a team member.
+
+## 6. 3D lab, Blender models and live engine server
 
 - **Tool:** Claude Code (Anthropic), on Saturday 2026-11-14.
 - **Scope:** wrote `modelos/construir_modelos.py` (Blender models), `servidor/` (HTTP wrapper around `motor/`), `web/src/escena3d`, `web/src/pantallas/operacion`, `web/src/pantallas/field/SombraCampo.tsx`, `web/src/datos/laboratorio.ts`, `web/src/sistema/lab.css`, and wired them into `web/src/sistema/MvpApp.tsx`.
