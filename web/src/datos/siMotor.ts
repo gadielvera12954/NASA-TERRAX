@@ -13,7 +13,7 @@ export interface PedidoMotorSI {
   horizonte?: "auto" | "relieve" | "liso";
 }
 
-export interface EscenarioMotorSI extends Escenario {
+export interface EscenarioMotorSI extends Pick<Escenario, "origen" | "punto" | "periodo" | "vehiculo" | "resultado"> {
   scenario_id?: string;
   meta: { parametros_sha256: string; motor_version: string; producto?: string };
 }
@@ -73,7 +73,7 @@ export function validarEscenarioSI(v: unknown, pedido: PedidoMotorSI, requiereId
     || typeof v.periodo.desde !== "string" || typeof v.periodo.hasta !== "string"
     || (pedido.lunacion ? v.periodo.lunacion !== pedido.lunacion
       : v.periodo.desde !== pedido.desde || v.periodo.hasta !== pedido.hasta)
-    || (requiereId && (typeof v.scenario_id !== "string" || !v.scenario_id.trim()))) {
+    || (requiereId && (typeof v.scenario_id !== "string" || !/^[a-f0-9]{64}$/i.test(v.scenario_id)))) {
     throw new ErrorMotorSI("contrato", "The engine response does not match the requested scenario or lacks provenance.");
   }
   for (const k of ["noche_geometrica_h", "tramo_oscuro_mas_largo_h", "potencia_media_w", "bateria_minima_wh"]) {
@@ -116,17 +116,23 @@ export async function analizarPuntoSI(entrada: unknown): Promise<ResultadoMotorS
   return [{ escenario: validarEscenarioSI(await post("/api/destino/punto", pedido), pedido) }];
 }
 
-/** Proposed J4 wire contract; confirm with Jean before integration. No individual-call emulation. */
+/** J4 contract from Jean: ordered wrappers with ok/id/escenario and per-item failures. */
 export async function compararEscenariosSI(entradas: unknown): Promise<ResultadoMotorSI[]> {
   if (!Array.isArray(entradas) || entradas.length < 2 || entradas.length > 3) throw new ErrorMotorSI("contexto", "Two or three scenarios are required.");
   const pedidos = entradas.map(validarPedidoSI);
-  const j = await post("/api/destino/comparar", { escenarios: pedidos });
-  if (!registro(j) || !Array.isArray(j.resultados) || j.resultados.length !== pedidos.length) {
+  const j = await post("/api/destino/comparar", { escenarios: pedidos, series: false });
+  if (!registro(j) || j.origen !== "motor-en-vivo" || !Array.isArray(j.escenarios) || j.escenarios.length !== pedidos.length) {
     throw new ErrorMotorSI("contrato", "The batch response does not match the agreed adapter contract.");
   }
-  return j.resultados.map((v: unknown, i: number) => {
-    if (registro(v) && typeof v.error === "string") return { error: "The engine could not calculate this scenario." };
-    try { return { escenario: validarEscenarioSI(v, pedidos[i], true) }; }
+  return j.escenarios.map((v: unknown, i: number) => {
+    if (registro(v) && v.id === String.fromCharCode(65 + i) && v.ok === false && typeof v.error === "string") {
+      return { error: "The engine could not calculate this scenario." };
+    }
+    try {
+      if (!registro(v) || v.id !== String.fromCharCode(65 + i) || v.ok !== true
+        || !registro(v.escenario) || v.scenario_id !== v.escenario.scenario_id) throw new Error("Mismatched scenario wrapper");
+      return { escenario: validarEscenarioSI(v.escenario, pedidos[i], true) };
+    }
     catch { return { error: "The scenario response could not be verified." }; }
   });
 }

@@ -38,21 +38,22 @@ the scientific endpoints. This branch does not change their files.
 and parameter hash must match before a readout can be shown. The SI does not
 calculate terrain metrics or invent `scenario_id` for this endpoint.
 
-The batch adapter currently proposes this J4 wire format:
+The batch adapter consumes Jean's J4 wire format (commit `5004720`):
 
 ```ts
 // POST /api/destino/comparar
-{ escenarios: [pedidoA, pedidoB] }
+{ escenarios: [pedidoA, pedidoB], series: false }
 // Response, in request order:
-{ resultados: [
-  { ...respuestaDePuntoA, scenario_id: hashReproducibleDeJean },
-  { error: "..." },
+{ origen: "motor-en-vivo", escenarios: [
+  { id: "A", ok: true, scenario_id: hashReproducibleDeJean, escenario: respuestaDePuntoA },
+  { id: "B", ok: false, error: "..." },
 ] }
 ```
 
-This envelope is **pending Jean's real request/response example**. Adapt only
-`web/src/datos/siMotor.ts` if J4 uses a different envelope. The browser tests mock
-this proposal; they do not certify the future batch endpoint. An unavailable
+The adapter checks wrapper IDs, matching nested scenario hashes and scientific
+fields before showing a readout. `series: false` avoids transferring unused time
+series. The browser suite exercises success, partial failure and unavailable
+endpoints. An unavailable
 endpoint produces an explicit message, never emulated individual calls or fake
 comparison results. Valid items survive individual response failures.
 
@@ -72,6 +73,6 @@ longer imports the embedded key module. Model text is buffered until checked.
 2. Erwan supplies `pedido` / `pedidos` from the visible experiment. His terrestrial
    site comparator can pass site IDs for explanation; it must not manufacture
    lunar destination requests from terrestrial IDs.
-3. Confirm J4's real envelope with Jean and exercise the adapter against it.
+3. Exercise the adapter against Jean's real endpoint after pulling `main`.
 4. Integrate the team PRs, run the final checks and freeze functionality.
    Publishing still requires the team's approval.

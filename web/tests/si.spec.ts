@@ -5,13 +5,16 @@ import { readFileSync, mkdirSync } from "node:fs";
 const referencia = (lunacion = "verano") => JSON.parse(readFileSync(new URL(`../public/data/destino/ficha_${lunacion}.json`, import.meta.url), "utf8"));
 const pedido = { fila: 249, col: 249, lunacion: "verano", consumo_w: 60, panel_w: 320, bateria_wh: 5420 };
 // Adapt the published scientific export to the existing live endpoint envelope.
-// These are route fixtures, never evidence that Jean's batch endpoint is deployed.
+// Route fixtures use Jean's J4 envelope; real-engine checks run separately.
 function escenario(lunacion = "verano") {
   const f = referencia(lunacion);
   return { ...f, origen: "motor-en-vivo", periodo: { lunacion, desde: f.lunacion.desde, hasta: f.lunacion.hasta },
     vehiculo: { ...f.vehiculo, consumo_w: f.vehiculo.consumo_w.valor },
     scenario_id: (lunacion === "verano" ? "a" : "b").repeat(64) };
 }
+const lote = (escenarios: ({ scenario_id: string } | { error: string })[]) => ({ origen: "motor-en-vivo", escenarios: escenarios.map((v, i) => ({
+  id: String.fromCharCode(65 + i), ...("error" in v ? { ok: false, error: v.error } : { ok: true, scenario_id: v.scenario_id, escenario: v }),
+})) });
 async function inicio(page: Page) {
   await page.goto("/");
   await expect(page.locator(".site-list").first().getByRole("link").first()).toBeVisible();
@@ -102,8 +105,8 @@ test("batch adapter makes one request and retains valid results on partial failu
   await page.route("**/api/destino/punto", r => { puntos++; return r.abort(); });
   await page.route("**/api/destino/comparar", async r => {
     lotes++;
-    expect(r.request().postDataJSON()).toEqual({ escenarios: [pedido, { ...pedido, lunacion: "invierno" }] });
-    await r.fulfill({ json: { resultados: [escenario(), { error: "scenario failed" }] } });
+    expect(r.request().postDataJSON()).toEqual({ escenarios: [pedido, { ...pedido, lunacion: "invierno" }], series: false });
+    await r.fulfill({ json: lote([escenario(), { error: "scenario failed" }]) });
   });
   await inicio(page);
   await abrir(page, { pagina: "lab", pedidos: [pedido, { ...pedido, lunacion: "invierno" }] });
@@ -114,7 +117,7 @@ test("batch adapter makes one request and retains valid results on partial failu
 });
 
 test("batch readout binds metrics to both returned scenarios", async ({ page }) => {
-  await page.route("**/api/destino/comparar", r => r.fulfill({ json: { resultados: [escenario(), escenario("invierno")] } }));
+  await page.route("**/api/destino/comparar", r => r.fulfill({ json: lote([escenario(), escenario("invierno")]) }));
   await inicio(page);
   await abrir(page, { pedidos: [pedido, { ...pedido, lunacion: "invierno" }] });
   await page.getByRole("button", { name: "Compare scenarios with the engine", exact: true }).click();
@@ -150,7 +153,7 @@ test("engine connection failures show no fabricated calculation", async ({ page 
 });
 
 test("an entirely failed batch cannot earn a calculation or verification label", async ({ page }) => {
-  await page.route("**/api/destino/comparar", r => r.fulfill({ json: { resultados: [{ error: "A" }, { error: "B" }] } }));
+  await page.route("**/api/destino/comparar", r => r.fulfill({ json: lote([{ error: "A" }, { error: "B" }]) }));
   await inicio(page);
   await abrir(page, { pedidos: [pedido, pedido] });
   await page.getByRole("button", { name: "Compare scenarios with the engine", exact: true }).click();
