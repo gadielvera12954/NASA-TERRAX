@@ -8,6 +8,7 @@ import { Goal, GoalPicker, siteName, Verdict } from "../../sistema/Catalogue";
 import { Ficha } from "../../datos/contract";
 import { readFicha, IndexEntry } from "../../datos/integration";
 import { useAncho } from "./Graficos";
+import BotonSI from "../../luz/BotonSI";
 
 interface Propiedad {
   estado: string;
@@ -256,12 +257,47 @@ export default function Comparador({
       </p>
       <div className="comparison-setup">
         <GoalPicker goal={goal} change={changeGoal} />
-        <p className="muted">
-          {t(
-            "The goal highlights one dimension of the existing records. Scores are read directly from each file.",
-            "El objetivo destaca una dimensión de las fichas existentes. Los puntajes provienen de cada archivo.",
-          )}
-        </p>
+        <div>
+          <p className="muted">
+            {t(
+              "The goal highlights one dimension of the existing records. Scores are read directly from each file.",
+              "El objetivo destaca una dimensión de las fichas existentes. Los puntajes provienen de cada archivo.",
+            )}
+          </p>
+          <BotonSI
+            texto={t(
+              "Explain with SI: explain this comparison",
+              "Explicar con SI: explicar esta comparación",
+            )}
+            disabled={!elegidas.length}
+            pregunta={() => {
+              const resumen = elegidas
+                .map(
+                  ({ id, ficha: f }) =>
+                    `${id} (${siteName(f.nombre, t)}): C=${f.C === null ? t("unknown", "desconocido") : num(f.C)}, L–U=${num(f.L)}–${num(f.U)}, E=${num(f.E)}`,
+                )
+                .join("; ");
+              return t(
+                `Compare these candidate records for the "${goal}" rehearsal goal: ${resumen}. Which site fits best, why, and what must be measured first in the field?`,
+                `Explica esta comparación para el objetivo de ensayo "${goal}": ${resumen}. ¿Qué sitio encaja mejor, por qué y qué hay que medir primero en el terreno?`,
+              );
+            }}
+            contexto={() => ({
+              pantalla: "compare",
+              objetivo: goal,
+              sitios: elegidas.map(({ id, ficha: f }) => ({
+                id,
+                nombre: f.nombre,
+                etiqueta: f.etiqueta,
+                C: f.C,
+                E: f.E,
+                L: f.L,
+                U: f.U,
+                medir_primero: f.record.medir_primero,
+              })),
+            })}
+          />
+        </div>
       </div>
       <div className="record-columns">
         {ranuras.map((id, k) => {
