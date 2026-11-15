@@ -12,6 +12,8 @@ import { FieldScreen } from '../pantallas/field/FieldScreen';
 import { LearnScreen } from '../pantallas/learn/LearnScreen';
 import { Recorrido90Segundos } from '../recorrido/Recorrido90Segundos';
 import { Sparkles, AlertCircle } from 'lucide-react';
+import { useSol } from '../luz/SolContext';
+import AsistenteSI from '../si/AsistenteSI';
 import '../sistema/tokens.css';
 
 export type PantallaId =
@@ -26,6 +28,7 @@ export type PantallaId =
   | 'data';
 
 export const AppContent: React.FC = () => {
+  const sol = useSol();
   const [pantallaActual, setPantallaActual] = useState<PantallaId>('mission');
   const [candidataSeleccionada, setCandidataSeleccionada] = useState<string>('P-07');
   const [idioma, setIdioma] = useState<'EN' | 'ES' | 'GN'>('EN');
@@ -159,6 +162,8 @@ export const AppContent: React.FC = () => {
         {pantallaActual === 'tests' && <TestsScreen />}
         {pantallaActual === 'data' && <DataScreen />}
       </main>
+
+      <AsistenteSI pagina={pantallaActual} elevacionSolDeg={sol.elevacion} idioma={idioma === 'ES' ? 'es' : 'en'} />
 
       {/* Fixed Horizon Bar at Bottom (Replaces traditional footer, controls Sol everywhere) */}
       <BarraHorizonte />

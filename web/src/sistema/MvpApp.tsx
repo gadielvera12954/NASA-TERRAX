@@ -13,6 +13,7 @@ import { EstadoMotor, estadoMotor } from "../datos/laboratorio";
 import DosMundos from "../pantallas/operacion/DosMundos";
 import Comparador from "../pantallas/operacion/Comparador";
 import SombraCampo from "../pantallas/field/SombraCampo";
+import AsistenteSI from "../si/AsistenteSI";
 import "./mvp.css";
 import "./lab.css";
 
@@ -62,6 +63,7 @@ function download(name: string, content: string) {
 
 function AppContent() {
   const { language, setLanguage, t } = useLanguage();
+  const sol = useSol();
   const [page, setPage] = useState<Page>(currentPage);
   const [manifest, setManifest] = useState<Manifest>();
   const [ficha, setFicha] = useState<Ficha>();
@@ -1062,6 +1064,15 @@ function AppContent() {
           {t("Data and limitations", "Datos y limitaciones")}
         </a>
       </footer>
+      <AsistenteSI
+        pagina={page}
+        ficha={ficha}
+        manifest={manifest}
+        elevacionSolDeg={sol.elevacion}
+        motorEnVivo={Boolean(motor)}
+        idioma={language === "es" ? "es" : "en"}
+        onNavegar={(dest) => go(dest as Page)}
+      />
       <Horizon />
     </>
   );
