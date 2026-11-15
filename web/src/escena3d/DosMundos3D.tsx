@@ -90,7 +90,7 @@ function crearMundo(esLuna: boolean): Mundo {
   }
   const bola = new THREE.Mesh(
     new THREE.SphereGeometry(0.11, 24, 12),
-    new THREE.MeshStandardMaterial({ color: 0xe7f434, roughness: 0.5 }),
+    new THREE.MeshStandardMaterial({ color: 0xf2b33d, roughness: 0.5 }),
   );
   bola.castShadow = true;
   bola.visible = false;
@@ -141,7 +141,7 @@ function crearMotor(lienzo: HTMLCanvasElement, caja: HTMLElement, inicial: Props
   mundos[1].escena.fog = niebla;
   let clave = "";
   let caidaDicha = "";
-  const matCinta = new THREE.LineBasicMaterial({ color: 0xe7f434 });
+  const matCinta = new THREE.LineBasicMaterial({ color: 0xf2b33d });
 
   function ponerCinta(m: Mundo, largo: number, haciaSombra: THREE.Vector3) {
     for (const h of m.cinta.children) (h as THREE.LineSegments).geometry.dispose();
