@@ -69,29 +69,11 @@ Límites: cuerpos de hasta 64 KB (413 si se pasan), errores siempre en JSON (400
 en cada pedido (`parametros.cargar()`), así que un cambio de consumo de una persona nunca se filtra
 al pedido de otra.
 
-## Cuentas, Comunidad y panel admin
+## Relevo del chat SI
 
-El mismo servidor guarda las cuentas, los artículos de divulgación y el registro de los admins en
-`datos/comunidad.sqlite3` (fuera de git; otra ruta con la variable `TERRAX_DB`). El sitio público
-sigue sin cuentas: la web las muestra solo cuando este servidor responde.
-
-- Roles: **lector** (lee y puede pedir verificación), **autor** (verificado por un admin: escribe),
-  **admin** (verifica personas, publica o pide cambios, cambia roles, desactiva cuentas).
-- Cada artículo pasa por revisión; lo que no está publicado solo lo ven su autor y los admins.
-- Contraseñas: hash scrypt de Werkzeug, 10 caracteres o más; 5 intentos fallidos bloquean 15 min.
-- Sesión: cookie firmada `HttpOnly`, `SameSite=Lax`; los pedidos que cambian algo exigen la
-  cabecera `X-TerraX: 1`. Toda acción de un admin queda en `GET /api/admin/auditoria`.
-
-El primer admin se crea así: la persona se registra en la web (`#account`) con su contraseña y
-después, en esta máquina:
-
-```bash
-python -m servidor.cuentas admin su-correo@ejemplo.org
-```
-
-```bash
-python -m servidor.cuentas lista
-```
+`POST /api/si/chat` (`servidor/si.py`) reenvía la pregunta a Gemini con la clave de la variable
+`TERRAX_GEMINI_KEY`, que nunca llega al navegador. Exige la cabecera `X-TerraX: 1` y acepta 20
+pedidos por minuto por IP. Sin clave responde 503 y la guía contesta solo con los datos de la ficha.
 
 ## Diferencia con el cálculo en el navegador
 

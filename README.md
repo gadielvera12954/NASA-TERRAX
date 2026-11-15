@@ -27,7 +27,7 @@ Built during the NASA Space Apps Challenge 2026 (Ciudad del Este, Paraguay). Eve
 
 Press **Ctrl K** anywhere for the SI console: it explains the active card in plain language, and every number it says is checked against the card before it is shown.
 
-7. **Community** (`/#community`, needs `python -m servidor`). Science outreach written by people the admins verified: anyone reads, verified authors write, every article is reviewed before it is published. The admin panel (`/#admin`) verifies people, reviews articles, manages roles and keeps an audit log. The public static site itself never stores personal data.
+7. **No accounts.** The site has no sign-in and stores no personal data; the optional server only runs the live engine and relays the SI chat.
 
 ## What is real and what is illustrative
 

@@ -20,7 +20,7 @@ from servidor.app import app, calentar  # noqa: E402
 
 
 def principal() -> None:
-    p = argparse.ArgumentParser(description="TERRA-X · motor en vivo, cuentas y Comunidad")
+    p = argparse.ArgumentParser(description="TERRA-X · motor en vivo y relevo del chat SI")
     p.add_argument("--host", default=os.environ.get("HOST", "127.0.0.1"))
     p.add_argument("--puerto", type=int, default=int(os.environ.get("PORT", "8787")))
     a = p.parse_args()

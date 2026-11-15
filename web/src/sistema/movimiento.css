@@ -1,0 +1,137 @@
+/* TERRA-X motion layer: page entrances, scroll reveal, hover feedback and a reading-progress line.
+   Every rule here is decoration on top of mvp.css; prefers-reduced-motion turns it off (tokens.css). */
+:root { --curva-salida: cubic-bezier(0.22, 1, 0.36, 1); --curva-resorte: cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* ---------- header ---------- */
+.mvp-header {
+  position: sticky;
+  top: 0;
+  z-index: 120;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  backdrop-filter: saturate(1.4) blur(14px);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  transition: box-shadow 240ms ease, min-height 240ms var(--curva-salida);
+}
+.mvp-header::after {
+  /* reading progress along the bottom edge of the header (scroll-driven, Chromium) */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--action), var(--amber));
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+@supports (animation-timeline: scroll()) {
+  .mvp-header::after { animation: progreso-lectura linear both; animation-timeline: scroll(root); }
+}
+@keyframes progreso-lectura { to { transform: scaleX(1); } }
+.brand img { transition: transform 600ms var(--curva-resorte); }
+.brand:hover img { transform: rotate(-12deg) scale(1.08); }
+.mvp-header nav a { position: relative; transition: color 180ms ease, background-color 180ms ease; }
+.mvp-header nav a::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 6px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--action);
+  transform: scaleX(0);
+  transition: transform 320ms var(--curva-salida);
+}
+.mvp-header nav a:hover { text-decoration: none; }
+.mvp-header nav a:hover::after { transform: scaleX(0.6); }
+.mvp-header nav a[aria-current]::after { transform: scaleX(1); }
+
+/* ---------- page entrance ---------- */
+.mvp-main > * { animation: entra-bloque 620ms var(--curva-salida) both; }
+.mvp-main > *:nth-child(2) { animation-delay: 60ms; }
+.mvp-main > *:nth-child(3) { animation-delay: 120ms; }
+.mvp-main > *:nth-child(4) { animation-delay: 170ms; }
+.mvp-main > *:nth-child(5) { animation-delay: 220ms; }
+.mvp-main > *:nth-child(n + 6) { animation-delay: 260ms; }
+.page-title h1 { animation: entra-titulo 760ms var(--curva-salida) 40ms both; }
+@keyframes entra-bloque { from { opacity: 0; transform: translateY(18px); } }
+@keyframes entra-titulo { from { opacity: 0; transform: translateY(22px); letter-spacing: -0.02em; filter: blur(6px); } }
+
+/* ---------- scroll reveal (useRevelar.ts) ---------- */
+[data-revelar]:not([data-visible]) { opacity: 0; transform: translateY(26px) scale(0.985); }
+[data-revelar][data-visible] {
+  transition: opacity 700ms var(--curva-salida) var(--revelar-retraso, 0ms), transform 800ms var(--curva-salida) var(--revelar-retraso, 0ms);
+}
+
+/* ---------- buttons and links ---------- */
+.btn, .text-btn { transition: background-color 180ms ease, transform 200ms var(--curva-salida), box-shadow 200ms ease, color 180ms ease; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px color-mix(in srgb, var(--action) 26%, transparent); }
+.btn:active, .text-btn:active { transform: translateY(0) scale(0.97); }
+.btn svg, .text-btn svg, .section-heading a svg { transition: transform 260ms var(--curva-salida); }
+.btn:hover svg, .text-btn:hover svg, .section-heading a:hover svg { transform: translateX(4px); }
+.text-btn:hover svg.lucide-play-circle, .text-btn:hover svg.lucide-circle-play, .text-btn:hover svg.lucide-message-circle { transform: scale(1.15) rotate(-8deg); }
+.theme-toggle { transition: background-color 180ms ease, border-color 180ms ease, transform 300ms var(--curva-resorte); }
+.theme-toggle:hover { transform: rotate(-18deg); }
+
+/* ---------- site list ---------- */
+.site-list a { position: relative; transition: background-color 200ms ease, padding-left 260ms var(--curva-salida); }
+.site-list a::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 18%;
+  bottom: 18%;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--action);
+  transform: scaleY(0);
+  transition: transform 260ms var(--curva-salida);
+}
+.site-list a:hover { padding-left: 14px; }
+.site-list a:hover::before { transform: scaleY(1); }
+.site-list a > svg:last-child { transition: transform 260ms var(--curva-salida); }
+.site-list a:hover > svg:last-child { transform: translate(3px, -3px); }
+.site-list .site-name svg { transition: transform 300ms var(--curva-resorte); }
+.site-list a:hover .site-name svg { transform: translateY(-3px); }
+
+/* ---------- panels and plates ---------- */
+.panel, .reference-plate, .filters, .comparison-setup, .record-columns {
+  transition: border-color 220ms ease, box-shadow 260ms ease, transform 260ms var(--curva-salida);
+}
+.panel:hover, .reference-plate:hover {
+  border-color: color-mix(in srgb, var(--action) 45%, var(--line));
+  box-shadow: 0 16px 40px #00000026;
+}
+.reference-plate .relief-map img { transition: transform 1200ms var(--curva-salida); }
+.reference-plate:hover .relief-map img { transform: scale(1.035); }
+.field-tools a { transition: padding-left 260ms var(--curva-salida); }
+.field-tools a:hover { padding-left: 6px; }
+.field-tools a > svg:first-child { transition: transform 320ms var(--curva-resorte), background-color 200ms ease; }
+.field-tools a:hover > svg:first-child { transform: rotate(-8deg) scale(1.08); background: color-mix(in srgb, var(--action) 22%, var(--tint)); }
+.field-tools a > svg:last-child { transition: transform 260ms var(--curva-salida); }
+.field-tools a:hover > svg:last-child { transform: translateX(4px); }
+
+/* ---------- data accents ---------- */
+.verdict { animation: sello 520ms var(--curva-resorte) both; }
+@keyframes sello { from { opacity: 0; transform: scale(0.7) rotate(-4deg); } }
+.metrics strong { background: linear-gradient(120deg, var(--ink) 30%, var(--action) 50%, var(--ink) 70%) 0 0 / 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: brillo-cifra 2.4s ease 400ms 1 both; }
+@keyframes brillo-cifra { from { background-position: 100% 0; } to { background-position: 0 0; } }
+.dimensions > div { transition: background-color 160ms ease, padding 220ms var(--curva-salida); }
+.dimensions > div:hover { background: var(--tint); padding-inline: 8px; }
+.view-switch a { transition: background-color 200ms ease, color 200ms ease; }
+.connection .luz.vivo { animation: luz-viva 2.4s ease-in-out infinite; }
+@keyframes luz-viva { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--success) 0%, transparent), 0 0 12px var(--success); } }
+
+/* ---------- details / accordions ---------- */
+details > summary { transition: color 160ms ease; }
+details[open] > *:not(summary) { animation: entra-bloque 360ms var(--curva-salida) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-revelar]:not([data-visible]) { opacity: 1; transform: none; }
+  .mvp-header::after { display: none; }
+}
+@media print {
+  [data-revelar] { opacity: 1 !important; transform: none !important; }
+  .mvp-header { position: static; backdrop-filter: none; }
+}

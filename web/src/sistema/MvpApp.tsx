@@ -8,12 +8,7 @@ import {
   IndexEntry,
 } from "../datos/integration";
 import { ScientificData } from "./ScientificData";
-import { Usuario, cuentas } from "../datos/cuentas";
 import { readRanking } from "../datos/ranking";
-import Comunidad from "../pantallas/comunidad/Comunidad";
-import Cuenta from "../pantallas/comunidad/Cuenta";
-import Admin from "../pantallas/comunidad/Admin";
-import "../pantallas/comunidad/comunidad.css";
 import AsistenteSI from "../si/AsistenteSI";
 import { abrirSI } from "../si/abrirSI";
 import { Integridad } from "./Integridad";
@@ -43,12 +38,13 @@ import {
   MapPin,
   PlayCircle,
   SlidersHorizontal,
-  LogIn,
   MessageCircle,
 } from "lucide-react";
 import "./tokens.css";
 import "./mvp.css";
 import "./lab.css";
+import "./movimiento.css";
+import { useRevelar } from "./useRevelar";
 
 // The 3D screens (three.js + Blender models) load only when they are opened.
 const Laboratorio = lazy(() => import("../pantallas/operacion/Laboratorio"));
@@ -61,10 +57,7 @@ type Page =
   | "worlds"
   | "lab"
   | "checks"
-  | "guide"
-  | "community"
-  | "account"
-  | "admin";
+  | "guide";
 const pages: Page[] = [
   "home",
   "explore",
@@ -74,9 +67,6 @@ const pages: Page[] = [
   "lab",
   "checks",
   "guide",
-  "community",
-  "account",
-  "admin",
 ];
 const tourPages: Page[] = [
   "home",
@@ -108,7 +98,6 @@ function download(name: string, content: string) {
 function AppContent() {
   const { language, setLanguage, t } = useLanguage();
   const sol = useSol();
-  const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [page, setPage] = useState<Page>(currentPage);
   const [manifest, setManifest] = useState<Manifest>();
   const [ficha, setFicha] = useState<Ficha>();
@@ -180,25 +169,7 @@ function AppContent() {
       window.clearInterval(timer);
     };
   }, []);
-  const servidor = motor !== null;
-  useEffect(() => {
-    let active = true;
-    if (!servidor) {
-      setUsuario(null);
-      return;
-    }
-    cuentas
-      .yo()
-      .then((r) => {
-        if (active) setUsuario(r.usuario);
-      })
-      .catch(() => {
-        if (active) setUsuario(null);
-      });
-    return () => {
-      active = false;
-    };
-  }, [servidor]);
+  useRevelar(page);
   const [query, setQuery] = useState("");
   const [operation, setOperation] = useState<Goal>(readGoal);
   const changeGoal = (goal: Goal) => {
@@ -379,9 +350,6 @@ function AppContent() {
     location.hash = tourPages[next];
   }, [remaining, tour]);
   const titles: Record<Page, string> = {
-    community: t("Community", "Comunidad"),
-    account: usuario ? t("Your account", "Tu cuenta") : t("Sign in", "Entrar"),
-    admin: t("Admin panel", "Panel admin"),
     home: t(
       "Earth sites for lunar rehearsals",
       "Sitios terrestres para ensayos lunares",
@@ -404,8 +372,8 @@ function AppContent() {
     { page: "home", label: t("Home", "Inicio") },
     { page: "explore", label: titles.explore },
     { page: "compare", label: t("Compare", "Comparar") },
+    { page: "lab", label: t("3D lab", "Laboratorio 3D") },
     { page: "guide", label: titles.guide },
-    { page: "community", label: titles.community },
   ];
   const entries: IndexEntry[] =
     candidateIndex.length ||
@@ -593,14 +561,6 @@ function AppContent() {
               ES
             </button>
           </div>
-          <a
-            className="account-link"
-            href={usuario?.rol === "admin" ? "#admin" : "#account"}
-            title={usuario?.nombre || titles.account}
-            aria-label={titles.account}
-          >
-            <LogIn size={18} aria-hidden="true" />
-          </a>
         </div>
       </header>
       {tour !== null && (
@@ -640,6 +600,7 @@ function AppContent() {
         </aside>
       )}
       <main
+        key={page}
         id="main-content"
         className={page === "home" ? "mvp-main inicio" : "mvp-main"}
       >
@@ -1158,29 +1119,6 @@ function AppContent() {
               · <a href="#checks">{titles.checks}</a>
             </div>
           </>
-        )}
-        {page === "community" && (
-          <Comunidad
-            servidor={servidor}
-            usuario={usuario}
-            onUsuario={setUsuario}
-            irA={(p) => go(p as Page)}
-          />
-        )}
-        {page === "account" && (
-          <Cuenta
-            servidor={servidor}
-            usuario={usuario}
-            onUsuario={setUsuario}
-            irA={(p) => go(p as Page)}
-          />
-        )}
-        {page === "admin" && (
-          <Admin
-            servidor={servidor}
-            usuario={usuario}
-            irA={(p) => go(p as Page)}
-          />
         )}
         {page === "checks" && (
           <>

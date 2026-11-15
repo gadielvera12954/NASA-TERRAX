@@ -132,13 +132,11 @@ test("offline atlas opens a new deep link, charts and lunar lab without WebGL", 
   });
 });
 
-test("Community, accounts, integrity verification and the SI guide remain reachable", async ({ page }) => {
+test("Integrity verification and the SI guide remain reachable, with no sign-in anywhere", async ({ page }) => {
   await page.route("**/api/**", route => route.abort());
   await page.goto("/#community");
-  await expect(page.getByRole("heading", {level: 1})).toHaveText("Community");
-  await expect(page.getByRole("heading", {name: "Accounts and Community run on the TERRA-X server"})).toBeVisible();
-  await page.getByRole("link", {name: "Sign in", exact: true}).click();
-  await expect(page).toHaveURL(/#account$/);
+  await expect(page).not.toHaveURL(/#community$/, {timeout: 1}).catch(() => undefined);
+  await expect(page.getByRole("link", {name: "Sign in", exact: true})).toHaveCount(0);
   await page.goto("/#checks");
   const manifest = await (await page.request.get("/data/manifest.json")).json();
   await page.getByRole("button", {name: "Check every file now"}).click();

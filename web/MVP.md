@@ -11,7 +11,6 @@ Run `npm ci` and `npm run dev` in `web/`. For the offline build, run `npm run bu
 | `?candidate=P-07#card` | Read the exported verdict, evidence, limits, measurement priorities and dated rehearsal windows. Download the source record or print the sheet. |
 | `#compare` | Read up to three named records together. The practice goal highlights a dimension. Detailed property scores, requirements, bounds and grazing-light curves follow the summary. |
 | `#worlds` | Select shadows, energy, gravity or time. Read the results before opening the illustrative 3D curtain. |
-| `#community`, `#account`, `#admin` | Read Community articles and use the server-backed accounts, author verification and moderation. |
 | `#guide` | Learn the method and use the field shadow kit. |
 | `#checks` | Inspect the test report, pending results, source registry and available hashes. |
 | `#lab` | Examine a rover scenario at a grid point on Mons Mouton. Use the terrain or enter a row and column. |
@@ -44,4 +43,4 @@ The original project design PDFs and their source material in `web/docs/` descri
 
 ## Integration with current main
 
-The atlas retains the published forty-parcel dataset, the existing account and Community flows, the SI assistant and the in-browser file-integrity check. The default candidate follows the first eligible record in the published ranking when the URL has no explicit candidate. The optional Python server continues to control account sessions and moderation. The static exploration and the laboratory also run from the exported data without that server.
+The atlas retains the published forty-parcel dataset, the SI assistant and the in-browser file-integrity check. It has no accounts and stores no personal data. The default candidate follows the first eligible record in the published ranking when the URL has no explicit candidate. The optional Python server runs the live engine and relays the SI chat. The static exploration and the laboratory also run from the exported data without that server.

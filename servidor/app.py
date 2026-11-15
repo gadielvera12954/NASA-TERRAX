@@ -22,6 +22,7 @@ import datetime as dt
 import hashlib
 import json
 import math
+import os
 import pathlib
 import threading
 import time
@@ -53,9 +54,13 @@ app.json.ensure_ascii = False
 app.config["MAX_CONTENT_LENGTH"] = 64 * 1024          # ningún pedido legítimo pasa de unos cientos de bytes (un artículo, unos KB)
 app.config["JSON_SORT_KEYS"] = False
 
-from servidor import cuentas, si  # noqa: E402  (cuentas, divulgación, panel admin y relevo del chat SI)
+from servidor import si  # noqa: E402  (relevo del chat SI)
 
-cuentas.configurar(app)
+if os.environ.get("TERRAX_DETRAS_DE_PROXY") == "1":
+    # Behind Vercel or another proxy: take the visitor's address from X-Forwarded-For (SI rate limit).
+    from werkzeug.middleware.proxy_fix import ProxyFix
+
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 app.register_blueprint(si.bp)
 
 RUTAS = [
@@ -65,9 +70,7 @@ RUTAS = [
     {"metodo": "POST", "ruta": "/api/destino/comparar",
      "que": "2 to 3 /punto requests in one call, each with a reproducible scenario_id, plus a side-by-side summary"},
     {"metodo": "POST", "ruta": "/api/campo/sombra", "que": "predicted board shadow and the error of a measured one"},
-    {"metodo": "POST", "ruta": "/api/cuentas/registro | /entrar | /salir · GET /api/cuentas/yo", "que": "accounts (local server only)"},
-    {"metodo": "GET", "ruta": "/api/divulgacion", "que": "published outreach articles by verified authors"},
-    {"metodo": "GET", "ruta": "/api/admin/resumen", "que": "admin panel (admins only)"},
+    {"metodo": "POST", "ruta": "/api/si/chat", "que": "SI guide relay (the Gemini key stays on the server)"},
 ]
 
 
@@ -534,7 +537,6 @@ def ruta_sombra():
 
 
 @app.errorhandler(Pedido)
-@app.errorhandler(cuentas.Pedido)
 def _error_pedido(e):
     return jsonify({"error": str(e)}), 400
 

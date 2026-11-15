@@ -10,6 +10,7 @@
 import { EntradaRanking } from "../datos/ranking";
 import type { ResultadoMotorSI } from "../datos/siMotor";
 import { explicarMotorSI } from "./motorSI";
+import type { Modelo3DSI } from "./Visor3DSI";
 import {
   AccionRapidaSI,
   ContextoSI,
@@ -30,6 +31,32 @@ export interface RespuestaChatSI {
   acciones: AccionRapidaSI[];
   aviso?: string;
   resultadosMotor?: ResultadoMotorSI[];
+  /** Published 3D models the guide shows inside the reply (see Visor3DSI.tsx). */
+  modelos3d?: Modelo3DSI[];
+}
+
+const MODELOS_VALIDOS: Modelo3DSI[] = ["moon", "payunia", "mars", "rover"];
+
+/**
+ * Which published models fit a question, by its words. Used when the model did not ask for one and when the
+ * SI answers offline, so "show me the relief" always gets a 3D view.
+ */
+export function modelosPorPalabras(texto: string): Modelo3DSI[] {
+  const s = texto.toLocaleLowerCase();
+  const pide3d = /\b3d\b|tridimensional|modelo|model|relieve|relief|terrain|terreno|topograf|maqueta|mostr|show|ver |see |crater|cráter|ladera|slope|pendiente/.test(s);
+  const out: Modelo3DSI[] = [];
+  const luna = /luna|lunar|moon|mons mouton|mouton|polo sur|south pole|lola/.test(s);
+  const tierra = /payunia|payún|payun|tierra|earth|mendoza|argentin|parcela|parcel|p-\d+/.test(s);
+  const marte = /marte|mars|jezero|perseverance/.test(s);
+  const rover = /rover|viper|panel|bater[ií]a|battery/.test(s);
+  const compara = /compar|versus|\bvs\b|dos mundos|two worlds|diferencia|difference/.test(s);
+  if (!pide3d && !compara && !(rover && /forma|shape|c[oó]mo es|what does|look/.test(s))) return out;
+  if (luna || (compara && !marte && !tierra)) out.push("moon");
+  if (tierra || (compara && luna)) out.push("payunia");
+  if (marte) out.push("mars");
+  if (rover && out.length < 2) out.push("rover");
+  if (!out.length && pide3d && /3d|tridimensional|modelo|model|maqueta/.test(s)) out.push("moon");
+  return [...new Set(out)].slice(0, 2);
 }
 
 const NOMBRES: Record<string, [string, string]> = {
@@ -101,6 +128,9 @@ export function instruccionSistema(ctx: ContextoSI, lang: "en" | "es"): string {
     "- Compatibility C and evidence E are separate: never describe a candidate as 'X % similar to the Moon'. Never say an Earth site reproduces lunar gravity or vacuum, or certifies a lunar mission.",
     "- When the visitor asks what to do or where to look, you may end with one or two action tags on their own last line, exactly like these:",
     "  [ACTION:NAVIGATE:lab] [ACTION:NAVIGATE:compare] [ACTION:NAVIGATE:card] [ACTION:NAVIGATE:explore] [ACTION:NAVIGATE:checks] [ACTION:SELECT_CANDIDATE:P-27] [ACTION:SET_SUN:1.5]",
+    "- You can also place an interactive 3D model of the published relief inside your reply, lit by the current Sun slider. Do it whenever the answer is about terrain, relief, shadows, light, slopes, craters, the rover or comparing worlds, by adding at most two of these tags on the last line:",
+    "  [ACTION:SHOW_3D:moon] (Mons Mouton, NASA LOLA) [ACTION:SHOW_3D:payunia] (Payunia, Copernicus DEM) [ACTION:SHOW_3D:mars] (Jezero crater) [ACTION:SHOW_3D:rover] (VIPER-sized rover template)",
+    "  When you show a model, say in one short sentence what to look at in it (for example the long shadows on the crater rims). Never describe numbers that are not in FACTS.",
     "",
     "FACTS (published by the engine)",
     "- Destination: Mons Mouton, 84.6°S 31.0°E, lunar south pole. The Sun never rises above about 7° there (6.96° at most in the 2027 lunations). On a flat horizon the night lasts 289 to 418 h per lunation; in the central 30 x 30 km crop the shortest continuous night is 424 h in summer and 622 h in winter.",
@@ -154,6 +184,15 @@ export function respuestaLocal(ctx: ContextoSI, lang: "en" | "es"): string {
   return es
     ? `${f.id} (${f.lugar.nombre}) tiene compatibilidad C = ${c} y evidencia E = ${f.E.toFixed(2)}, con límites ${f.L.toFixed(2)} a ${f.U.toFixed(2)}: veredicto "${nombreEtiqueta(f.etiqueta, "es")}".${lineaPos} No se reproduce: ${f.no_transfiere.join(", ")}. Lo primero que habría que medir: ${f.medir_primero}.`
     : `${f.id} (${f.lugar.nombre}) has compatibility C = ${c} and evidence E = ${f.E.toFixed(2)}, bounds ${f.L.toFixed(2)} to ${f.U.toFixed(2)}: verdict "${nombreEtiqueta(f.etiqueta, "en")}".${lineaPos} What does not transfer: ${f.no_transfiere.join(", ")}. First thing to measure: ${f.medir_primero}.`;
+}
+
+export function extraerModelos3D(texto: string): Modelo3DSI[] {
+  const out: Modelo3DSI[] = [];
+  for (const m of texto.matchAll(/\[ACTION:SHOW_3D:([a-z]+)\]/gi)) {
+    const v = m[1].toLowerCase() as Modelo3DSI;
+    if (MODELOS_VALIDOS.includes(v) && !out.includes(v)) out.push(v);
+  }
+  return out.slice(0, 2);
 }
 
 export function extraerAcciones(texto: string): { textoLimpio: string; acciones: AccionRapidaSI[] } {
@@ -221,7 +260,7 @@ export async function consultarSI(
     const texto = verificacion.valido ? candidata : (lang === "es"
       ? "No puedo mostrar cifras verificadas con los datos disponibles. Abrí la ficha fuente para revisar el resultado."
       : "I cannot show verified figures from the available data. Open the source card to inspect the result.");
-    return { texto, origen: "local", modeloUsado: "card only", latenciaMs: Math.round(performance.now() - t0), verificacion: verificarRespuestaSI(texto, ctx), acciones: [], aviso };
+    return { texto, origen: "local", modeloUsado: "card only", latenciaMs: Math.round(performance.now() - t0), verificacion: verificarRespuestaSI(texto, ctx), acciones: [], aviso, modelos3d: modelosPorPalabras(pregunta) };
   };
   const instruccion = instruccionSistema(ctx, lang);
   try {
@@ -242,7 +281,11 @@ export async function consultarSI(
           : "The model's answer carried figures that are not in the published data, so only what the card says is shown.");
       }
     }
-    return { texto: textoLimpio, origen: "gemini", modeloUsado: NOMBRE_MODELO, latenciaMs: Math.round(performance.now() - t0), verificacion: verif, acciones };
+    const pedidos3d = extraerModelos3D(crudo);
+    return {
+      texto: textoLimpio, origen: "gemini", modeloUsado: NOMBRE_MODELO, latenciaMs: Math.round(performance.now() - t0), verificacion: verif, acciones,
+      modelos3d: pedidos3d.length ? pedidos3d : modelosPorPalabras(pregunta),
+    };
   } catch {
     return local(lang === "es"
       ? "Sin conexión con la SI. Se muestran los datos locales disponibles."

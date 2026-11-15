@@ -68,9 +68,8 @@
 - **Scope:** the "Meridian Wall" visual system of the public app: light plaster ground with basalt plates for everything lunar, self-hosted fonts, the shadow nomogram on the home page (a 0.50 m board, shadow = 0.50 / tan(Sun elevation)) and the drawn verdict marks. The team workspace (`team.html`) keeps the original instrument theme in `tokens-equipo.css`.
 - **No model computes results:** every number shown comes from the exported files or from the formulas already in the app; the nomogram only re-plots `height / tan(elevation)`.
 - **Pending:** human review of copy and contrast by the team before the final submission.
-## 9. Accounts, Community and admin panel (`servidor/cuentas.py`, `web/src/pantallas/comunidad`)
+## 9. SI guide redesign and inline 3D views (`web/src/si`)
 
 - **Tool:** Claude Code (Anthropic), on Sunday 2026-11-15.
-- **Scope:** sign-up and sign-in, author verification by admins, outreach articles with admin review, the admin panel and its audit log; all of it in the optional local server, stored in a git-ignored SQLite file.
-- **Control:** `servidor/tests/test_cuentas.py` covers password hashing, sign-in throttling, the CSRF header, role permissions, the verify → write → review → publish circuit and the audit log.
-- **No model writes or approves content:** articles are written by people and published by people; the SI console does not read or write them.
+- **Scope:** removal of the accounts and Community feature (the site keeps no personal data), page motion, a new look for the SI guide and inline 3D views the guide opens when a question is about terrain or light (Mons Mouton relief, the Payunia and Jezero models already published by the team).
+- **No model computes results:** the 3D views show the published `.glb` models and the exported relief; the guide picks which one to show, never the numbers in it.

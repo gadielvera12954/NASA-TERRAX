@@ -1,274 +1,154 @@
-import {
-  lazy,
-  ReactNode,
-  Suspense,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type KeyboardEvent,
-  type PointerEvent,
-} from "react";
-import { ChevronsLeftRight } from "lucide-react";
+import { lazy, ReactNode, Suspense, useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { useLanguage } from "../i18n/Language";
-import { CONSTANTES, FUENTES } from "../escena3d/mundos";
+import { CONSTANTES, FUENTES, Mundo } from "../escena3d/mundos";
+import { aPixeles, CUERPOS, encuadre, ROTACION_H, VUELTA_TIERRA_S } from "./tresMundos";
 import "./inicio.css";
 
-// three.js and the NASA imagery load after the page is usable; the copy never waits for them.
-const PlanetaDividido = lazy(() => import("./PlanetaDividido"));
-
-/** Same value as RADIO_DISCO in PlanetaDividido (kept here so the 3D module stays lazy). */
-const RADIO = 0.43;
-/** Same as ROTACION_* and VUELTA_TIERRA_S in PlanetaDividido (NSSDCA sidereal periods). */
-const VUELTA_LUNA_MIN = (60 * (655.72 / 23.9345)) / 60;
-const LIMITE = 0.94;
+// three.js and the NASA/USGS imagery load after the page is usable; the copy never waits for them.
+const TresMundos3D = lazy(() => import("./TresMundos3D"));
 
 type Estado = "cargando" | "listo" | "sin3d";
+const ORDEN: Mundo[] = ["tierra", "luna", "marte"];
 
 export default function HeroEspacio({ children }: { children: ReactNode }) {
   const { t, language } = useLanguage();
-  const disco = useRef<HTMLDivElement>(null);
-  const costuraRef = useRef(0);
-  const resaltar = useRef(false);
-  const arrastrando = useRef(false);
-  const intro = useRef(0);
-  const [costura, setCostura] = useState(0);
+  const escenario = useRef<HTMLDivElement>(null);
   const [estado, setEstado] = useState<Estado>("cargando");
   const [montar3d, setMontar3d] = useState(false);
-
-  const mover = useCallback((s: number) => {
-    const v = Math.max(-LIMITE, Math.min(LIMITE, s));
-    costuraRef.current = v;
-    setCostura(v);
-  }, []);
-  const pararIntro = () => cancelAnimationFrame(intro.current);
+  const [foco, setFoco] = useState<Mundo>("luna");
+  const [caja, setCaja] = useState({ w: 0, h: 0 });
 
   useEffect(() => {
     const ric = window.requestIdleCallback;
     if (ric) {
-      const id = ric(() => setMontar3d(true), { timeout: 900 });
+      const id = ric(() => setMontar3d(true), { timeout: 1200 });
       return () => window.cancelIdleCallback(id);
     }
-    const id = window.setTimeout(() => setMontar3d(true), 150);
+    const id = window.setTimeout(() => setMontar3d(true), 200);
     return () => window.clearTimeout(id);
   }, []);
-  useEffect(() => pararIntro, []);
+  useEffect(() => {
+    const el = escenario.current;
+    if (!el) return;
+    const obs = new ResizeObserver(([e]) => setCaja({ w: e.contentRect.width, h: e.contentRect.height }));
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
-  const onListo = useCallback(
-    (animado: boolean) => {
-      setEstado("listo");
-      if (!animado || arrastrando.current) return;
-      // Opening move: the Moon slides in from the right until the globe is half and half.
-      const inicio = performance.now();
-      const desde = 0.9;
-      const paso = (ahora: number) => {
-        const k = Math.min(1, (ahora - inicio) / 1900);
-        const e = 1 - Math.pow(1 - k, 4);
-        mover(desde * (1 - e));
-        if (k < 1) intro.current = requestAnimationFrame(paso);
-      };
-      intro.current = requestAnimationFrame(paso);
-    },
-    [mover],
-  );
+  const onListo = useCallback(() => setEstado("listo"), []);
   const onFallo = useCallback(() => setEstado("sin3d"), []);
 
-  function geometria() {
-    const r = disco.current!.getBoundingClientRect();
-    return {
-      cx: r.left + r.width / 2,
-      cy: r.top + r.height / 2,
-      radio: RADIO * Math.min(r.width, r.height),
-    };
-  }
-  function desdePuntero(e: PointerEvent) {
-    const { cx, radio } = geometria();
-    mover((e.clientX - cx) / radio);
-  }
-  function dentro(e: PointerEvent) {
-    const { cx, cy, radio } = geometria();
-    return Math.hypot(e.clientX - cx, e.clientY - cy) <= radio * 1.04;
-  }
-  function alPresionar(e: PointerEvent<HTMLDivElement>) {
-    const enMando = (e.target as HTMLElement).closest(".costura-mando");
-    if (!enMando && !dentro(e)) return;
-    pararIntro();
-    arrastrando.current = true;
-    resaltar.current = true;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    if (!enMando) desdePuntero(e);
-  }
-  function alMover(e: PointerEvent<HTMLDivElement>) {
-    if (arrastrando.current) return desdePuntero(e);
-    resaltar.current = dentro(e);
-    e.currentTarget.style.cursor = resaltar.current ? "ew-resize" : "";
-  }
-  function alSoltar() {
-    arrastrando.current = false;
-  }
-  function alTeclado(e: KeyboardEvent) {
-    const pasos: Record<string, number> = {
-      ArrowLeft: -0.05,
-      ArrowDown: -0.05,
-      ArrowRight: 0.05,
-      ArrowUp: 0.05,
-      PageDown: -0.25,
-      PageUp: 0.25,
-    };
-    let s: number | null = null;
-    if (e.key in pasos) s = costuraRef.current + pasos[e.key];
-    else if (e.key === "Home") s = -LIMITE;
-    else if (e.key === "End") s = LIMITE;
-    if (s === null) return;
-    e.preventDefault();
-    pararIntro();
-    mover(s);
-  }
-
-  const tierraPct = Math.round(((costura + 1) / 2) * 100);
   const loc = language === "es" ? "es" : "en";
-  const num = (v: number, d = 0) =>
-    v.toLocaleString(loc, { minimumFractionDigits: d, maximumFractionDigits: d });
-  const razon = (luna: number, tierra: number) => `${num(luna / tierra, 2)}×`;
+  const num = (v: number, d = 0) => v.toLocaleString(loc, { minimumFractionDigits: d, maximumFractionDigits: d });
+  const nombre: Record<Mundo, string> = { tierra: t("Earth", "Tierra"), luna: t("Moon", "Luna"), marte: t("Mars", "Marte") };
+  const papel: Record<Mundo, string> = {
+    tierra: t("Where we rehearse", "Donde ensayamos"),
+    luna: t("Where the base goes", "Donde va la base"),
+    marte: t("The next step", "El paso siguiente"),
+  };
   const T = CONSTANTES.tierra;
-  const L = CONSTANTES.luna;
+  const razon = (m: Mundo, v: number, ref: number) => (m === "tierra" ? "" : `${num(v / ref, 2)}×`);
+  const filas: { k: string; v: (m: Mundo) => string; r?: (m: Mundo) => string }[] = [
+    { k: t("Radius", "Radio"), v: (m) => `${num(CONSTANTES[m].radioKm)} km`, r: (m) => razon(m, CONSTANTES[m].radioKm, T.radioKm) },
+    { k: t("Gravity", "Gravedad"), v: (m) => `${num(CONSTANTES[m].gravedad, 2)} m/s²`, r: (m) => razon(m, CONSTANTES[m].gravedad, T.gravedad) },
+    { k: t("Solar day", "Día solar"), v: (m) => `${num(CONSTANTES[m].diaSolarH, m === "luna" ? 0 : 1)} h` },
+    { k: t("Axial tilt", "Inclinación"), v: (m) => `${num(CONSTANTES[m].inclinacionDeg, 2)}°` },
+    { k: t("Air pressure", "Presión del aire"), v: (m) => (m === "luna" ? t("none", "nula") : `${num(CONSTANTES[m].presionHpa, m === "marte" ? 2 : 0)} hPa`) },
+    { k: t("Sunlight", "Luz solar"), v: (m) => `${num(CONSTANTES[m].irradianciaWm2)} W/m²`, r: (m) => razon(m, CONSTANTES[m].irradianciaWm2, T.irradianciaWm2) },
+  ];
+  const enc = caja.w > 0 ? encuadre(caja.w, caja.h) : null;
+  const vueltaMarteS = VUELTA_TIERRA_S * (ROTACION_H.marte / ROTACION_H.tierra);
+  const vueltaLunaMin = (VUELTA_TIERRA_S * (ROTACION_H.luna / ROTACION_H.tierra)) / 60;
 
   return (
     <div className={`espacio ${estado}`}>
-      <div className="espacio-fondo" aria-hidden="true">
-        {montar3d && estado !== "sin3d" && (
-          <Suspense fallback={null}>
-            <PlanetaDividido
-              disco={disco}
-              costura={costuraRef}
-              resaltar={resaltar}
-              onListo={onListo}
-              onFallo={onFallo}
-            />
-          </Suspense>
-        )}
-      </div>
+      <div className="espacio-fondo" aria-hidden="true" />
       <section className="atlas-hero">
         {children}
-        <div className="planeta-ancla">
-          <div
-            ref={disco}
-            className={`planeta-disco ${estado}`}
-            style={{ "--costura": costura } as CSSProperties}
-            onPointerDown={alPresionar}
-            onPointerMove={alMover}
-            onPointerUp={alSoltar}
-            onPointerCancel={alSoltar}
-            onPointerLeave={() => {
-              if (!arrastrando.current) resaltar.current = false;
-            }}
-          >
-            <div className="disco-estatico" aria-hidden="true">
-              <span className="mitad tierra" />
-              <span className="mitad luna" />
-              <span className="sombra" />
-            </div>
-            <div
-              className="costura-mando"
-              role="slider"
-              tabIndex={0}
-              aria-label={t("Earth and Moon divider", "Divisor entre la Tierra y la Luna")}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={tierraPct}
-              aria-valuetext={t(
-                `${tierraPct}% Earth, ${100 - tierraPct}% Moon`,
-                `${tierraPct}% Tierra, ${100 - tierraPct}% Luna`,
-              )}
-              onKeyDown={alTeclado}
-              onFocus={() => (resaltar.current = true)}
-              onBlur={() => (resaltar.current = false)}
-            >
-              <ChevronsLeftRight size={18} aria-hidden="true" />
-            </div>
+        <div className="mundos">
+          <div className="mundos-escenario" ref={escenario}>
+            {montar3d && estado !== "sin3d" && (
+              <Suspense fallback={null}>
+                <TresMundos3D foco={foco} onListo={onListo} onFallo={onFallo} />
+              </Suspense>
+            )}
+            {enc &&
+              CUERPOS.map((c, i) => {
+                const p = aPixeles(c, enc);
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    className={`mundo-boton ${c.id}`}
+                    aria-pressed={foco === c.id}
+                    onClick={() => setFoco(c.id)}
+                    onMouseEnter={() => setFoco(c.id)}
+                    onFocus={() => setFoco(c.id)}
+                    style={{ "--x": `${p.x}px`, "--y": `${p.y}px`, "--r": `${p.r}px`, "--i": i } as CSSProperties}
+                  >
+                    <span className="mundo-disco" aria-hidden="true" />
+                    <span className="mundo-anillo" aria-hidden="true" />
+                    <span className="mundo-rotulo">
+                      <strong>{nombre[c.id]}</strong>
+                      <small>{papel[c.id]}</small>
+                    </span>
+                  </button>
+                );
+              })}
           </div>
-          <div className="dato-mundo tierra">
-            <p className="nombre">
-              <strong>{t("Earth", "Tierra")}</strong>
-              <span>{t("Where we rehearse", "Donde ensayamos")}</span>
-            </p>
-            <dl>
-            <div>
-              <dt>{t("Radius", "Radio")}</dt>
-              <dd>{num(T.radioKm)} km</dd>
-            </div>
-            <div>
-              <dt>{t("Gravity", "Gravedad")}</dt>
-              <dd>{num(T.gravedad, 2)} m/s²</dd>
-            </div>
-            <div>
-              <dt>{t("Solar day", "Día solar")}</dt>
-              <dd>{num(T.diaSolarH)} h</dd>
-            </div>
-            <div>
-              <dt>{t("Axial tilt", "Inclinación")}</dt>
-              <dd>{num(T.inclinacionDeg, 2)}°</dd>
-            </div>
-            <div>
-              <dt>{t("Air", "Aire")}</dt>
-              <dd>{num(T.presionHpa)} hPa</dd>
-            </div>
-            </dl>
-          </div>
-          <div className="dato-mundo luna">
-            <p className="nombre">
-              <strong>{t("Moon", "Luna")}</strong>
-              <span>{t("The base we rehearse for", "La base para la que ensayamos")}</span>
-            </p>
-            <dl>
-            <div>
-              <dt>{t("Radius", "Radio")}</dt>
-              <dd>
-                {num(L.radioKm, 1)} km <small>{razon(L.radioKm, T.radioKm)}</small>
-              </dd>
-            </div>
-            <div>
-              <dt>{t("Gravity", "Gravedad")}</dt>
-              <dd>
-                {num(L.gravedad, 2)} m/s² <small>{razon(L.gravedad, T.gravedad)}</small>
-              </dd>
-            </div>
-            <div>
-              <dt>{t("Solar day", "Día solar")}</dt>
-              <dd>
-                {num(L.diaSolarH, 1)} h <small>{razon(L.diaSolarH, T.diaSolarH)}</small>
-              </dd>
-            </div>
-            <div>
-              <dt>{t("Axial tilt", "Inclinación")}</dt>
-              <dd>{num(L.inclinacionDeg, 2)}°</dd>
-            </div>
-            <div>
-              <dt>{t("Air", "Aire")}</dt>
-              <dd>{t("none (exosphere)", "no tiene (exosfera)")}</dd>
-            </div>
-            </dl>
-          </div>
+          <table className="mundos-tabla">
+            <caption className="sr-only">
+              {t("Earth, Moon and Mars compared (NASA NSSDCA fact sheets)", "Tierra, Luna y Marte comparados (fichas NSSDCA de la NASA)")}
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">
+                  <span className="sr-only">{t("Property", "Propiedad")}</span>
+                </th>
+                {ORDEN.map((m) => (
+                  <th key={m} scope="col" className={m} data-foco={foco === m || undefined}>
+                    <button type="button" onClick={() => setFoco(m)} aria-pressed={foco === m}>
+                      <i aria-hidden="true" />
+                      {nombre[m]}
+                    </button>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filas.map((f) => (
+                <tr key={f.k}>
+                  <th scope="row">{f.k}</th>
+                  {ORDEN.map((m) => (
+                    <td key={m} data-foco={foco === m || undefined}>
+                      {f.v(m)}
+                      {f.r && f.r(m) && <small>{f.r(m)}</small>}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
       <p className="espacio-creditos">
         <span>
           {t(
-            `Drag the divider. Tilts and spin to scale: the Earth turns once every 60 s, the Moon once every ${num(VUELTA_LUNA_MIN)} min.`,
-            `Arrastra el divisor. Inclinación y giro a escala: la Tierra da una vuelta cada 60 s; la Luna, cada ${num(VUELTA_LUNA_MIN)} min.`,
+            `True relative sizes, tilts and spin: the Earth turns once every ${VUELTA_TIERRA_S} s, Mars every ${num(vueltaMarteS, 1)} s, the Moon every ${num(vueltaLunaMin)} min. One low Sun lights all three.`,
+            `Tamaños relativos, inclinaciones y giro a escala: la Tierra da una vuelta cada ${VUELTA_TIERRA_S} s, Marte cada ${num(vueltaMarteS, 1)} s y la Luna cada ${num(vueltaLunaMin)} min. Un mismo Sol bajo ilumina a los tres.`,
           )}
         </span>
         <span>
-          {t("Imagery", "Imágenes")}: NASA Blue Marble · Black Marble · LRO LROC · LOLA.{" "}
+          {t("Imagery", "Imágenes")}: NASA Blue Marble · Black Marble · LRO LROC · LOLA · USGS Viking MDIM.{" "}
           {t("Constants", "Constantes")}:{" "}
-          <a href={FUENTES.tierra} target="_blank" rel="noreferrer">
-            NSSDCA {t("Earth", "Tierra")}
-          </a>{" "}
-          ·{" "}
-          <a href={FUENTES.luna} target="_blank" rel="noreferrer">
-            NSSDCA {t("Moon", "Luna")}
-          </a>
+          {ORDEN.map((m, i) => (
+            <span key={m}>
+              {i > 0 && " · "}
+              <a href={FUENTES[m]} target="_blank" rel="noreferrer">
+                NSSDCA {nombre[m]}
+              </a>
+            </span>
+          ))}
         </span>
       </p>
     </div>

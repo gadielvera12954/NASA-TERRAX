@@ -24,7 +24,7 @@ Hackathon demo (Sunday 15 Nov 2026, delivery 23:59), in English with a Spanish t
 
 ## Capabilities and Constraints
 
-- Screens: Home, Explore (candidate picker), Candidate card, Compare sites, Earth/Moon phenomena, Community, accounts, admin, 3D lab (park a rover on real Mons Mouton relief, watch battery through the lunar night), Verification (data and sources), Guide (with a Sun-angle shadow lab and field measurement).
+- Screens: Home, Explore (candidate picker), Candidate card, Compare sites, Earth/Moon phenomena, 3D lab (park a rover on real Mons Mouton relief, watch battery through the lunar night), Verification (data and sources), Guide (with a Sun-angle shadow lab and field measurement).
 - Data comes from `web/public/data` (manifest with SHA-256, fichas per candidate, 40 Payunia parcels plus controls). Numbers are never invented in the UI.
 - Verdict vocabulary: supported, with gaps, insufficient, unknown, incompatible.
 - English by default; "SI" instead of "AI" in NASA-facing text. Apache-2.0; every source cited.

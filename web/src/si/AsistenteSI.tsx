@@ -2,8 +2,9 @@
  * The TERRA-X guide: a small chat, grounded in the published data (see geminiClient.ts).
  * One panel, no settings. Ctrl K opens it; Esc closes it.
  */
-import { Fragment, useEffect, useRef, useState } from "react";
-import { ArrowUp, RotateCcw, X } from "lucide-react";
+import { Fragment, lazy, Suspense, useEffect, useRef, useState } from "react";
+import { ArrowUp, Box, RotateCcw, Sparkles, X } from "lucide-react";
+import type { Modelo3DSI } from "./Visor3DSI";
 import { Ficha, Manifest } from "../datos/contract";
 import { IndexEntry } from "../datos/integration";
 import { EntradaRanking, readRanking } from "../datos/ranking";
@@ -33,7 +34,27 @@ interface Turno {
   rol: "user" | "assistant";
   texto: string;
   meta?: RespuestaChatSI;
+  /** 3D views shown with this reply (from the model's tags, the question's words or a gallery button). */
+  modelos3d?: Modelo3DSI[];
 }
+
+// three.js only loads when the guide first shows a 3D view.
+const Visor3DSI = lazy(() => import("./Visor3DSI"));
+
+const GALERIA: { id: Modelo3DSI; en: string; es: string; textoEn: string; textoEs: string }[] = [
+  { id: "moon", en: "Mons Mouton", es: "Mons Mouton",
+    textoEn: "This is Mons Mouton, the destination, from NASA LOLA relief on the 60 m grid. Drag to orbit, scroll to zoom. Look at how a Sun a few degrees above the horizon leaves whole crater floors in shadow: that is why the rover's parking spot decides how long its night lasts.",
+    textoEs: "Este es Mons Mouton, el destino, con el relieve NASA LOLA en la grilla de 60 m. Arrastrá para girar y usá la rueda para acercar. Mirá cómo un Sol a pocos grados del horizonte deja fondos de cráter enteros en sombra: por eso el lugar donde se estaciona el rover decide cuánto dura su noche." },
+  { id: "payunia", en: "Payunia", es: "Payunia",
+    textoEn: "This is Payunia (Mendoza, Argentina), where the 40 Earth parcels are, from Copernicus DEM relief on the same 60 m grid. Compare its slopes and grazing-light shadows with the Moon; gravity, vacuum and dust do not transfer.",
+    textoEs: "Esta es Payunia (Mendoza, Argentina), donde están las 40 parcelas terrestres, con el relieve Copernicus DEM en la misma grilla de 60 m. Compará sus pendientes y sombras de luz rasante con la Luna; la gravedad, el vacío y el polvo no se reproducen." },
+  { id: "mars", en: "Jezero (Mars)", es: "Jezero (Marte)",
+    textoEn: "This is Jezero crater on Mars, the Perseverance landing area, from the team's published relief. It is shown for comparison only: the ranking scores Earth sites against the Moon.",
+    textoEs: "Este es el cráter Jezero en Marte, la zona de aterrizaje de Perseverance, con el relieve publicado por el equipo. Se muestra solo para comparar: el ranking puntúa sitios terrestres contra la Luna." },
+  { id: "rover", en: "Rover", es: "Rover",
+    textoEn: "This is the rover template: a generic shape with VIPER's public dimensions and panels on three sides, not an official NASA model. With the Sun this low, which panel faces it matters as much as where the rover parks.",
+    textoEs: "Esta es la plantilla del rover: una forma genérica con las medidas públicas de VIPER y paneles en tres lados, no un modelo oficial de la NASA. Con el Sol tan bajo, importa tanto qué panel mira al Sol como dónde se estaciona." },
+];
 
 /** Bold, inline code and bullet lists; nothing else, on purpose. */
 function Prosa({ texto }: { texto: string }) {
@@ -76,9 +97,11 @@ function Prosa({ texto }: { texto: string }) {
   );
 }
 
-function Marca() {
+function Marca({ grande }: { grande?: boolean }) {
   return (
-    <img src="/terra-x.svg" width="22" height="22" alt="" aria-hidden="true" />
+    <span className={grande ? "si-avatar grande" : "si-avatar"} aria-hidden="true">
+      <img src="/terra-x.svg" width={grande ? 30 : 22} height={grande ? 30 : 22} alt="" />
+    </span>
   );
 }
 
@@ -96,7 +119,7 @@ export default function AsistenteSI(p: Props) {
   const [resultadosMotor, setResultadosMotor] = useState<ResultadoMotorSI[]>([]);
   const [ranking, setRanking] = useState<EntradaRanking[]>([]);
   const finRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const origenRef = useRef<HTMLElement | null>(null);
   const generacionRef = useRef(0);
   const ocupadoRef = useRef(false);
@@ -240,6 +263,7 @@ export default function AsistenteSI(p: Props) {
       { id: `u${Date.now()}`, rol: "user", texto: limpia },
     ]);
     setEntrada("");
+    if (inputRef.current) inputRef.current.style.height = "auto";
     setCargando(true);
     try {
       const r = await consultarSI(limpia, ctx, p.idioma, historial);
@@ -247,7 +271,7 @@ export default function AsistenteSI(p: Props) {
       if (r.aviso) setConectada(false);
       setTurnos((prev) => [
         ...prev,
-        { id: `a${Date.now()}`, rol: "assistant", texto: r.texto, meta: r },
+        { id: `a${Date.now()}`, rol: "assistant", texto: r.texto, meta: r, modelos3d: r.modelos3d },
       ]);
     } finally {
       if (generacion === generacionRef.current) {
@@ -256,6 +280,18 @@ export default function AsistenteSI(p: Props) {
         inputRef.current?.focus();
       }
     }
+  };
+
+  /** Gallery button: shows a published model at once, with a fixed caption (no request to the model). */
+  const mostrar3D = (m: Modelo3DSI) => {
+    if (ocupadoRef.current) return;
+    const g = GALERIA.find((x) => x.id === m);
+    if (!g) return;
+    setTurnos((prev) => [
+      ...prev,
+      { id: `u${Date.now()}`, rol: "user", texto: t(`Show ${g.en} in 3D`, `Mostrame ${g.es} en 3D`) },
+      { id: `a${Date.now() + 1}`, rol: "assistant", texto: es ? g.textoEs : g.textoEn, modelos3d: [m] },
+    ]);
   };
 
   const correrMotor = async (comparar: boolean, pedidos?: unknown[]) => {
@@ -324,10 +360,10 @@ export default function AsistenteSI(p: Props) {
       >
         <header className="si-cabeza">
           <div className="si-titulo">
-            <Marca />
+            <Marca grande />
             <div>
               <strong>{t("TERRA-X SI assistant", "Asistente SI de TERRA-X")}</strong>
-              <span className="si-contexto mono" role="status">
+              <span className="si-contexto mono" role="status" data-conectada={conectada === null ? "?" : conectada ? "si" : "no"}>
                 {conectada === null ? t("Checking SI connection…", "Comprobando conexión de la SI…")
                   : conectada ? t("SI connected", "SI conectada") : t("SI using local data", "SI con datos locales")}
               </span>
@@ -371,21 +407,44 @@ export default function AsistenteSI(p: Props) {
         <div className="si-mensajes" role="log" aria-live="polite">
           {turnos.length === 0 && (
             <div className="si-bienvenida">
+              <p className="si-hola">
+                <Sparkles size={16} aria-hidden="true" />
+                {t("Hi! Ask me about the Moon, the sites or the method.", "¡Hola! Preguntame por la Luna, los sitios o el método.")}
+              </p>
               <p>
                 {bienvenidaSI(ctx, p.idioma, !!contextoExterno.pedido || !!contextoExterno.pedidos)}
               </p>
               <div className="si-sugerencias">
-                {sugerencias.map((s) => (
+                {sugerencias.map((s, i) => (
                   <button
                     key={s}
                     type="button"
                     className="si-chip"
+                    style={{ animationDelay: `${80 + i * 60}ms` }}
                     disabled={cargando}
                     onClick={() => enviar(s)}
                   >
                     {s}
                   </button>
                 ))}
+              </div>
+              <div className="si-galeria" role="group" aria-label={t("See it in 3D", "Verlo en 3D")}>
+                <span className="si-galeria-titulo mono"><Box size={13} aria-hidden="true" /> {t("See it in 3D", "Verlo en 3D")}</span>
+                <div>
+                  {GALERIA.map((g, i) => (
+                    <button
+                      key={g.id}
+                      type="button"
+                      className={`si-modelo-btn ${g.id}`}
+                      style={{ animationDelay: `${200 + i * 60}ms` }}
+                      disabled={cargando}
+                      onClick={() => mostrar3D(g.id)}
+                    >
+                      <i aria-hidden="true" />
+                      {es ? g.es : g.en}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -410,6 +469,15 @@ export default function AsistenteSI(p: Props) {
               }
             >
               <Prosa texto={x.texto} />
+              {x.rol === "assistant" && !!x.modelos3d?.length && (
+                <div className={x.modelos3d.length > 1 ? "si-3d-fila doble" : "si-3d-fila"}>
+                  <Suspense fallback={<div className="si-3d"><div className="si-3d-lienzo"><span className="si-3d-carga">{t("Loading 3D model…", "Cargando modelo 3D…")}</span></div></div>}>
+                    {x.modelos3d.map((m) => (
+                      <Visor3DSI key={m} modelo={m} idioma={p.idioma} elevacionSolDeg={ctx.elevacionSolDeg} />
+                    ))}
+                  </Suspense>
+                </div>
+              )}
               {x.meta && x.meta.acciones.length > 0 && (
                 <div className="si-acciones">
                   {x.meta.acciones.map((a, i) => (
@@ -474,11 +542,22 @@ export default function AsistenteSI(p: Props) {
             enviar(entrada);
           }}
         >
-          <input
+          <textarea
             ref={inputRef}
-            type="text"
+            rows={1}
             value={entrada}
-            onChange={(e) => setEntrada(e.target.value)}
+            onChange={(e) => {
+              setEntrada(e.target.value);
+              const el = e.currentTarget;
+              el.style.height = "auto";
+              el.style.height = `${Math.min(140, el.scrollHeight)}px`;
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+                e.preventDefault();
+                enviar(entrada);
+              }
+            }}
             placeholder={t(
               "Ask about this candidate, the Moon, the method…",
               "Preguntá por esta candidata, la Luna, el método…",
