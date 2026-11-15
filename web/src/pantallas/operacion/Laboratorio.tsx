@@ -26,6 +26,7 @@ import TerrenoLunar, { PuntoGrilla, rangoHoras } from "../../escena3d/TerrenoLun
 import { EjeTiempo, PerfilCielo, Pista, useAncho } from "./Graficos";
 import { Pause, Play } from "lucide-react";
 import { Marca } from "../../sistema/Marca";
+import BotonSI from "../../luz/BotonSI";
 
 type Periodo = "verano" | "invierno" | "fechas";
 interface Intento {
@@ -204,6 +205,54 @@ export default function Laboratorio({ motor, onMotorCaido }: { motor: EstadoMoto
       sinPotencia: tramosDe(z.potencia_w, (v) => v < esc.vehiculo.p_surv_w),
     };
   }, [esc]);
+  const tramosLunacion = useMemo(() => {
+    if (!esc) return [];
+    const z = esc.serie;
+    const pasoH = z.paso_s / 3600;
+    const toca = ([a, b]: [number, number]) => a <= z.i1 - 1 && b >= z.i0;
+    const baseTramos = franjas.sinPotencia.filter(toca);
+    const lista = baseTramos.length > 0 ? baseTramos : franjas.noche.filter(toca);
+    return lista.map(([a, b], idxTramo) => {
+      const horasTramo = (b - a + 1) * pasoH;
+      const inicio = Math.max(z.i0, a);
+      return {
+        indice: idxTramo + 1,
+        a,
+        b,
+        inicio,
+        horas: horasTramo,
+        superaLimite: horasTramo > esc.limite_refugio_h,
+      };
+    });
+  }, [esc, franjas]);
+  const pasoBateriaMin = useMemo(() => {
+    if (!esc) return 0;
+    const z = esc.serie;
+    let s0 = z.i0;
+    let s1 = z.i1 - 1;
+    for (const tr of tramosLunacion) {
+      s0 = Math.min(s0, tr.a);
+      s1 = Math.max(s1, tr.b);
+    }
+    let mejorPaso = s0;
+    const tope = Math.min(z.bateria_wh.length - 1, s1);
+    for (let k = s0; k <= tope; k++) {
+      if (z.bateria_wh[k] < z.bateria_wh[mejorPaso]) mejorPaso = k;
+    }
+    return mejorPaso;
+  }, [esc, tramosLunacion]);
+  const irSiguienteOscuridad = () => {
+    if (!tramosLunacion.length) return;
+    setAndando(false);
+    const siguiente =
+      tramosLunacion.find((tr) => tr.inicio > i && !(i >= tr.a && i <= tr.b)) ??
+      tramosLunacion[0];
+    setPaso(siguiente.inicio);
+  };
+  const irBateriaMinima = () => {
+    setAndando(false);
+    setPaso(pasoBateriaMin);
+  };
   const bateriaPct = useMemo(() => (esc ? esc.serie.bateria_wh.map((v) => (100 * v) / esc.vehiculo.bateria_wh) : []), [esc]);
   const rango = useMemo(() => (horas ? rangoHoras(horas) : [0, 0]), [horas]);
   const marcas = useMemo(() => {
@@ -469,6 +518,24 @@ export default function Laboratorio({ motor, onMotorCaido }: { motor: EstadoMoto
                     ? t(`Live engine · ${esc.calculo_ms} ms · ${esc.punto.horizonte.n_az} azimuths`, `Motor en vivo · ${esc.calculo_ms} ms · ${esc.punto.horizonte.n_az} azimutes`)
                     : t(`In the browser · ${esc.punto.horizonte.n_az} azimuths`, `En el navegador · ${esc.punto.horizonte.n_az} azimutes`)}
               </span>
+              <BotonSI
+                texto={t("Explain with SI: analyze this point", "Explicar con SI: analizar este punto")}
+                pregunta={() =>
+                  t(
+                    `In the Mons Mouton 3D lab at row ${esc.punto.fila}, column ${esc.punto.col} (${num(esc.punto.lat, 4)}°, ${num(esc.punto.lon, 4)}°), during ${esc.periodo.lunacion ? (nombres[esc.periodo.lunacion] ?? esc.periodo.lunacion) : `${esc.periodo.desde} to ${esc.periodo.hasta}`} with ${num(consumo, 1)} W consumption, the longest stretch without enough power (< ${num(esc.vehiculo.p_surv_w, 1)} W) is ${num(r.tramo_oscuro_mas_largo_h)} h vs the ${num(limite)} h public NASA VIPER battery survival limit, the longest geometric night is ${num(r.noche_geometrica_h)} h, and the lowest battery is ${num(100 * r.bateria_minima_frac)} % (reserve ${num(100 * esc.vehiculo.reserva_frac)} %). Verdict: ${r.en_riesgo ? "Rover lost" : "Rover survives"}. Analyze this point.`,
+                    `En el laboratorio 3D de Mons Mouton en la fila ${esc.punto.fila}, columna ${esc.punto.col} (${num(esc.punto.lat, 4)}°, ${num(esc.punto.lon, 4)}°), durante ${esc.periodo.lunacion ? (nombres[esc.periodo.lunacion] ?? esc.periodo.lunacion) : `${esc.periodo.desde} a ${esc.periodo.hasta}`} con consumo de ${num(consumo, 1)} W, el tramo más largo sin potencia suficiente (< ${num(esc.vehiculo.p_surv_w, 1)} W) es ${num(r.tramo_oscuro_mas_largo_h)} h frente al límite público de ${num(limite)} h de supervivencia con batería de VIPER (NASA), la noche geométrica más larga es ${num(r.noche_geometrica_h)} h y la batería mínima es ${num(100 * r.bateria_minima_frac)} % (reserva ${num(100 * esc.vehiculo.reserva_frac)} %). Veredicto: ${r.en_riesgo ? "Rover perdido" : "El rover sobrevive"}. Analiza este punto.`,
+                  )
+                }
+                contexto={() => ({
+                  pantalla: "lab",
+                  punto: esc.punto,
+                  periodo: esc.periodo,
+                  vehiculo: esc.vehiculo,
+                  resultado: r,
+                  limite_refugio_h: limite,
+                  paso_reloj: i,
+                })}
+              />
             </div>
             <div className="condiciones">
               <div className={r.condiciones.oscuridad ? "mal" : "bien"}>
@@ -510,6 +577,21 @@ export default function Laboratorio({ motor, onMotorCaido }: { motor: EstadoMoto
               {andando ? <Pause aria-hidden="true" size={16} /> : <Play aria-hidden="true" size={16} />}
               {andando ? t("Pause", "Pausar") : t("Play the lunation", "Reproducir la lunación")}
             </button>
+            <button
+              type="button"
+              className="btn sec chico"
+              onClick={irSiguienteOscuridad}
+              disabled={!tramosLunacion.length}
+            >
+              {t("Next darkness", "Siguiente oscuridad")}
+            </button>
+            <button
+              type="button"
+              className="btn sec chico"
+              onClick={irBateriaMinima}
+            >
+              {t("Lowest battery", "Batería mínima")}
+            </button>
             <label htmlFor="lab-reloj" className="mono">
               {ahora ? fecha.format(ahora) : ""} UTC
             </label>
@@ -530,6 +612,58 @@ export default function Laboratorio({ motor, onMotorCaido }: { motor: EstadoMoto
             }}
             aria-valuetext={ahora ? fecha.format(ahora) : undefined}
           />
+          <p className="mono lectura" data-testid="reloj-distincion">
+            {s.elevacion_deg[i] < s.horizonte_deg[i]
+              ? t("Geometric night (Sun behind relief)", "Noche geométrica (Sol tras el relieve)")
+              : t("Geometric day (Sun above relief)", "Día geométrico (Sol sobre el relieve)")}{" "}
+            ·{" "}
+            {s.potencia_w[i] < esc.vehiculo.p_surv_w
+              ? t(
+                  `Power shortfall (${num(s.potencia_w[i])} W < ${num(esc.vehiculo.p_surv_w, 1)} W)`,
+                  `Falta de potencia (${num(s.potencia_w[i])} W < ${num(esc.vehiculo.p_surv_w, 1)} W)`,
+                )
+              : t(
+                  `Power above threshold (${num(s.potencia_w[i])} W ≥ ${num(esc.vehiculo.p_surv_w, 1)} W)`,
+                  `Potencia sobre el umbral (${num(s.potencia_w[i])} W ≥ ${num(esc.vehiculo.p_surv_w, 1)} W)`,
+                )}{" "}
+            ·{" "}
+            {bateriaPct[i] < 100 * esc.vehiculo.reserva_frac
+              ? t(
+                  `Battery ${num(bateriaPct[i])} % (below ${num(100 * esc.vehiculo.reserva_frac)} % reserve)`,
+                  `Batería ${num(bateriaPct[i])} % (bajo la reserva de ${num(100 * esc.vehiculo.reserva_frac)} %)`,
+                )
+              : t(
+                  `Battery ${num(bateriaPct[i])} % (above ${num(100 * esc.vehiculo.reserva_frac)} % reserve)`,
+                  `Batería ${num(bateriaPct[i])} % (sobre la reserva de ${num(100 * esc.vehiculo.reserva_frac)} %)`,
+                )}
+          </p>
+          {tramosLunacion.length > 0 && (
+            <div
+              className="fichas-rapidas"
+              role="group"
+              aria-label={t(
+                `Darkness windows vs the ${num(limite)} h public NASA VIPER battery survival limit`,
+                `Ventanas de oscuridad frente al límite público de ${num(limite)} h de supervivencia de VIPER (NASA)`,
+              )}
+            >
+              {tramosLunacion.map((tr) => (
+                <button
+                  key={tr.a}
+                  type="button"
+                  aria-pressed={i >= tr.a && i <= tr.b}
+                  onClick={() => {
+                    setAndando(false);
+                    setPaso(tr.inicio);
+                  }}
+                >
+                  #{tr.indice} · {num(tr.horas)} h{" "}
+                  {tr.superaLimite
+                    ? t(`× > ${num(limite)} h VIPER (NASA)`, `× > ${num(limite)} h VIPER (NASA)`)
+                    : t(`✓ ≤ ${num(limite)} h VIPER (NASA)`, `✓ ≤ ${num(limite)} h VIPER (NASA)`)}
+                </button>
+              ))}
+            </div>
+          )}
           <Pista
             titulo={t("Sun elevation at the rover (°)", "Altura del Sol en el rover (°)")}
             lineas={[

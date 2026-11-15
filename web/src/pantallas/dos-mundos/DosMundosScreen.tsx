@@ -1,6 +1,8 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useSol } from '../../luz/SolContext';
 import { TerrainShadowCanvas } from '../../luz/TerrainShadowCanvas';
+import BotonSI from '../../luz/BotonSI';
+import { escribiendoEnCampo } from '../../luz/EscenarioCortina';
 import { Split, ArrowLeftRight, CheckCircle2, ShieldAlert } from 'lucide-react';
 
 export const DosMundosScreen: React.FC = () => {
@@ -14,11 +16,12 @@ export const DosMundosScreen: React.FC = () => {
   // Dragging the vertical curtain separator
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     if (!containerRef.current) return;
+    containerRef.current.focus({ preventScroll: true });
     const rect = containerRef.current.getBoundingClientRect();
     const updatePos = (clientX: number) => {
       const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
       const pct = (x / rect.width) * 100;
-      setCortinaPos(Math.round(pct * 10) / 10);
+      setCortinaPos(Math.max(5, Math.min(95, Math.round(pct))));
     };
 
     updatePos(e.clientX);
@@ -35,24 +38,61 @@ export const DosMundosScreen: React.FC = () => {
     window.addEventListener('pointerup', onPointerUp);
   }, []);
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (escribiendoEnCampo(e.target)) return;
+    const step = e.shiftKey ? 10 : 1;
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setCortinaPos((c) => Math.max(5, c - step));
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setCortinaPos((c) => Math.min(95, c + step));
+    } else if (e.key === 'Home' || e.key === 't' || e.key === 'T') {
+      e.preventDefault();
+      setCortinaPos(5);
+    } else if (e.key === 'End' || e.key === 'l' || e.key === 'L') {
+      e.preventDefault();
+      setCortinaPos(95);
+    }
+  };
+
   return (
-    <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px 20px 80px' }}>
+    <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px 20px 80px' }} onKeyDown={handleKeyDown}>
       {/* Title & Core Project Statement */}
-      <div style={{ marginBottom: '20px' }}>
-        <div className="et" style={{ marginBottom: '4px' }}>
-          Comparative Engine · Same Code on Two Worlds
+      <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '12px' }}>
+        <div>
+          <div className="et" style={{ marginBottom: '4px' }}>
+            Comparative Engine · Same Code on Two Worlds
+          </div>
+          <h1 style={{ fontSize: '32px', fontWeight: 600 }}>
+            Same Sun height. Same shadows. <span style={{ color: 'var(--sol)' }}>Two worlds.</span>
+          </h1>
+          <p style={{ color: 'var(--texto-sec)', fontSize: '14px', marginTop: '4px' }}>
+            Sun: <b style={{ color: 'var(--sol)' }}>{elevacion.toFixed(2)}°</b> @ <b style={{ color: 'var(--dato)' }}>{azimut.toFixed(0)}°</b>. Drag the yellow curtain (or use ←/→, Home/End, L/T) to compare Mons Mouton with Candidate P-07 in Payunia, Argentina.
+          </p>
         </div>
-        <h1 style={{ fontSize: '32px', fontWeight: 600 }}>
-          Same Sun height. Same shadows. <span style={{ color: 'var(--sol)' }}>Two worlds.</span>
-        </h1>
-        <p style={{ color: 'var(--texto-sec)', fontSize: '14px', marginTop: '4px' }}>
-          Sun: <b style={{ color: 'var(--sol)' }}>{elevacion.toFixed(2)}°</b> @ <b style={{ color: 'var(--dato)' }}>{azimut.toFixed(0)}°</b>. Drag the yellow curtain to compare the lunar surface at Mons Mouton with Candidate P-07 in Payunia, Argentina.
-        </p>
+        <BotonSI
+          texto="Explain with SI"
+          pregunta={() =>
+            `In Two Worlds with the Sun at ${elevacion.toFixed(2)}° elevation and ${azimut.toFixed(0)}° azimuth, Mons Mouton has ${lunaStats.shadowPercent}% shadow coverage vs ${tierraStats.shadowPercent}% on Payunia P-07. Explain what transfers and what does not.`
+          }
+          contexto={() => ({
+            pantalla: 'two worlds',
+            elevacion_sol_deg: elevacion,
+            azimut_sol_deg: azimut,
+            sombra_luna_pct: lunaStats.shadowPercent,
+            sombra_tierra_pct: tierraStats.shadowPercent,
+          })}
+        />
       </div>
 
       {/* Flagship Split Screen Viewport */}
       <div
         ref={containerRef}
+        tabIndex={0}
+        role="group"
+        aria-label="Two Worlds comparison stage. Use Left and Right arrows, Home, End, L for Moon and T for Earth."
         style={{
           position: 'relative',
           height: '420px',
@@ -207,8 +247,9 @@ export const DosMundosScreen: React.FC = () => {
             bottom: 0,
             left: `${cortinaPos}%`,
             transform: 'translateX(-50%)',
-            width: '24px',
+            width: '44px',
             cursor: 'ew-resize',
+            touchAction: 'none',
             zIndex: 30,
             display: 'flex',
             alignItems: 'center',
