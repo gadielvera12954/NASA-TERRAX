@@ -44,16 +44,32 @@ FUENTES = {
 PROYECCION = {"tipo": "polar_estereografica_sur", "radio_m": R, "lon0_deg": 0.0}
 
 
-def leer_ventana(url: str, fila0: int, col0: int, alto: int, ancho: int) -> tuple[np.ndarray, dict]:
+def leer_ventana(url: str, fila0: int, col0: int, alto: int, ancho: int, bloque: int = 250,
+                 intentos: int = 8) -> tuple[np.ndarray, dict]:
+    """Lee la ventana por bloques de filas; si la conexión corta un bloque, se repite solo ese bloque."""
+    import time
+
     import rasterio
     from rasterio.windows import Window
 
-    with entorno_gdal():
-        with rasterio.open("/vsicurl/" + url) as ds:
-            relleno = np.nan if np.dtype(ds.dtypes[0]).kind == "f" else -32768
-            a = ds.read(1, window=Window(col0, fila0, ancho, alto), boundless=True, fill_value=relleno)
-            info = {"pixel_m": float(ds.res[0]), "esquina": [float(ds.transform.c), float(ds.transform.f)]}
-    return a, info
+    partes, info = [], None
+    for f in range(0, alto, bloque):
+        h = min(bloque, alto - f)
+        for intento in range(1, intentos + 1):
+            try:
+                with entorno_gdal():
+                    with rasterio.open("/vsicurl/" + url) as ds:
+                        relleno = np.nan if np.dtype(ds.dtypes[0]).kind == "f" else -32768
+                        partes.append(ds.read(1, window=Window(col0, fila0 + f, ancho, h), boundless=True, fill_value=relleno))
+                        info = {"pixel_m": float(ds.res[0]), "esquina": [float(ds.transform.c), float(ds.transform.f)]}
+                break
+            except Exception as err:
+                if intento == intentos:
+                    raise
+                print(f"    bloque {f}-{f + h}: {err.__class__.__name__}, reintento {intento}", flush=True)
+                time.sleep(5 * intento)
+        print(f"    filas {f + h}/{alto}", flush=True)
+    return np.concatenate(partes, axis=0), info
 
 
 def principal(lat: float = -84.60, lon: float = 31.00, lado: int = 500, margen_km: float = 60.0,
@@ -92,8 +108,17 @@ def principal(lat: float = -84.60, lon: float = 31.00, lado: int = 500, margen_k
     guardar("mons_mouton_margen_60m", zm, 60.0, -ESQUINA_GLOBAL + 60.0 * (J - m) + 30.0,
             ESQUINA_GLOBAL - 60.0 * (I - m) - 30.0, "ldem_60s_60m", "60 m nativos")
     df, dc = I0 - (I - m), J0 - (J - m)
-    guardar("mons_mouton_60m", zm[df:df + lado, dc:dc + lado].copy(), 60.0, x0, y0, "ldem_60s_60m",
-            "60 m nativos de LDEM_60S_60MPP (sin promediar ni interpolar); ver motor/ingest/lola.py")
+    previo = DATOS / "grillas" / "mons_mouton_60m.json"
+    meta_previa = json.loads(previo.read_text(encoding="utf-8")) if previo.exists() else None
+    if meta_previa and "20MPP" in meta_previa["fuentes"][0]["id"] and meta_previa["x0_m"] == x0 and meta_previa["y0_m"] == y0:
+        # Ya hay un objetivo promediado desde 20 m (lo que pide el documento 02) en la misma grilla: se conserva.
+        prov["grillas"]["mons_mouton_60m"] = {"conservado": "promedio de bloques 3 x 3 de LDEM_80S_20MPP_ADJ",
+                                              "sha256": meta_previa["fuentes"][0]["sha256"]}
+        prov["nota"] = "objetivo promediado desde LDEM_80S_20MPP (bajado por puente_lola); margen, lejano e iluminación por motor/ingest/lola.py"
+        print("  mons_mouton_60m: se conserva el objetivo promediado desde 20 m", flush=True)
+    else:
+        guardar("mons_mouton_60m", zm[df:df + lado, dc:dc + lado].copy(), 60.0, x0, y0, "ldem_60s_60m",
+                "60 m nativos de LDEM_60S_60MPP (sin promediar ni interpolar); ver motor/ingest/lola.py")
 
     print("lejano: LDEM_60S_240MPP", flush=True)
     I4, J4 = int(math.floor((ESQUINA_GLOBAL - y) / 240.0)), int(math.floor((x + ESQUINA_GLOBAL) / 240.0))
