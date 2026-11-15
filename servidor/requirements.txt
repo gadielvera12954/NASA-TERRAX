@@ -1,0 +1,2 @@
+# Servidor del motor en vivo (además de requirements-motor.txt)
+flask>=3.0

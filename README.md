@@ -19,6 +19,33 @@ The bilingual MVP adapts the current physics-engine exports without changing the
 
 See [web/MVP.md](web/MVP.md) for scope, remaining team integration and browser checks. Run `npm run test:e2e` inside `web/` to run the MVP browser suite (Microsoft Edge by default).
 
+## Interactive 3D lab and live engine
+
+The main interface is no longer a set of static pages:
+
+- **Home**: the real relief of Mons Mouton in 3D (LOLA, 60 m) with the shadows of a real lunation moving over it.
+- **3D lab** (`/#lab`): click anywhere on the relief to park a solar rover, choose the season and the power it needs, and follow Sun, panel power and battery hour by hour. Hovering the charts moves the Sun in the 3D view; every attempt is kept in a list so that places can be compared.
+- **Two worlds** (`/#compare`): the same rover and the same 0.50 m board under the same Sun angle on the Moon and on Earth, with live readouts for shadow length (F14, F15, F19), panel power (F4), a gravity drop test and the time a grazing Sun lasts.
+- **Candidate comparator** (`/#compare`): up to three exported candidates or controls side by side, property by property.
+- **Field kit** (`/#guide`): type a measured shadow and check it against the Sun model.
+
+The 3D models (generic solar rover, calibration board, Mons Mouton relief) are built in Blender by one reproducible script: see [modelos/LEEME.md](modelos/LEEME.md). The rover is a generic shape with public VIPER dimensions, not an official model. There is no Earth terrain in 3D yet, because the NASADEM grids of the candidates have not been delivered.
+
+The lab has two calculation paths and always says which one answered:
+
+| | Live engine (`servidor/`, optional) | Browser (always available, offline too) |
+|---|---|---|
+| What runs | the Python code of `motor/` at that moment | the same formulas F3–F7 in TypeScript over the exported files |
+| Horizon of the point | 360 azimuths, ray-cast over LOLA relief out to 300 km | 72 azimuths from `horizontes.bin` |
+| Dates | any date from 1901 to 2049 | the two exported lunations of 2027 |
+
+```bash
+python -m pip install -r requirements-motor.txt -r servidor/requirements.txt
+python -m servidor
+```
+
+Then start the web as usual; Vite forwards `/api` to the engine. Details and endpoints in [servidor/LEEME.md](servidor/LEEME.md). For the centre of Mons Mouton the live answer is identical to the exported card (`servidor/tests`), and the browser path is within 5 % of it (`web/tests/lab.spec.ts`).
+
 ## Target Capabilities & Scientific Design
 
 1. **Grazing Sun Optical Engine (`web/src/luz`)**:
