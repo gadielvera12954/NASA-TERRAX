@@ -1,5 +1,26 @@
 import type { ContextoSI } from "./verificadorSI";
 
+const registro = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
+
+/** Accept Erwan's screen payload as inputs, never as verified scientific output. */
+export function normalizarContextoSI(c: Record<string, unknown>): Record<string, unknown> {
+  const contexto = { ...c };
+  if (typeof contexto.pagina !== "string" && typeof c.pantalla === "string") contexto.pagina = c.pantalla;
+  if (contexto.alturaObjetoM === undefined) contexto.alturaObjetoM = c.altura_objeto_m;
+  if (contexto.elevacionSolDeg === undefined) contexto.elevacionSolDeg = c.elevacion_sol_deg;
+  if (!contexto.pedido && c.pantalla === "lab" && registro(c.punto) && registro(c.periodo) && registro(c.vehiculo)) {
+    contexto.pedido = {
+      fila: c.punto.fila, col: c.punto.col,
+      ...(c.periodo.lunacion ? { lunacion: c.periodo.lunacion } : { desde: c.periodo.desde, hasta: c.periodo.hasta }),
+      consumo_w: c.vehiculo.consumo_w, panel_w: c.vehiculo.panel_w, bateria_wh: c.vehiculo.bateria_wh,
+    };
+  }
+  if (Array.isArray(c.sitios)) contexto.sitiosComparados = [...new Set(c.sitios.flatMap(s =>
+    registro(s) && typeof s.id === "string" ? [s.id] : typeof s === "string" ? [s] : [],
+  ))].slice(0, 3);
+  return contexto;
+}
+
 export function sugerenciasSI(ctx: ContextoSI, idioma: "en" | "es"): string[] {
   const es = idioma === "es";
   const id = ctx.ficha?.id;
@@ -41,6 +62,7 @@ export function bienvenidaSI(ctx: ContextoSI, idioma: "en" | "es", tienePedido: 
   else partes.push(es ? "No hay una ficha cargada en este contexto." : "No site record is loaded in this context.");
   if (ctx.ranking?.length) partes.push(es ? "También tengo el ranking publicado." : "I also have the published ranking.");
   if (ctx.manifest) partes.push(es ? "El manifiesto de fuentes está disponible." : "The source manifest is available.");
+  if (ctx.fichasComparacion?.length) partes.push(es ? "Tengo las fichas publicadas de los sitios comparados." : "I have the published records of the compared sites.");
   if (tienePedido) partes.push(es ? "Podés ejecutar el motor con los parámetros de esta pantalla." : "You can run the engine with this screen's parameters.");
   else if (ctx.pagina === "lab") partes.push(es ? "Usá «Explicar con SI» desde el punto del laboratorio para traer sus parámetros." : "Use Explain with SI from a laboratory point to supply its parameters.");
   return partes.join(" ");

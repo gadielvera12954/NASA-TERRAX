@@ -10,7 +10,7 @@ import { EntradaRanking, readRanking } from "../datos/ranking";
 import { RespuestaChatSI, consultarSI } from "./geminiClient";
 import { AccionRapidaSI, ContextoSI } from "./verificadorSI";
 import { AperturaSI, EVENTO_SI } from "./abrirSI";
-import { bienvenidaSI, sugerenciasSI } from "./contextoSI";
+import { bienvenidaSI, normalizarContextoSI, sugerenciasSI } from "./contextoSI";
 import { explicarMotorSI } from "./motorSI";
 import { analizarPuntoSI, compararEscenariosSI, ErrorMotorSI, estadoSI, ResultadoMotorSI } from "../datos/siMotor";
 import { readFicha } from "../datos/integration";
@@ -91,6 +91,7 @@ export default function AsistenteSI(p: Props) {
   const [cargando, setCargando] = useState(false);
   const [contextoExterno, setContextoExterno] = useState<Record<string, unknown>>({});
   const [fichaEvento, setFichaEvento] = useState<Ficha>();
+  const [fichasComparacion, setFichasComparacion] = useState<Ficha[]>([]);
   const [conectada, setConectada] = useState<boolean | null>(null);
   const [resultadosMotor, setResultadosMotor] = useState<ResultadoMotorSI[]>([]);
   const [ranking, setRanking] = useState<EntradaRanking[]>([]);
@@ -142,6 +143,17 @@ export default function AsistenteSI(p: Props) {
   }, [contextoExterno, p.ficha?.id]);
 
   useEffect(() => {
+    let vigente = true;
+    setFichasComparacion([]);
+    const ids = contextoExterno.sitiosComparados;
+    if (Array.isArray(ids)) Promise.allSettled(ids.filter((id): id is string => typeof id === "string").map(readFicha))
+      .then(resultados => {
+        if (vigente) setFichasComparacion(resultados.flatMap(r => r.status === "fulfilled" ? [r.value] : []));
+      });
+    return () => { vigente = false; };
+  }, [contextoExterno]);
+
+  useEffect(() => {
     const abrir = (evento: Event) => {
       const d = (evento as CustomEvent<AperturaSI>).detail;
       if (!d || typeof d.pregunta !== "string") return;
@@ -152,7 +164,7 @@ export default function AsistenteSI(p: Props) {
       setTurnos([]);
       setResultadosMotor([]);
       origenRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-      setContextoExterno(d.contexto && typeof d.contexto === "object" && !Array.isArray(d.contexto) ? { ...d.contexto } : {});
+      setContextoExterno(normalizarContextoSI(d.contexto && typeof d.contexto === "object" && !Array.isArray(d.contexto) ? d.contexto : {}));
       setEntrada(d.pregunta.slice(0, 600));
       setAbierto(true);
     };
@@ -192,7 +204,8 @@ export default function AsistenteSI(p: Props) {
 
   const ctx: ContextoSI = {
     pagina: typeof contextoExterno.pagina === "string" ? contextoExterno.pagina : p.pagina,
-    ficha: typeof contextoExterno.candidataId === "string" && contextoExterno.candidataId !== p.ficha?.id ? fichaEvento : p.ficha,
+    ficha: (contextoExterno.pagina ?? p.pagina) === "lab" ? undefined
+      : typeof contextoExterno.candidataId === "string" && contextoExterno.candidataId !== p.ficha?.id ? fichaEvento : p.ficha,
     manifest: p.manifest,
     indice: p.indice,
     ranking,
@@ -203,6 +216,7 @@ export default function AsistenteSI(p: Props) {
     instante: typeof contextoExterno.instante === "string" && Number.isFinite(Date.parse(contextoExterno.instante)) ? contextoExterno.instante : undefined,
     motorEnVivo: p.motorEnVivo,
     resultadosMotor,
+    fichasComparacion: fichasComparacion.filter(f => Array.isArray(contextoExterno.sitiosComparados) && contextoExterno.sitiosComparados.includes(f.id)),
   };
 
   const ejecutar = (a: AccionRapidaSI) => {
@@ -244,7 +258,7 @@ export default function AsistenteSI(p: Props) {
     }
   };
 
-  const correrMotor = async (comparar: boolean) => {
+  const correrMotor = async (comparar: boolean, pedidos?: unknown[]) => {
     if (ocupadoRef.current) return;
     ocupadoRef.current = true;
     const generacion = generacionRef.current;
@@ -253,7 +267,7 @@ export default function AsistenteSI(p: Props) {
       : t("Analyze this point with the engine", "Analizar este punto con el motor");
     setTurnos(prev => [...prev, { id: `u${Date.now()}`, rol: "user", texto }]);
     try {
-      const resultados = comparar ? await compararEscenariosSI(contextoExterno.pedidos) : await analizarPuntoSI(contextoExterno.pedido);
+      const resultados = comparar ? await compararEscenariosSI(pedidos ?? contextoExterno.pedidos) : await analizarPuntoSI(contextoExterno.pedido);
       if (generacion !== generacionRef.current) return;
       const respuesta = explicarMotorSI(resultados, p.idioma);
       setResultadosMotor(resultados);
@@ -274,6 +288,9 @@ export default function AsistenteSI(p: Props) {
   };
 
   const sugerencias = sugerenciasSI(ctx, p.idioma);
+  const pedidoActual = contextoExterno.pedido as Record<string, unknown> | undefined;
+  const comparacionEstacional = pedidoActual && ["verano", "invierno"].includes(String(pedidoActual.lunacion))
+    ? [{ ...pedidoActual, lunacion: "verano" }, { ...pedidoActual, lunacion: "invierno" }] : undefined;
   const n = (v: number, d: number) =>
     v.toLocaleString(p.idioma, {
       maximumFractionDigits: d,
@@ -315,10 +332,12 @@ export default function AsistenteSI(p: Props) {
                   : conectada ? t("SI connected", "SI conectada") : t("SI using local data", "SI con datos locales")}
               </span>
               <span className="si-contexto mono">
-                {ctx.ficha
+                {contextoExterno.pedido
+                  ? t("Point parameters loaded", "Parámetros del punto cargados")
+                  : contextoExterno.pedidos ? t("Comparison parameters loaded", "Parámetros de comparación cargados") : ctx.ficha
                   ? `${ctx.ficha.id} · ${ctx.ficha.lugar.nombre}`
                   : t("no candidate open", "sin candidata abierta")}{" "}
-                · {t("Sun", "Sol")} {n(ctx.elevacionSolDeg, 1)}°
+                · {ctx.pagina === "lab" ? t("Engine inputs", "Entradas del motor") : `${t("Sun", "Sol")} ${n(ctx.elevacionSolDeg, 1)}°`}
               </span>
             </div>
           </div>
@@ -377,6 +396,9 @@ export default function AsistenteSI(p: Props) {
               </button>}
               {!!contextoExterno.pedidos && <button className="si-chip accion" type="button" disabled={cargando} onClick={() => correrMotor(true)}>
                 {t("Compare scenarios with the engine", "Comparar escenarios con el motor")}
+              </button>}
+              {!contextoExterno.pedidos && comparacionEstacional && <button className="si-chip accion" type="button" disabled={cargando} onClick={() => correrMotor(true, comparacionEstacional)}>
+                {t("Compare summer and winter at this point", "Comparar verano e invierno en este punto")}
               </button>}
             </div>
           )}

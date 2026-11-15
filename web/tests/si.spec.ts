@@ -92,6 +92,7 @@ test("external opening supplies engine context and performs one real point reque
   await page.getByRole("button", { name: "Analyze this point", exact: true }).click();
   const dialog = page.getByRole("dialog");
   await expect(dialog).toContainText("4 figures verified against TERRA-X engine data");
+  await expect(dialog.locator(".si-contexto").last()).toHaveText("Point parameters loaded · Engine inputs");
   await expect(dialog).toContainText(`Geometric night: ${referencia().resultado.noche_geometrica_h.toFixed(2)} h`);
   await expect(dialog).toContainText("darkness: fails; battery: fails; slope: passes");
   expect(cuerpos).toEqual([pedido]);
@@ -123,6 +124,43 @@ test("batch readout binds metrics to both returned scenarios", async ({ page }) 
   await page.getByRole("button", { name: "Compare scenarios with the engine", exact: true }).click();
   await expect(page.getByRole("dialog")).toContainText("8 figures verified against TERRA-X engine data");
   await expect(page.getByRole("dialog")).toContainText(`Geometric night: ${referencia("invierno").resultado.noche_geometrica_h.toFixed(2)} h`);
+});
+
+test("Erwan's laboratory payload supplies inputs but never verified output", async ({ page }) => {
+  const r = escenario();
+  await page.route("**/api/destino/punto", route => route.fulfill({ json: r }));
+  await inicio(page);
+  await abrir(page, { pantalla: "lab", punto: r.punto, periodo: r.periodo, vehiculo: r.vehiculo,
+    resultado: { potencia_media_w: 987654321 } });
+  await expect(page.getByRole("dialog")).toContainText("How are geometric night, darkness and battery risk different?");
+  await page.getByRole("button", { name: "Analyze this point", exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText("4 figures verified against TERRA-X engine data");
+  await expect(page.getByRole("dialog")).not.toContainText("987654321");
+});
+
+test("the lab SI can compare both published lunations with unchanged vehicle parameters", async ({ page }) => {
+  let cuerpo: unknown;
+  await page.route("**/api/destino/comparar", async r => {
+    cuerpo = r.request().postDataJSON();
+    await r.fulfill({ json: lote([escenario(), escenario("invierno")]) });
+  });
+  await inicio(page);
+  await abrir(page, { pedido });
+  await page.getByRole("button", { name: "Compare summer and winter at this point", exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText("8 figures verified against TERRA-X engine data");
+  expect(cuerpo).toEqual({ escenarios: [pedido, { ...pedido, lunacion: "invierno" }], series: false });
+});
+
+test("Erwan's record comparison reloads published cards instead of trusting caller scores", async ({ page }) => {
+  await inicio(page);
+  await abrir(page, { pantalla: "compare", sitios: [{ id: "P-27", C: 987654321 }, { id: "P-05", C: 987654321 }] });
+  await expect(page.getByRole("dialog")).toContainText("published records of the compared sites");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  const respuesta = page.getByRole("dialog").locator(".si-turno.guia");
+  await expect(respuesta).toContainText("P-27");
+  await expect(respuesta).toContainText("P-05");
+  await expect(respuesta).not.toContainText("987654321");
+  await expect(respuesta).not.toContainText("figures verified against TERRA-X engine data");
 });
 
 test("unavailable comparison reports the dependency and invents no result", async ({ page }) => {

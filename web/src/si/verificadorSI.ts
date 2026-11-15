@@ -65,6 +65,7 @@ export interface ContextoSI {
   instante?: string;
   motorEnVivo?: boolean;
   resultadosMotor?: ResultadoMotorSI[];
+  fichasComparacion?: Ficha[];
 }
 
 export interface ResultadoVerificacionSI {
@@ -157,6 +158,9 @@ function recolectarNumerosVerificados(ctx: ContextoSI): number[] {
   agregar(ctx.alturaObjetoM);
   const sombra = (ctx.alturaObjetoM ?? 0.5) / Math.tan((ctx.elevacionSolDeg * Math.PI) / 180);
   agregar(sombra);
+  for (const f of ctx.fichasComparacion ?? []) {
+    agregar(f.C); agregar(f.E); agregar(f.L); agregar(f.U);
+  }
   for (const e of ctx.ranking ?? []) {
     agregar(e.C);
     agregar(e.E);

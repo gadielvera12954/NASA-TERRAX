@@ -119,6 +119,11 @@ export function instruccionSistema(ctx: ContextoSI, lang: "en" | "es"): string {
     "",
     `CURRENT SCREEN: ${ctx.pagina} · Sun slider ${ctx.elevacionSolDeg}° · live engine ${ctx.motorEnVivo ? "connected" : "off (browser calculation)"}`,
     ctx.instante ? `DISPLAY TIME (screen parameter, not an additional engine calculation): ${ctx.instante}` : "",
+    ...(ctx.fichasComparacion?.length ? [
+      "COMPARED SOURCE RECORDS (loaded from the published files, not from the caller's numbers)",
+      JSON.stringify(ctx.fichasComparacion.map(f => ({ id: f.id, nombre: f.lugar.nombre, C: f.C, E: f.E, L: f.L, U: f.U,
+        etiqueta: f.etiqueta, medir_primero: f.medir_primero }))),
+    ] : []),
     ...(ctx.resultadosMotor?.length ? [
       "VERIFIED ENGINE RESULTS (authoritative; each result retains its own inputs and units)",
       JSON.stringify(ctx.resultadosMotor.map(r => r.escenario ? {
@@ -136,6 +141,12 @@ export function instruccionSistema(ctx: ContextoSI, lang: "en" | "es"): string {
 export function respuestaLocal(ctx: ContextoSI, lang: "en" | "es"): string {
   const f = ctx.ficha;
   const es = lang === "es";
+  if (ctx.fichasComparacion?.length) return ctx.fichasComparacion.map(f =>
+    `${f.id} (${f.lugar.nombre}): C = ${f.C === null ? (es ? "desconocido" : "unknown") : f.C.toFixed(2)}, E = ${f.E.toFixed(2)}, L–U = ${f.L.toFixed(2)}–${f.U.toFixed(2)}. ${es ? "Medir primero" : "Measure first"}: ${f.medir_primero}.`,
+  ).join("\n");
+  if (ctx.pagina === "lab") return es
+    ? "Usá Analizar este punto para ejecutar el motor con los parámetros del laboratorio. El resultado verificado se mostrará aquí. Si faltan parámetros, abrí el laboratorio y usá Explicar con SI desde un punto."
+    : "Use Analyze this point to run the engine with the laboratory parameters. The verified result will appear here. If parameters are missing, open the lab and use Explain with SI from a point.";
   if (!f) return es ? "No hay una candidata abierta. Abrí una desde Explorar y te la explico." : "No candidate is open. Pick one on Explore and I will walk you through it.";
   const c = f.C === null ? "—" : f.C.toFixed(2);
   const pos = ctx.ranking?.find((e) => e.id === f.id)?.orden;
