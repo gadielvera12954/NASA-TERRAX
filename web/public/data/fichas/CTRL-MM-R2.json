@@ -1,20 +1,20 @@
 {
  "id": "CTRL-MM-R2",
- "nombre": "Recorte de Mons Mouton con ruido 2 (control)",
+ "nombre": "Mons Mouton con ruido de 5 m (control)",
  "region": "payunia",
  "control": "positivo_ruido",
- "etiqueta": "con_huecos",
- "orden": 5,
+ "etiqueta": "no_alcanza",
+ "orden": 6,
  "orden_candidatas": null,
  "lugar": {
   "lat": -84.6,
   "lon": 31.0,
-  "alt_m": 0.0
+  "alt_m": 5297.7
  },
- "C": 0.6317,
+ "C": 0.4621,
  "E": 0.8,
- "L": 0.5053,
- "U": 0.7053,
+ "L": 0.3697,
+ "U": 0.5697,
  "umbral": 0.7,
  "requisitos": {
   "vegetacion": {
@@ -25,7 +25,7 @@
   },
   "pendiente": {
    "estado": "cumple",
-   "valor": 5.941,
+   "valor": 7.357,
    "limite": 15.0,
    "unidad": "grados (mediana a 60 m)"
   }
@@ -34,46 +34,46 @@
   "pendiente": {
    "estado": "conocida",
    "peso": 0.3,
-   "distancia": 0.737,
+   "distancia": 0.4371,
    "tolerancia": 3.0,
-   "utilidad": 0.782193,
+   "utilidad": 0.864421,
    "unidad": "grados (W1)"
   },
   "luz_rasante": {
    "estado": "conocida",
    "peso": 0.3,
-   "distancia": 0.03,
+   "distancia": 0.08133,
    "tolerancia": 0.05,
-   "utilidad": 0.548812,
+   "utilidad": 0.196584,
    "unidad": "fracción en sombra (media de |Δf̄| de 1,5° a 10°)"
   },
   "rugosidad": {
    "estado": "conocida",
    "peso": 0.2,
-   "distancia": 0.63463,
+   "distancia": 7.15351,
    "tolerancia": 1.0,
-   "utilidad": 0.530217,
+   "utilidad": 0.256778,
    "unidad": "W1/τ, media de las escalas de 200 a 1.600 m",
    "detalle": {
     "200": {
-     "w1_m": 0.2918,
-     "tolerancia_m": 0.4521,
-     "utilidad": 0.524493
+     "w1_m": 3.23,
+     "tolerancia_m": 0.1559,
+     "utilidad": 0.0
     },
     "400": {
-     "w1_m": 0.6219,
-     "tolerancia_m": 1.0055,
-     "utilidad": 0.538765
+     "w1_m": 3.0668,
+     "tolerancia_m": 0.4941,
+     "utilidad": 0.002015
     },
     "800": {
-     "w1_m": 1.3203,
-     "tolerancia_m": 2.1416,
-     "utilidad": 0.539832
+     "w1_m": 1.9402,
+     "tolerancia_m": 1.3381,
+     "utilidad": 0.234581
     },
     "1600": {
-     "w1_m": 2.7621,
-     "tolerancia_m": 4.1964,
-     "utilidad": 0.517779
+     "w1_m": 0.8606,
+     "tolerancia_m": 3.6612,
+     "utilidad": 0.790516
     }
    }
   },
@@ -96,7 +96,7 @@
  },
  "dimensiones": {
   "relieve": {
-   "valor": "fuerte",
+   "valor": "debil",
    "fuente": "calculada"
   },
   "iluminacion": {
@@ -104,7 +104,7 @@
    "fuente": "calculada"
   },
   "operaciones_roboticas": {
-   "valor": "fuerte",
+   "valor": "debil",
    "fuente": "calculada"
   },
   "materiales": {
@@ -150,44 +150,44 @@
    10.0
   ],
   "f_parcela": [
-   0.7206,
-   0.6353,
-   0.5582,
-   0.4888,
-   0.4266,
-   0.3711,
-   0.3218,
-   0.2783,
-   0.24,
-   0.2067,
-   0.1777,
-   0.1527,
-   0.1312,
-   0.113,
-   0.0975,
-   0.0846,
-   0.0737,
-   0.0648
+   0.7406,
+   0.6982,
+   0.6525,
+   0.6045,
+   0.5568,
+   0.5104,
+   0.4658,
+   0.4232,
+   0.3834,
+   0.3465,
+   0.3125,
+   0.2815,
+   0.2532,
+   0.2273,
+   0.2036,
+   0.1825,
+   0.1633,
+   0.1461
   ],
   "f_referencia": [
-   0.6906,
-   0.6053,
-   0.5282,
-   0.4588,
-   0.3966,
-   0.3411,
-   0.2918,
-   0.2483,
-   0.21,
-   0.1767,
-   0.1477,
-   0.1227,
-   0.1012,
-   0.083,
-   0.0675,
-   0.0546,
-   0.0437,
-   0.0348
+   0.6861,
+   0.6365,
+   0.5834,
+   0.5285,
+   0.4746,
+   0.4219,
+   0.3733,
+   0.3281,
+   0.2869,
+   0.2499,
+   0.2175,
+   0.1888,
+   0.1638,
+   0.1423,
+   0.1235,
+   0.1075,
+   0.0935,
+   0.0818
   ]
  },
  "horario": [],
@@ -201,17 +201,45 @@
  },
  "fuentes": [
   {
-   "id": "maqueta_terra_x",
+   "id": "pgda_LDEM_80S_20MPP_ADJ",
+   "sha256": "c19914b1fc45fadd86611819fd10b4165d221b13fe6abdbaa78e6dff3740fa30"
+  },
+  {
+   "id": "pgda_LDEM_60S_60MPP_ADJ",
+   "sha256": "d82aa5426e5c50c166a9f83e2ca0d489dfb76aabea6f153ab056a507ab1903c0"
+  },
+  {
+   "id": "pgda_LDEM_60S_240MPP_ADJ",
+   "sha256": "2be359e79416a00324831c51591dd6e569be511a63a9dfbdd4b56f2725e09efa"
+  },
+  {
+   "id": "luna_sin_vegetacion",
    "sha256": null
+  },
+  {
+   "id": "copernicus_glo30_Copernicus_DSM_COG_10_S37_00_W070_00_DEM",
+   "sha256": "a886aa9f9eccb2f62d8a60dcabdf97c8090724fcfacee08ea237177430aa81fb"
+  },
+  {
+   "id": "copernicus_glo30_Copernicus_DSM_COG_10_S21_00_W062_00_DEM",
+   "sha256": "d5ccb8a3f17348011eeb4164c59b983c27110f7a4bea336f8f066b34e240b861"
+  },
+  {
+   "id": "copernicus_glo30_Copernicus_DSM_COG_10_S20_00_W062_00_DEM",
+   "sha256": "5a738c1ec8f910f034f0b18a255931c6410caeea9953b45e71f4e12d31f60824"
+  },
+  {
+   "id": "sentinel2_l2a_ndvi_p90",
+   "sha256": "03ead08c7468af67cafc9e282c1379f99edebf916e285a07c00d62eaf29b8358"
   }
  ],
- "maqueta": true,
+ "maqueta": false,
  "meta": {
   "producto": "tarjeta_analogo",
   "version_formato": 1,
   "motor_version": "0.1.0",
   "parametros_sha256": "346a6cd22cc8cb1c75852fd8310971a78d50b2bf33d4c0710658e79e8556231c",
-  "generado_utc": "2026-11-14T16:33:45Z",
+  "generado_utc": "2026-11-15T04:36:25Z",
   "uso_si": "Código del motor físico (Parte 3) redactado con SI (Claude Code, Anthropic) a partir de los documentos 02 y 04, con pruebas de resultado conocido escritas antes del código. Los números los calcula el motor determinista con datos y parámetros publicados; ningún modelo de lenguaje interviene en el cálculo.",
   "notas": [
    "Compatibilidad y evidencia van separadas: un valor de C no es un porcentaje de parecido.",

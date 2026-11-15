@@ -7,21 +7,21 @@
   "recorte_primero_frac": 1.0,
   "detalle": [
    "Recorte de Mons Mouton: puesto 1 (primero en 100.0 % de los pesos de robustez)",
-   "Copias con ruido: puestos 3, 5, 8",
+   "Copias con ruido: puestos 2, 6, 18",
    "Control negativo: CTRL-MEDANOS → incompatible"
   ]
  },
  "redundancia_h1b": {
-  "rho": 0.9761904761904763,
-  "n": 8
+  "rho": 0.7562268407399965,
+  "n": 40
  },
- "maqueta": true,
+ "maqueta": false,
  "meta": {
   "producto": "puntaje_controles",
   "version_formato": 1,
   "motor_version": "0.1.0",
   "parametros_sha256": "346a6cd22cc8cb1c75852fd8310971a78d50b2bf33d4c0710658e79e8556231c",
-  "generado_utc": "2026-11-14T16:33:48Z",
+  "generado_utc": "2026-11-15T04:36:38Z",
   "uso_si": "Código del motor físico (Parte 3) redactado con SI (Claude Code, Anthropic) a partir de los documentos 02 y 04, con pruebas de resultado conocido escritas antes del código. Los números los calcula el motor determinista con datos y parámetros publicados; ningún modelo de lenguaje interviene en el cálculo.",
   "notas": []
  }
