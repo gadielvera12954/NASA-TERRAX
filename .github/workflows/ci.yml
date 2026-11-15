@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  motor:
+    name: Physics engine, live server and published data
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements-motor.txt
+            servidor/requirements.txt
+      - name: Cache NAIF kernels (Skyfield downloads them once)
+        uses: actions/cache@v4
+        with:
+          path: motor/sol/kernels
+          key: naif-kernels-de421-v1
+      - run: python -m pip install -r requirements-motor.txt -r servidor/requirements.txt
+      - name: Known-result tests (motor/tests) and live-server tests (servidor/tests)
+        run: python -m pytest -q
+      - name: Published data matches its manifest (SHA-256, sizes, frozen parameters)
+        run: python -m motor.exportar.verificar
+
+  web:
+    name: Web app (types and production build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit -p .
+      - run: npm run build
+      - name: Offline cache lists every built asset
+        run: test -f dist/sw.js && grep -c '"/data/manifest.json"' dist/sw.js

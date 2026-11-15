@@ -48,6 +48,23 @@ ANIO_MIN, ANIO_MAX = 1900, 2050          # cobertura de moon_pa_de421_1900-2050.
 
 app = Flask(__name__)
 app.json.ensure_ascii = False
+app.config["MAX_CONTENT_LENGTH"] = 64 * 1024          # ningún pedido legítimo pasa de unos cientos de bytes (un artículo, unos KB)
+app.config["JSON_SORT_KEYS"] = False
+
+from servidor import cuentas, si  # noqa: E402  (cuentas, divulgación, panel admin y relevo del chat SI)
+
+cuentas.configurar(app)
+app.register_blueprint(si.bp)
+
+RUTAS = [
+    {"metodo": "GET", "ruta": "/api/estado", "que": "engine version, frozen-parameter hash, which terrain data is loaded"},
+    {"metodo": "GET", "ruta": "/api/sol/ahora", "que": "the Sun right now over Mons Mouton and over the field site (DE421)"},
+    {"metodo": "POST", "ruta": "/api/destino/punto", "que": "park the rover at (fila, col): horizon, power, battery, verdict"},
+    {"metodo": "POST", "ruta": "/api/campo/sombra", "que": "predicted board shadow and the error of a measured one"},
+    {"metodo": "POST", "ruta": "/api/cuentas/registro | /entrar | /salir · GET /api/cuentas/yo", "que": "accounts (local server only)"},
+    {"metodo": "GET", "ruta": "/api/divulgacion", "que": "published outreach articles by verified authors"},
+    {"metodo": "GET", "ruta": "/api/admin/resumen", "que": "admin panel (admins only)"},
+]
 
 
 class Pedido(ValueError):
@@ -255,6 +272,29 @@ def simular(cuerpo: dict) -> dict:
 # ------------------------------------------------------------------------------------------------
 # Rutas
 # ------------------------------------------------------------------------------------------------
+@app.get("/api")
+def ruta_indice():
+    """Qué expone este servidor, para quien llega sin leer servidor/LEEME.md."""
+    return jsonify({"motor": "terra-x", "version": MOTOR_VERSION, "rutas": RUTAS,
+                    "nota": "Stateless local engine: no database, no accounts, no data is kept between requests.",
+                    "documentacion": "servidor/LEEME.md"})
+
+
+@app.before_request
+def _preflight():
+    """Preflight CORS para una web servida desde otro puerto local (la de Vite usa un proxy y no lo necesita).
+
+    Se resuelve antes del enrutado para no registrar una ruta comodín: así un GET a una ruta
+    inexistente sigue dando 404 y no 405.
+    """
+    if request.method == "OPTIONS" and request.path.startswith("/api"):
+        resp = app.make_response(("", 204))
+        resp.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, OPTIONS"
+        resp.headers["Access-Control-Max-Age"] = "600"
+        return resp
+    return None
+
+
 @app.get("/api/estado")
 def ruta_estado():
     prm = parametros.cargar()
@@ -353,13 +393,24 @@ def ruta_sombra():
 
 
 @app.errorhandler(Pedido)
+@app.errorhandler(cuentas.Pedido)
 def _error_pedido(e):
     return jsonify({"error": str(e)}), 400
 
 
 @app.errorhandler(404)
 def _error_404(_):
-    return jsonify({"error": "not found"}), 404
+    return jsonify({"error": "not found", "rutas": [r["ruta"] for r in RUTAS]}), 404
+
+
+@app.errorhandler(405)
+def _error_405(_):
+    return jsonify({"error": "method not allowed"}), 405
+
+
+@app.errorhandler(413)
+def _error_413(_):
+    return jsonify({"error": f"request body larger than {app.config['MAX_CONTENT_LENGTH']} bytes"}), 413
 
 
 @app.errorhandler(Exception)
@@ -371,11 +422,14 @@ def _error_general(e):
 @app.after_request
 def _cabeceras(resp):
     origen = request.headers.get("Origin", "")
-    if origen.startswith(("http://localhost:", "http://127.0.0.1:")):
+    if origen.startswith(("http://localhost:", "http://127.0.0.1:")) or origen in ("http://localhost", "http://127.0.0.1"):
         resp.headers["Access-Control-Allow-Origin"] = origen
-        resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        resp.headers["Access-Control-Allow-Headers"] = "Content-Type, X-TerraX"
+        resp.headers["Access-Control-Allow-Credentials"] = "true"
         resp.headers["Vary"] = "Origin"
     resp.headers["Cache-Control"] = "no-store"
+    resp.headers["X-Content-Type-Options"] = "nosniff"
+    resp.headers["X-TerraX-Engine"] = MOTOR_VERSION
     return resp
 
 

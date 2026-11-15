@@ -396,13 +396,92 @@ figure.escena-plana img {
   font-size: 14px;
   line-height: 1.5;
 }
-.condiciones > .mal strong::before {
-  content: "× ";
-  color: var(--inco);
+/* A drawn swatch marks the state, the same colour as the rule above it */
+.condiciones > .mal strong::before,
+.condiciones > .bien strong::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: 0 10px 2px 0;
+  background: var(--inco);
 }
 .condiciones > .bien strong::before {
-  content: "✓ ";
-  color: var(--sost);
+  background: var(--sost);
+}
+.sello {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  animation: sello-cae 260ms var(--ease-out);
+}
+/* A stamp hitting the wall: starts slightly large and faint, lands crisp. */
+@keyframes sello-cae {
+  from {
+    opacity: 0;
+    transform: scale(1.14);
+  }
+}
+.verdict {
+  animation: sello-cae 260ms var(--ease-out);
+}
+
+/* On-screen invitation over the relief */
+.escena-marco {
+  position: relative;
+}
+.guia-lab {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  pointer-events: none;
+  transition: opacity 320ms ease;
+}
+.guia-lab.oculta {
+  opacity: 0;
+}
+.guia-cruz {
+  position: relative;
+  width: 44px;
+  height: 44px;
+}
+.guia-cruz::before,
+.guia-cruz::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid #eceae4;
+  border-radius: 50%;
+}
+.guia-cruz::after {
+  animation: guia-pulso 1.6s ease-out infinite;
+}
+.guia-texto {
+  background: rgba(20, 20, 20, 0.82);
+  color: #eceae4;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid rgba(236, 234, 228, 0.3);
+}
+@keyframes guia-pulso {
+  from {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+.marca-linea {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 .barra-limite {
   height: 6px;

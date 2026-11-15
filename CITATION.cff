@@ -1,0 +1,92 @@
+cff-version: 1.2.0
+message: >-
+  If you use TERRA-X, please cite it as below, and cite the NASA, JPL and Copernicus
+  datasets it is built on (listed under references and in THIRD_PARTY_NOTICES.md).
+title: "TERRA-X: Earth analogs for lunar south pole operations"
+type: software
+version: 1.0.0
+date-released: 2026-11-15
+license: Apache-2.0
+repository-code: https://github.com/gadielvera12954/NASA-TERRAX
+url: https://nasa-terrax.vercel.app
+abstract: >-
+  TERRA-X finds places on Earth where a crew can rehearse work planned for the lunar south
+  pole (a VIPER-class rover at Mons Mouton, 84.60°S 31.00°E). It runs the same physics and the
+  same 60 m grid on lunar relief (NASA LOLA) and on Earth relief (Copernicus DEM), with the Sun
+  from JPL ephemerides, and reports for every candidate what transfers, what does not and what
+  must be measured first. Built during the NASA Space Apps Challenge 2026, Ciudad del Este.
+authors:
+  - name: "TERRA-X team, NASA Space Apps Challenge 2026 (Ciudad del Este, Paraguay)"
+keywords:
+  - lunar south pole
+  - terrestrial analogs
+  - Mons Mouton
+  - VIPER
+  - LOLA
+  - grazing sunlight
+  - NASA Space Apps Challenge
+references:
+  - type: data
+    title: "LOLA south polar digital elevation models LDEM_80S_20MPP_ADJ, LDEM_60S_60MPP_ADJ and LDEM_60S_240MPP_ADJ (PGDA product 90)"
+    authors:
+      - family-names: Barker
+        given-names: M. K.
+      - name: "LOLA Science Team"
+    year: 2023
+    publisher:
+      name: "NASA Goddard Planetary Geodynamics Data Archive (PGDA)"
+    url: https://pgda.gsfc.nasa.gov/products/90
+  - type: data
+    title: "Average solar visibility of the lunar south polar region at 60 m (AVGVISIB_85S_060M, PGDA product 69)"
+    authors:
+      - family-names: Mazarico
+        given-names: E.
+    year: 2011
+    publisher:
+      name: "NASA Goddard Planetary Geodynamics Data Archive (PGDA)"
+    url: https://pgda.gsfc.nasa.gov/products/69
+  - type: article
+    title: "Illumination conditions of the lunar polar regions using LOLA topography"
+    authors:
+      - family-names: Mazarico
+        given-names: E.
+      - family-names: Neumann
+        given-names: G. A.
+      - family-names: Smith
+        given-names: D. E.
+      - family-names: Zuber
+        given-names: M. T.
+      - family-names: Torrence
+        given-names: M. H.
+    journal: Icarus
+    volume: 211
+    year: 2011
+    doi: 10.1016/j.icarus.2010.10.030
+  - type: software
+    title: "JPL Horizons on-line ephemeris system, API v1.2"
+    authors:
+      - name: "NASA JPL Solar System Dynamics Group"
+    url: https://ssd.jpl.nasa.gov/horizons/
+  - type: data
+    title: "JPL planetary and lunar ephemerides DE421 and lunar orientation frame MOON_ME (NAIF kernels)"
+    authors:
+      - family-names: Folkner
+        given-names: W. M.
+      - family-names: Williams
+        given-names: J. G.
+      - family-names: Boggs
+        given-names: D. H.
+    year: 2009
+    url: https://naif.jpl.nasa.gov/naif/data.html
+  - type: data
+    title: "Copernicus DEM GLO-30 (WorldDEM-30 derived), tiles S37_W070, S20_W062 and S21_W062"
+    authors:
+      - name: "European Space Agency / Airbus, distributed through the AWS Open Data programme"
+    year: 2021
+    url: https://registry.opendata.aws/copernicus-dem/
+  - type: data
+    title: "Copernicus Sentinel-2 Level-2A surface reflectance (Earth Search STAC catalogue, Element 84)"
+    authors:
+      - name: "European Union / ESA Copernicus programme"
+    year: 2026
+    url: https://registry.opendata.aws/sentinel-2-l2a-cogs/

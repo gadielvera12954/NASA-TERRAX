@@ -1,0 +1,27 @@
+# Render Blueprint for the TERRA-X server (live engine, accounts, Community, admin panel).
+# See PUBLICAR.md. The persistent disk keeps the SQLite database across deploys.
+services:
+  - type: web
+    name: terrax-servidor
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements-motor.txt -r servidor/requirements.txt
+    startCommand: waitress-serve --host 0.0.0.0 --port $PORT servidor.app:app
+    healthCheckPath: /api/estado
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: TERRAX_SECRET_KEY
+        generateValue: true
+      - key: TERRAX_DB
+        value: /data/comunidad.sqlite3
+      - key: TERRAX_COOKIE_SEGURA
+        value: "1"
+      - key: TERRAX_DETRAS_DE_PROXY
+        value: "1"
+      - key: TERRAX_GEMINI_KEY
+        sync: false   # paste the Gemini key in the Render dashboard; never in the repository
+    disk:
+      name: terrax-datos
+      mountPath: /data
+      sizeGB: 1

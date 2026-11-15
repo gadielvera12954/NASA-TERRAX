@@ -14,7 +14,7 @@ import { Recorrido90Segundos } from '../recorrido/Recorrido90Segundos';
 import { Sparkles, AlertCircle } from 'lucide-react';
 import { useSol } from '../luz/SolContext';
 import AsistenteSI from '../si/AsistenteSI';
-import '../sistema/tokens.css';
+import '../sistema/tokens-equipo.css';
 
 export type PantallaId =
   | 'mission'

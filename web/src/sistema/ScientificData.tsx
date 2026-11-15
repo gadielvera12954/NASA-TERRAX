@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLanguage } from "../i18n/Language";
+import { Marca } from "./Marca";
 interface Test {
   id: string;
   nombre_en: string;
@@ -71,12 +72,16 @@ export function ScientificData() {
             {report.pruebas.map((p) => (
               <section key={p.id}>
                 <h3>{language === "es" ? p.nombre_es : p.nombre_en}</h3>
-                <span className="verdict">
+                <span
+                  className="verdict"
+                  data-tono={p.estado === "pasa" ? "sostenido" : p.estado === "falla" ? "incompatible" : undefined}
+                >
+                  <Marca tono={p.estado} />
                   {p.estado === "pasa"
-                    ? t("✓ Passed", "✓ Aprobada")
+                    ? t("Passed", "Aprobada")
                     : p.estado === "falla"
-                      ? t("× Failed", "× Fallida")
-                      : t("? Pending", "? Pendiente")}
+                      ? t("Failed", "Fallida")
+                      : t("Pending", "Pendiente")}
                 </span>
                 <p>
                   {language === "es"

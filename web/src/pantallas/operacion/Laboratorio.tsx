@@ -24,6 +24,8 @@ import {
 } from "../../datos/laboratorio";
 import TerrenoLunar, { PuntoGrilla, rangoHoras } from "../../escena3d/TerrenoLunar";
 import { EjeTiempo, PerfilCielo, Pista, useAncho } from "./Graficos";
+import { Pause, Play } from "lucide-react";
+import { Marca } from "../../sistema/Marca";
 
 type Periodo = "verano" | "invierno" | "fechas";
 interface Intento {
@@ -49,6 +51,12 @@ export default function Laboratorio({ motor, onMotorCaido }: { motor: EstadoMoto
   const [panel, setPanel] = useState(320);
   const [bateria, setBateria] = useState(5420);
   const [esc, setEsc] = useState<Escenario>();
+  // On-screen invitation over the relief until the first click (or 15 s).
+  const [guiado, setGuiado] = useState(true);
+  useEffect(() => {
+    const id = window.setTimeout(() => setGuiado(false), 15000);
+    return () => window.clearTimeout(id);
+  }, []);
   const [base, setBase] = useState<SerieSol>();
   const [estado, setEstado] = useState<"calculando" | "listo" | "error">("calculando");
   const [error, setError] = useState("");
@@ -205,6 +213,7 @@ export default function Laboratorio({ motor, onMotorCaido }: { motor: EstadoMoto
   const mejor = intentos.length ? intentos.reduce((a, b) => (b.tramoH < a.tramoH ? b : a)) : null;
   const elegir = (p: PuntoGrilla) => {
     setAndando(false);
+    setGuiado(false);
     setPunto(p);
   };
   const nombres: Record<string, string> = {
@@ -260,6 +269,7 @@ export default function Laboratorio({ motor, onMotorCaido }: { motor: EstadoMoto
                 : t("Drag to orbit · + / − to zoom · click to park", "Arrastra para girar · + / − para acercar · clic para estacionar")}
             </span>
           </div>
+          <div className="escena-marco">
           <TerrenoLunar
             azimut={solAz}
             elevacion={solEl}
@@ -282,6 +292,13 @@ textoAcercar={t("Zoom in", "Acercar")}
               "El 3D no está disponible en este navegador. Usa los campos de fila y columna para estacionar el rover.",
             )}
           />
+          <div className={guiado ? "guia-lab" : "guia-lab oculta"} aria-hidden="true">
+            <span className="guia-cruz" />
+            <span className="guia-texto">
+              {t("Click anywhere on the relief to park the rover", "Hacé clic en cualquier punto del relieve para estacionar el rover")}
+            </span>
+          </div>
+          </div>
           {capa === "oscuridad" && horas && (
             <div className="rampa" aria-hidden="true">
               <span className="mono">{num(rango[0])} h</span>
@@ -432,7 +449,10 @@ textoAcercar={t("Zoom in", "Acercar")}
         {r && esc && estado !== "error" && (
           <>
             <div className="veredicto-titulo">
-              <span className="sello">{r.en_riesgo ? t("× Rover lost", "× Rover perdido") : t("● Rover survives", "● El rover sobrevive")}</span>
+              <span className="sello" key={`${r.en_riesgo}-${esc?.punto?.fila}-${esc?.punto?.col}`}>
+                <Marca tono={r.en_riesgo ? "incompatible" : "sostenido"} size={26} />
+                {r.en_riesgo ? t("Rover lost", "Rover perdido") : t("Rover survives", "El rover sobrevive")}
+              </span>
               <span className="muted">
                 {estado === "calculando"
                   ? t("Computing…", "Calculando…")
@@ -478,7 +498,8 @@ textoAcercar={t("Zoom in", "Acercar")}
         <section className="panel reloj" ref={refGraficos}>
           <div className="reloj-cabeza">
             <button className="btn" onClick={() => setAndando((a) => !a)}>
-              {andando ? t("❚❚ Pause", "❚❚ Pausar") : t("▶ Play the lunation", "▶ Reproducir la lunación")}
+              {andando ? <Pause aria-hidden="true" size={16} /> : <Play aria-hidden="true" size={16} />}
+              {andando ? t("Pause", "Pausar") : t("Play the lunation", "Reproducir la lunación")}
             </button>
             <label htmlFor="lab-reloj" className="mono">
               {ahora ? fecha.format(ahora) : ""} UTC
@@ -631,7 +652,12 @@ textoAcercar={t("Zoom in", "Acercar")}
                     <td className="mono">{num(x.consumo, 1)} W</td>
                     <td className="mono">{num(x.tramoH)} h</td>
                     <td className="mono">{num(100 * x.bateriaMin)} %</td>
-                    <td>{x.enRiesgo ? t("× Lost", "× Perdido") : t("● Survives", "● Sobrevive")}</td>
+                    <td>
+                      <span className="marca-linea">
+                        <Marca tono={x.enRiesgo ? "incompatible" : "sostenido"} size={14} />
+                        {x.enRiesgo ? t("Lost", "Perdido") : t("Survives", "Sobrevive")}
+                      </span>
+                    </td>
                     <td>{x.origen === "motor-en-vivo" ? t("Live engine", "Motor en vivo") : t("Browser", "Navegador")}</td>
                     <td>
                       <button className="btn sec chico" onClick={() => elegir(x.punto)}>

@@ -6,6 +6,7 @@ import { PointerEvent, useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../i18n/Language";
 import { IndexEntry } from "../../datos/integration";
 import { useAncho } from "./Graficos";
+import { Marca } from "../../sistema/Marca";
 
 interface Propiedad {
   estado: string;
@@ -95,11 +96,11 @@ export default function Comparador({ indice, actual }: { indice: IndexEntry[]; a
     });
 
   const veredictos: Record<string, string> = {
-    analogo_sostenido: t("● Supported", "● Respaldado"),
-    con_huecos: t("◐ With gaps", "◐ Con vacíos"),
-    no_alcanza: t("○ Insufficient", "○ Insuficiente"),
-    no_podemos_concluir: t("? Cannot conclude", "? No se puede concluir"),
-    incompatible: t("× Incompatible", "× Incompatible"),
+    analogo_sostenido: t("Supported", "Respaldado"),
+    con_huecos: t("With gaps", "Con vacíos"),
+    no_alcanza: t("Insufficient", "Insuficiente"),
+    no_podemos_concluir: t("Cannot conclude", "No se puede concluir"),
+    incompatible: t("Incompatible", "Incompatible"),
   };
   const propiedades: [string, string][] = [
     ["pendiente", t("Slope", "Pendiente")],
@@ -209,7 +210,10 @@ export default function Comparador({ indice, actual }: { indice: IndexEntry[]; a
                 <strong>{id}</strong> · {nombre(f)}
                 {f.maqueta && <em className="maqueta"> {t("MOCK", "MAQUETA")}</em>}
                 <br />
-                <span className="muted">{veredictos[f.etiqueta] ?? f.etiqueta}</span>
+                <span className="muted marca-linea">
+                  <Marca tono={f.etiqueta} size={13} />
+                  {veredictos[f.etiqueta] ?? f.etiqueta}
+                </span>
               </span>
             </div>
             <div className="carril-pista" role="img" aria-label={t(
@@ -281,15 +285,18 @@ export default function Comparador({ indice, actual }: { indice: IndexEntry[]; a
                 const fallas = Object.entries(f.requisitos ?? {}).filter(([, r]) => r.estado !== "cumple");
                 return (
                   <td key={id}>
-                    {fallas.length === 0
-                      ? t("✓ Met", "✓ Cumple")
-                      : fallas
-                          .map(([nombreReq, r]) =>
-                            nombreReq === "vegetacion"
-                              ? t(`× Vegetation: NDVI ${num(r.valor)} (limit ${num(r.limite)})`, `× Vegetación: NDVI ${num(r.valor)} (límite ${num(r.limite)})`)
-                              : t(`× Slope: ${num(r.valor, 1)}° (limit ${num(r.limite, 0)}°)`, `× Pendiente: ${num(r.valor, 1)}° (límite ${num(r.limite, 0)}°)`),
-                          )
-                          .join(" · ")}
+                    <span className="marca-linea">
+                      <Marca tono={fallas.length === 0 ? "ok" : "mal"} size={13} />
+                      {fallas.length === 0
+                        ? t("Met", "Cumple")
+                        : fallas
+                            .map(([nombreReq, r]) =>
+                              nombreReq === "vegetacion"
+                                ? t(`Vegetation: NDVI ${num(r.valor)} (limit ${num(r.limite)})`, `Vegetación: NDVI ${num(r.valor)} (límite ${num(r.limite)})`)
+                                : t(`Slope: ${num(r.valor, 1)}° (limit ${num(r.limite, 0)}°)`, `Pendiente: ${num(r.valor, 1)}° (límite ${num(r.limite, 0)}°)`),
+                            )
+                            .join(" · ")}
+                    </span>
                   </td>
                 );
               })}

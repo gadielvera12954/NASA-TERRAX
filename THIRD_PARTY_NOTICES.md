@@ -48,3 +48,8 @@ TERRA-X incorporates and references open scientific datasets and open-source sof
 ### pyproj (used by `motor/escala`)
 - **License**: MIT
 - **Copyright**: (c) pyproj contributors.
+
+### Archivo · Public Sans · Azeret Mono (web fonts, self-hosted via `@fontsource`)
+- **License**: SIL Open Font License 1.1
+- **Copyright**: Archivo (c) Omnibus-Type; Public Sans (c) General Services Administration / Impallari Type; Azeret Mono (c) Displaay Type Foundry.
+- **Use**: display, text and tabular-number faces of the public web app and the team workspace; shipped as woff2 files inside the build so the app renders offline.

@@ -10,7 +10,9 @@ import pathlib
 
 import pytest
 
-from servidor.app import app, terreno
+pytest.importorskip("flask", reason="pip install -r servidor/requirements.txt")
+
+from servidor.app import app, terreno  # noqa: E402
 
 RAIZ = pathlib.Path(__file__).resolve().parents[2]
 FICHA = RAIZ / "web" / "public" / "data" / "destino" / "ficha_verano.json"
@@ -76,6 +78,21 @@ def test_sombra_de_campo(cliente):
     assert comp["pasa"] is (comp["error_corregido_frac"] <= j["meta_error_frac"])
     de_noche = cliente.post("/api/campo/sombra", json={"fecha": "2026-11-14", "hora_local": "23:10"}).get_json()
     assert de_noche["prediccion"]["sombra_m"] is None
+
+
+def test_indice_y_errores_en_json(cliente):
+    j = cliente.get("/api").get_json()
+    assert {r["ruta"] for r in j["rutas"]} >= {"/api/estado", "/api/destino/punto", "/api/campo/sombra"}
+    assert cliente.get("/api/no-existe").status_code == 404 and "rutas" in cliente.get("/api/no-existe").get_json()
+    assert cliente.get("/api/destino/punto").status_code == 405
+    grande = cliente.post("/api/destino/punto", data="x" * (70 * 1024), content_type="application/json")
+    assert grande.status_code == 413 and "error" in grande.get_json()
+    pre = cliente.options("/api/destino/punto", headers={"Origin": "http://localhost:5173"})
+    assert pre.status_code == 204 and pre.headers["Access-Control-Allow-Origin"] == "http://localhost:5173"
+    assert "POST" in pre.headers["Access-Control-Allow-Methods"]
+    ajeno = cliente.get("/api/estado", headers={"Origin": "https://example.com"})
+    assert "Access-Control-Allow-Origin" not in ajeno.headers           # solo se abre a la web local
+    assert ajeno.headers["Cache-Control"] == "no-store"
 
 
 def test_sol_ahora(cliente):

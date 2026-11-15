@@ -1,0 +1,424 @@
+/* Community, Account and Admin screens on the Meridian Wall */
+.sin-servidor {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 20px;
+  align-items: start;
+  padding: 28px;
+  background: var(--muro-luz);
+  border: 1px solid var(--regla);
+  max-width: 820px;
+}
+.sin-servidor svg {
+  color: var(--oxido);
+  margin-top: 4px;
+}
+.sin-servidor h2 {
+  margin-bottom: 8px;
+}
+.comando {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 10px 14px;
+  background: var(--tinta);
+  color: var(--muro-luz);
+  font-size: 15px;
+}
+.aviso-form {
+  margin: 4px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--oxido);
+  color: var(--oxido-hondo);
+  background: rgba(168, 50, 30, 0.06);
+  font-size: 14px;
+}
+.aviso-form.ok {
+  border-color: var(--sost);
+  color: var(--sost);
+  background: rgba(47, 107, 58, 0.06);
+}
+.pestanas {
+  margin-bottom: 20px;
+}
+.pestanas button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Account */
+.cuenta-panel {
+  max-width: 560px;
+}
+.form-cuenta {
+  display: grid;
+  gap: 16px;
+}
+.form-cuenta textarea {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--regla);
+  background: var(--muro-luz);
+  color: var(--tinta);
+  font: inherit;
+  font-weight: 400;
+  resize: vertical;
+}
+.form-cuenta .btn {
+  justify-self: start;
+}
+.form-cuenta .dos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.contador-car {
+  display: block;
+  margin-top: 6px;
+  font-weight: 400;
+  font-size: 12px;
+}
+
+/* Community */
+.comunidad {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr);
+  gap: 40px;
+  align-items: start;
+}
+.comunidad-lado {
+  position: sticky;
+  top: 92px;
+  display: grid;
+  gap: 20px;
+}
+.filtro-cat {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+.filtro-cat button {
+  padding: 7px 12px;
+  border: 1px solid var(--regla);
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.filtro-cat button[aria-pressed="true"] {
+  background: var(--tinta);
+  color: var(--muro-luz);
+}
+.articulos {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid var(--regla);
+}
+.tarjeta-art {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  padding: 22px 8px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--regla);
+  text-align: left;
+  color: var(--tinta);
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tarjeta-art:hover {
+    background: var(--muro-luz);
+  }
+}
+.cat {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--oxido);
+}
+.tarjeta-titulo {
+  font-family: var(--tit);
+  font-stretch: 118%;
+  font-weight: 800;
+  font-size: clamp(20px, 1.8vw, 26px);
+  line-height: 1.15;
+}
+.tarjeta-resumen {
+  color: var(--tinta-2);
+  max-width: 64ch;
+}
+.tarjeta-pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.autoria {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+.autoria strong {
+  margin-right: 8px;
+}
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  background: var(--ocre);
+  color: var(--tinta);
+  font-family: var(--tit);
+  font-weight: 800;
+  font-size: 14px;
+}
+.verificado {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--sost);
+  font-size: 12px;
+  font-weight: 700;
+  margin-right: 8px;
+}
+.afiliacion {
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+.vacio {
+  padding: 28px 0;
+}
+.mis-articulos {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: grid;
+  gap: 10px;
+}
+.mis-articulos li {
+  display: grid;
+  gap: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--regla-suave);
+}
+.estado-art {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--tinta-2);
+}
+.estado-art.publicado { color: var(--sost); }
+.estado-art.rechazado { color: var(--oxido); }
+.estado-art.revision { color: var(--huec); }
+.motivo {
+  font-size: 13px;
+  color: var(--oxido-hondo);
+}
+.editor {
+  margin-top: 8px;
+}
+
+/* One article */
+.articulo {
+  max-width: 760px;
+}
+.volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+.articulo-titulo {
+  font-size: clamp(30px, 3.6vw, 48px) !important;
+  font-stretch: 125%;
+  line-height: 1.05;
+  margin: 8px 0 12px !important;
+}
+.articulo-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 0;
+  border-top: 1px solid var(--regla);
+  border-bottom: 1px solid var(--regla);
+  margin: 20px 0 28px;
+}
+.articulo-cuerpo {
+  font-size: 18px;
+  line-height: 1.7;
+}
+.articulo-cuerpo h3 {
+  margin: 28px 0 8px;
+}
+.articulo-fuentes {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--regla);
+  font-size: 14px;
+}
+.nota-revision {
+  margin-top: 28px;
+}
+
+/* Admin */
+.admin-tarjetas {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  border: 1px solid var(--regla);
+  margin-bottom: 28px;
+}
+.admin-tarjeta {
+  display: grid;
+  gap: 4px;
+  padding: 18px 20px;
+  background: var(--muro-luz);
+  border: 0;
+  text-align: left;
+  color: var(--tinta);
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+.admin-tarjeta + .admin-tarjeta {
+  border-left: 1px solid var(--regla);
+}
+.admin-tarjeta strong {
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 1;
+}
+.admin-tarjeta span {
+  font-size: 13px;
+  color: var(--tinta-2);
+}
+.admin-tarjeta.activa {
+  background: var(--tinta);
+  color: var(--muro-luz);
+}
+.admin-tarjeta.activa span {
+  color: #b3b0a8;
+}
+.admin-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid var(--regla);
+}
+.admin-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--regla-suave);
+}
+.admin-item.columna {
+  flex-direction: column;
+  gap: 10px;
+}
+.admin-art-cabeza {
+  display: grid;
+  gap: 6px;
+}
+.admin-art-cabeza strong {
+  font-family: var(--tit);
+  font-stretch: 112%;
+  font-size: 20px;
+}
+.cita {
+  margin: 8px 0 !important;
+  font-style: italic;
+  color: var(--tinta-2);
+}
+.admin-botones {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.admin-lectura {
+  padding: 16px 20px;
+  background: var(--muro-luz);
+  border: 1px solid var(--regla-suave);
+}
+.tabla-admin {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.tabla-admin th,
+.tabla-admin td {
+  text-align: left;
+  padding: 12px 14px 12px 0;
+  border-bottom: 1px solid var(--regla-suave);
+  vertical-align: middle;
+}
+.tabla-admin th {
+  color: var(--tinta-2);
+  font-weight: 600;
+  border-bottom-color: var(--regla);
+}
+.tabla-admin select {
+  margin: 0;
+  min-height: 38px;
+  padding: 6px 34px 6px 10px;
+  width: auto;
+}
+.tabla-admin tr.inactivo {
+  opacity: 0.5;
+}
+.ok-icono {
+  color: var(--sost);
+}
+.auditoria {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid var(--regla);
+}
+.auditoria li {
+  display: grid;
+  grid-template-columns: 180px 140px 150px 1fr;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--regla-suave);
+  font-size: 14px;
+}
+
+@media (max-width: 900px) {
+  .comunidad {
+    grid-template-columns: 1fr;
+  }
+  .comunidad-lado {
+    position: static;
+  }
+  .admin-tarjetas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .admin-tarjeta:nth-child(3) {
+    border-left: 0;
+  }
+  .admin-tarjeta:nth-child(n + 3) {
+    border-top: 1px solid var(--regla);
+  }
+  .admin-item {
+    flex-direction: column;
+  }
+  .auditoria li {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .sin-servidor {
+    grid-template-columns: 1fr;
+  }
+}

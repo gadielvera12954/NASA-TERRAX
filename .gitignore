@@ -46,3 +46,6 @@ salida/destino/_iluminacion_*.npy
 /datos/
 # Salidas intermedias del motor (se copian a web/public/data con puente_lola/exportar_web.py)
 /salida/
+
+# Design-tool scratch (impeccable)
+/.impeccable/

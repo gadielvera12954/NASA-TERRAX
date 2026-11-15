@@ -57,6 +57,8 @@ export interface ContextoSI {
   ficha?: Ficha;
   manifest?: Manifest;
   indice?: IndexEntry[];
+  /** The real published ranking (fichas/indice.json); its numbers count as verified. */
+  ranking?: import("../datos/ranking").EntradaRanking[];
   elevacionSolDeg: number;
   motorEnVivo?: boolean;
 }
@@ -79,14 +81,11 @@ const CONSTANTES_VERIFICADAS: number[] = [
   30, 40, 50, 60, 70, 72, 80, 90, 100, 101, 118, 180, 200, 240, 250, 300, 360,
   400, 500, 800, 1000, 1600, 2025, 2026,
   0.1, 0.2, 0.3, 0.5, 0.53, 0.7, 0.8, 1.5, 2.5, 3.5, 7.0, 10.0, 15.0,
-  84.6, -84.6, 31.0, 320, 5420, 5.42, 108.4, 85, 424, 622, 0.985, 98.5, 1.62,
+  84.6, -84.6, 31.0, 320, 5420, 5.42, 108.4, 85, 424, 622, 1.62,
   9.81, 708, 29.5,
-  // Valores del índice de candidatas (P-07, P-09, P-19, P-23, P-01, P-15, P-03, P-12, controles)
-  0.886, 0.8863, 88.6, 0.709, 70.9, 0.909, 90.9, 5.21, 0.07, 0.955, 95.5, 0.86,
-  86.0, 0.822, 82.2, 0.7917, 0.6333, 0.8333, 0.714, 0.5712, 0.7712, 0.6317,
-  0.5053, 0.7053, 0.6247, 0.4997, 0.6997, 0.6055, 0.4844, 0.6844, 0.5078,
-  0.4062, 0.6062, 0.2249, 0.18, 0.38, 0.1234, 0.0987, 0.2987, 0.118, 0.0944,
-  0.2944, 0.1142, 0.0914, 0.2914, 0.9183, 0.7346, 0.9346, 30.1, 30.2, 30.3, 30.4,
+  // Mons Mouton and the mission (engine outputs published on the site)
+  6.96, 289, 418, 2027, 45, 14, 64, 1901, 2049,
+  // The ranking itself (C, E, L, U of every candidate and control) is added from ctx.ranking.
 ];
 
 const PATRONES_PROHIBIDOS: { regex: RegExp; motivo: string }[] = [
@@ -124,6 +123,16 @@ function recolectarNumerosVerificados(ctx: ContextoSI): number[] {
   agregar(ctx.elevacionSolDeg);
   const sombra = 0.5 / Math.tan((ctx.elevacionSolDeg * Math.PI) / 180);
   agregar(sombra);
+  for (const e of ctx.ranking ?? []) {
+    agregar(e.C);
+    agregar(e.E);
+    agregar(e.L);
+    agregar(e.U);
+    agregar(e.orden);
+    agregar(e.lugar.lat);
+    agregar(e.lugar.lon);
+    agregar(e.lugar.alt_m);
+  }
 
   const f = ctx.ficha;
   if (f) {
@@ -200,6 +209,12 @@ export function verificarRespuestaSI(
 
   const limpio = texto
     .replace(/\[ACTION:[^\]]+\]/g, " ")
+    .replace(/\bSHA-?256\b/gi, " ")
+    .replace(/\bDE-?421\b/gi, " ")
+    .replace(/\bGLO-?30\b/gi, " ")
+    .replace(/\bSentinel-?2\b/gi, " ")
+    .replace(/\bPGDA\s*\d+\b/gi, " ")
+    .replace(/\bGemini\s*\d+(?:\.\d+)?\b/gi, " ")
     .replace(/\b(?:P|CTRL-MM-R|F)-?\d+\b/gi, " ")
     .replace(/\bUTC[−+-]?\d+\b/gi, " ")
     .replace(/\b1\/6\b/g, " ")

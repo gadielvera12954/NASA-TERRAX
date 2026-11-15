@@ -1,452 +1,243 @@
+/**
+ * TERRA-X guide: Gemini 3.5 Flash grounded in the published data.
+ *
+ * The model never computes anything. It receives the real ranking (fichas/indice.json), the active
+ * candidate card and the engine's published facts, answers in plain language, and every number it
+ * writes is checked against those facts (verificadorSI). If a number cannot be verified the model
+ * is asked once to rewrite without it; if that still fails, a short answer built only from the card
+ * is shown and labelled as such.
+ */
+import { EntradaRanking } from "../datos/ranking";
+import { CLAVE_GEMINI } from "./clave";
 import {
   AccionRapidaSI,
   ContextoSI,
   ResultadoVerificacionSI,
-  WidgetTipoSI,
   extraerDetalleFuente,
-  respuestaDeterministaRica,
   verificarRespuestaSI,
 } from "./verificadorSI";
 
-export type GeminiModelId =
-  | "gemini-2.5-flash"
-  | "gemini-2.5-flash-lite"
-  | "gemini-4-hydrogen"
-  | "gemini-3.5-flash-lite";
+export const MODELO = "gemini-3.5-flash";
+export const NOMBRE_MODELO = "Gemini 3.5 Flash";
 
-export interface ModeloGeminiInfo {
-  id: GeminiModelId;
-  nombre: string;
-  badge: string;
-  etiquetaEn: string;
-  etiquetaEs: string;
-  api: "generateContent" | "interactions";
-}
-
-export const MODELOS_GEMINI: ModeloGeminiInfo[] = [
-  {
-    id: "gemini-2.5-flash",
-    nombre: "Gemini 2.5 Flash",
-    badge: "RECOMMENDED · FREE TIER",
-    etiquetaEn:
-      "Best free model on Google AI Studio: fast reasoning, 1M context, SSE streaming, up to 1,500 free req/day",
-    etiquetaEs:
-      "Mejor modelo gratuito en Google AI Studio: razonamiento rápido, 1M contexto, streaming SSE, 1.500 req/día gratis",
-    api: "generateContent",
-  },
-  {
-    id: "gemini-2.5-flash-lite",
-    nombre: "Gemini 2.5 Flash-Lite",
-    badge: "MAX FREE QUOTA",
-    etiquetaEn:
-      "Lowest latency and highest free daily quota on Google AI Studio",
-    etiquetaEs:
-      "Menor latencia y máxima cuota diaria gratuita en Google AI Studio",
-    api: "generateContent",
-  },
-  {
-    id: "gemini-4-hydrogen",
-    nombre: "Gemini 4 Hydrogen",
-    badge: "INTERACTIONS API",
-    etiquetaEn:
-      "Next-gen 1M unified context via v1/interactions (auto-falls back to 2.5 Flash if needed)",
-    etiquetaEs:
-      "Contexto unificado 1M vía v1/interactions (cae automáticamente a 2.5 Flash si hace falta)",
-    api: "interactions",
-  },
-  {
-    id: "gemini-3.5-flash-lite",
-    nombre: "Gemini 3.5 Flash-Lite",
-    badge: "FAST · INTERACTIONS",
-    etiquetaEn: "High-throughput lightweight model via v1/interactions",
-    etiquetaEs: "Modelo liviano de alto rendimiento vía v1/interactions",
-    api: "interactions",
-  },
-];
-
-const STORAGE_KEY_API = "terrax_gemini_api_key";
-const STORAGE_KEY_MODEL = "terrax_gemini_model";
-
-export function obtenerApiKeyGuardada(): string {
-  try {
-    const local = localStorage.getItem(STORAGE_KEY_API)?.trim();
-    if (local) return local;
-  } catch {
-    // ignore storage errors
-  }
-  const envKey = (
-    import.meta as unknown as { env?: Record<string, string | undefined> }
-  ).env?.VITE_GEMINI_API_KEY;
-  return envKey?.trim() ?? "";
-}
-
-export function guardarApiKey(key: string): void {
-  try {
-    const limpia = key.trim();
-    if (limpia) {
-      localStorage.setItem(STORAGE_KEY_API, limpia);
-    } else {
-      localStorage.removeItem(STORAGE_KEY_API);
-    }
-  } catch {
-    // ignore storage errors
-  }
-}
-
-export function obtenerModeloGuardado(): GeminiModelId {
-  try {
-    const guardado = localStorage.getItem(
-      STORAGE_KEY_MODEL,
-    ) as GeminiModelId | null;
-    if (guardado && MODELOS_GEMINI.some((m) => m.id === guardado)) {
-      return guardado;
-    }
-  } catch {
-    // ignore
-  }
-  return "gemini-2.5-flash";
-}
-
-export function guardarModelo(modelo: GeminiModelId): void {
-  try {
-    localStorage.setItem(STORAGE_KEY_MODEL, modelo);
-  } catch {
-    // ignore
-  }
-}
-
-export function construirInstruccionSistema(
-  ctx: ContextoSI,
-  lang: "en" | "es",
-): string {
-  const f = ctx.ficha;
-  const det = extraerDetalleFuente(f);
-
-  const fichaCompleta = f
-    ? JSON.stringify(
-        {
-          id: f.id,
-          etiqueta: f.etiqueta,
-          maqueta: f.maqueta,
-          lugar: f.lugar,
-          C: f.C,
-          E: f.E,
-          L: f.L,
-          U: f.U,
-          requisitos: det?.requisitos ?? null,
-          propiedades: det?.propiedades ?? null,
-          robustez: det?.robustez ?? null,
-          dimensiones: f.dimensiones,
-          horario_muestra: f.horario.slice(0, 4),
-          no_transfiere: f.no_transfiere,
-          medir_primero: f.medir_primero,
-          resumen: f.resumen,
-        },
-        null,
-        2,
-      )
-    : "null";
-
-  return [
-    "You are the TERRA-X Mission SI (Super Intelligence) Console for the 2026 NASA Space Apps Challenge.",
-    "STRICT SCIENTIFIC & HACKATHON RULES (NEVER VIOLATE):",
-    "1. Always write 'SI' (Super Intelligence), NEVER write 'AI' or 'IA'.",
-    "2. You ONLY explain precomputed deterministic physics data; you NEVER calculate new rankings or invent numbers.",
-    "3. Every number in your output MUST appear in the VERIFIED TELEMETRY below. An automated post-processor extracts every number you write and blocks your response if any number is unverified.",
-    "4. NEVER write 'X% similar to the Moon' or 'X% similar to Mars'. Always separate Compatibility (C) and Evidence (E) with algebraic bounds L = C * E and U = L + (1 - E).",
-    "5. NEVER claim an Earth site reproduces lunar gravity (1/6 g), vacuum, or certifies a lunar mission.",
-    "6. Respond in " +
-      (lang === "es" ? "Spanish (español)" : "English") +
-      " using 3 to 5 crisp, technical bullet points (`• **Heading:** ...`).",
-    "7. At the very end of your response, you MAY append 1 or 2 interactive tags on their own line from this exact list when relevant:",
-    "   [WIDGET:TELEMETRY] (shows the interactive C/E/[L,U] & property breakdown card)",
-    "   [WIDGET:LIGHT_CURVE] (shows the interactive 1.5°–10° grazing-light curve SVG)",
-    "   [WIDGET:RANKING] (shows the interactive candidate & control ranking table)",
-    "   [ACTION:NAVIGATE:lab] | [ACTION:NAVIGATE:compare] | [ACTION:NAVIGATE:card] | [ACTION:NAVIGATE:explore]",
-    "   [ACTION:SELECT_CANDIDATE:P-07] | [ACTION:SELECT_CANDIDATE:P-09] | [ACTION:SELECT_CANDIDATE:CTRL-MEDANOS]",
-    "   [ACTION:SET_SUN:1.5] | [ACTION:SET_SUN:3.5] | [ACTION:SET_SUN:7.0]",
-    "",
-    "=== VERIFIED TELEMETRY ===",
-    `- Active screen: ${ctx.pagina} | Current Sun slider: ${ctx.elevacionSolDeg} deg (0.5 m board shadow = ${(0.5 / Math.tan((ctx.elevacionSolDeg * Math.PI) / 180)).toFixed(2)} m)`,
-    "- Common scale: 60 m/pixel without downward interpolation (LOLA 20 m averaged in 3x3 blocks; Copernicus GLO-30 average-resampled to 60 m UTM). Parcels are 3 x 3 km (50 x 50 px) with 30 km relief margin.",
-    "- Formulas F1–F20: Horn 3x3 slope (F8), circular plane-detrended RMS roughness at 200, 400, 800, 1600 m (F9), azimuth-averaged shadow fraction f_bar(e) from 1.5 deg to 10 deg every 0.5 deg over 72 azimuths (F16), IQR-normalized Wasserstein W1 over 101 quantiles (F14, F15), bounds L = C*E and U = L + (1 - E) (F17, F18).",
-    "- Lunar destination: Mons Mouton (84.6 deg S, 31.0 deg E, 30 x 30 km crop at 60 m). Rover template (NASA VIPER): 320 W solar panels on 3 sides, 5420 Wh battery, 50 h darkness survival limit (108.4 W survival draw, F6).",
-    "- Validated lunar results: Spearman correlation 0.985 and RMSE 2.5 percentage points against NASA LOLA AVGVISIB (10000 points). In central 30 x 30 km Mons Mouton crop, shortest continuous night is 424 h in summer and 622 h in winter (0% refuges under 50 h limit; 85% sunlit ridges lie 20 to 24 km west).",
-    "- Candidate ranking in indice.json (threshold 0.70): #1 CTRL-MM (C=1.0, E=0.8, L=0.80, U=1.00, positive control), #2 P-07 (C=0.8863, E=0.8, L=0.709, U=0.909, supported analog, 100% #1 across 1000 Dirichlet alpha=100 perturbations), #3 CTRL-MM-R1 (C=0.7917, L=0.6333, U=0.8333), #4 P-09 (C=0.714, E=0.8, L=0.5712, U=0.7712, with gaps), #5 CTRL-MM-R2 (C=0.6317, L=0.5053, U=0.7053), #6 P-19 (C=0.6247, L=0.4997, U=0.6997), #7 P-23 (C=0.6055, L=0.4844, U=0.6844), #8 CTRL-MM-R3 (C=0.5078, L=0.4062, U=0.6062), #9 P-01 (C=0.2249), #10 P-15 (C=0.1234), #11 P-03 (C=0.118), #12 P-12 (C=0.1142), CTRL-MEDANOS (C=0.9183 relief, rejected as incompatible due to vegetation NDVI > 0.20).",
-    `- Active Candidate Card:\n${fichaCompleta}`,
-  ].join("\n");
-}
-
-function extraerEtiquetasAccion(
-  textoCrudo: string,
-  widgetsPorDefecto: WidgetTipoSI[],
-  accionesPorDefecto: AccionRapidaSI[],
-): {
-  textoLimpio: string;
-  widgets: WidgetTipoSI[];
-  acciones: AccionRapidaSI[];
-} {
-  const widgets = new Set<WidgetTipoSI>();
-  const acciones: AccionRapidaSI[] = [];
-
-  if (/\[WIDGET:TELEMETRY\]/i.test(textoCrudo)) widgets.add("telemetria_ficha");
-  if (/\[WIDGET:LIGHT_CURVE\]/i.test(textoCrudo)) widgets.add("curva_luz");
-  if (/\[WIDGET:RANKING\]/i.test(textoCrudo)) widgets.add("ranking_controles");
-
-  const navMatches = textoCrudo.matchAll(/\[ACTION:NAVIGATE:([a-z]+)\]/gi);
-  for (const m of navMatches) {
-    const dest = m[1].toLowerCase();
-    const labels: Record<string, [string, string]> = {
-      lab: ["Open 3D Lunar Lab", "Abrir Laboratorio Lunar 3D"],
-      compare: ["Open Two Worlds 3D", "Abrir Dos Mundos 3D"],
-      card: ["Open Candidate Card", "Abrir Ficha Candidata"],
-      explore: ["Browse Candidates", "Explorar Candidatas"],
-      checks: ["Open Verification", "Abrir Verificación"],
-    };
-    const [en, es] = labels[dest] ?? [`Go to ${dest}`, `Ir a ${dest}`];
-    acciones.push({ tipo: "navegar", valor: dest, etiquetaEn: en, etiquetaEs: es });
-  }
-
-  const candMatches = textoCrudo.matchAll(
-    /\[ACTION:SELECT_CANDIDATE:([A-Z0-9-]+)\]/gi,
-  );
-  for (const m of candMatches) {
-    const id = m[1].toUpperCase();
-    acciones.push({
-      tipo: "seleccionar_candidata",
-      valor: id,
-      etiquetaEn: `Load ${id}`,
-      etiquetaEs: `Cargar ${id}`,
-    });
-  }
-
-  const sunMatches = textoCrudo.matchAll(/\[ACTION:SET_SUN:([\d.]+)\]/gi);
-  for (const m of sunMatches) {
-    const deg = Number(m[1]);
-    if (Number.isFinite(deg) && deg >= 1.5 && deg <= 10) {
-      acciones.push({
-        tipo: "ajustar_sol",
-        valor: deg,
-        etiquetaEn: `Set Sun to ${deg}°`,
-        etiquetaEs: `Sol a ${deg}°`,
-      });
-    }
-  }
-
-  const textoLimpio = textoCrudo
-    .replace(/\[WIDGET:[^\]]+\]/gi, "")
-    .replace(/\[ACTION:[^\]]+\]/gi, "")
-    .trim();
-
-  return {
-    textoLimpio,
-    widgets:
-      widgets.size > 0 ? Array.from(widgets) : widgetsPorDefecto.slice(0, 1),
-    acciones: acciones.length > 0 ? acciones : accionesPorDefecto,
-  };
-}
-
-async function llamarStreamGenerateContent(
-  apiKey: string,
-  modelo: string,
-  instruccionSistema: string,
-  mensajeUsuario: string,
-  historial: { rol: "user" | "model"; texto: string }[],
-  onDelta?: (acumulado: string) => void,
-): Promise<string> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-    modelo,
-  )}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`;
-
-  const contents = [
-    ...historial.slice(-6).map((h) => ({
-      role: h.rol,
-      parts: [{ text: h.texto }],
-    })),
-    {
-      role: "user",
-      parts: [{ text: mensajeUsuario }],
-    },
-  ];
-
-  const resp = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      systemInstruction: {
-        parts: [{ text: instruccionSistema }],
-      },
-      contents,
-      generationConfig: {
-        maxOutputTokens: 750,
-      },
-    }),
-  });
-
-  if (!resp.ok || !resp.body) {
-    const errText = await resp.text().catch(() => "");
-    throw new Error(`HTTP ${resp.status}: ${errText.slice(0, 140)}`);
-  }
-
-  const reader = resp.body.getReader();
-  const decoder = new TextDecoder("utf-8");
-  let buffer = "";
-  let acumulado = "";
-
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const lineas = buffer.split("\n");
-    buffer = lineas.pop() ?? "";
-
-    for (const linea of lineas) {
-      const trim = linea.trim();
-      if (!trim.startsWith("data:")) continue;
-      const jsonStr = trim.slice(5).trim();
-      if (!jsonStr || jsonStr === "[DONE]") continue;
-      try {
-        const chunk = JSON.parse(jsonStr) as {
-          candidates?: { content?: { parts?: { text?: string }[] } }[];
-        };
-        const delta =
-          chunk.candidates?.[0]?.content?.parts
-            ?.map((p) => p.text ?? "")
-            .join("") ?? "";
-        if (delta) {
-          acumulado += delta;
-          if (onDelta) {
-            onDelta(
-              acumulado
-                .replace(/\[WIDGET:[^\]]*\]?/gi, "")
-                .replace(/\[ACTION:[^\]]*\]?/gi, "")
-                .trim(),
-            );
-          }
-        }
-      } catch {
-        // ignore partial JSON line
-      }
-    }
-  }
-
-  if (!acumulado.trim()) {
-    throw new Error("Empty SSE stream from Gemini");
-  }
-  return acumulado.trim();
-}
-
-async function llamarInteractionsApi(
-  apiKey: string,
-  modelo: string,
-  instruccionSistema: string,
-  mensajeUsuario: string,
-): Promise<string> {
-  const url = "https://generativelanguage.googleapis.com/v1/interactions";
-  const resp = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-goog-api-key": apiKey,
-      "Api-Revision": "2026-05-20",
-    },
-    body: JSON.stringify({
-      model: modelo,
-      system_instruction: instruccionSistema,
-      input: mensajeUsuario,
-      store: false,
-    }),
-  });
-
-  if (!resp.ok) {
-    throw new Error(`Interactions API status ${resp.status}`);
-  }
-
-  const data = (await resp.json()) as {
-    output_text?: string;
-    steps?: { type?: string; content?: { type?: string; text?: string }[] }[];
-  };
-  if (typeof data.output_text === "string" && data.output_text.trim()) {
-    return data.output_text.trim();
-  }
-  const steps = data.steps ?? [];
-  for (let i = steps.length - 1; i >= 0; i--) {
-    if (steps[i].type === "model_output") {
-      const txt = steps[i].content
-        ?.map((c) => c.text ?? "")
-        .join("")
-        .trim();
-      if (txt) return txt;
-    }
-  }
-  throw new Error("Empty response from Gemini Interactions API");
-}
-
-export async function probarConexionGemini(
-  apiKey: string,
-  modelo: GeminiModelId,
-): Promise<{ ok: boolean; latenciaMs: number; modeloUsado: string; detalle: string }> {
-  const limpia = apiKey.trim();
-  if (!limpia) {
-    return {
-      ok: false,
-      latenciaMs: 0,
-      modeloUsado: modelo,
-      detalle: "API Key is empty",
-    };
-  }
-  const t0 = performance.now();
-  try {
-    const modeloEfectivo =
-      modelo === "gemini-4-hydrogen" || modelo === "gemini-3.5-flash-lite"
-        ? "gemini-2.5-flash"
-        : modelo;
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-      modeloEfectivo,
-    )}:generateContent?key=${encodeURIComponent(limpia)}`;
-    const resp = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: "Reply OK" }] }],
-        generationConfig: { maxOutputTokens: 10 },
-      }),
-    });
-    const latenciaMs = Math.round(performance.now() - t0);
-    if (!resp.ok) {
-      const body = await resp.text().catch(() => "");
-      return {
-        ok: false,
-        latenciaMs,
-        modeloUsado: modeloEfectivo,
-        detalle: `HTTP ${resp.status}: ${body.slice(0, 100)}`,
-      };
-    }
-    return {
-      ok: true,
-      latenciaMs,
-      modeloUsado: modeloEfectivo,
-      detalle: `Connected (${latenciaMs} ms)`,
-    };
-  } catch (err) {
-    return {
-      ok: false,
-      latenciaMs: Math.round(performance.now() - t0),
-      modeloUsado: modelo,
-      detalle: err instanceof Error ? err.message : String(err),
-    };
-  }
+export function claveGemini(): string {
+  const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env?.VITE_GEMINI_API_KEY;
+  return (env?.trim() || CLAVE_GEMINI).trim();
 }
 
 export interface RespuestaChatSI {
   texto: string;
-  origen: "gemini-api" | "determinista-local" | "respaldo-verificado";
+  origen: "gemini" | "local";
   modeloUsado: string;
   latenciaMs: number;
   verificacion: ResultadoVerificacionSI;
-  widgets: WidgetTipoSI[];
   acciones: AccionRapidaSI[];
   aviso?: string;
+}
+
+const NOMBRES: Record<string, [string, string]> = {
+  analogo_sostenido: ["supported analog", "análogo respaldado"],
+  sostenido: ["supported analog", "análogo respaldado"],
+  con_huecos: ["with gaps", "con vacíos de información"],
+  no_alcanza: ["insufficient", "insuficiente"],
+  no_podemos_concluir: ["cannot conclude", "no se puede concluir"],
+  no_puede: ["cannot conclude", "no se puede concluir"],
+  incompatible: ["incompatible (fails a hard requirement)", "incompatible (incumple un requisito)"],
+};
+const nombreEtiqueta = (e: string, lang: "en" | "es") => (NOMBRES[e] ?? [e, e])[lang === "es" ? 1 : 0];
+
+function lineaRanking(e: EntradaRanking, lang: "en" | "es"): string {
+  const pos = e.orden === null ? "—" : `#${e.orden}`;
+  const que = e.control ? (lang === "es" ? `control ${e.control}` : `${e.control === "positivo" || e.control === "positivo_ruido" ? "positive" : "negative"} control`) : "";
+  const c = e.C === null ? "C=—" : `C=${e.C.toFixed(3)}`;
+  return `${pos} ${e.id}${que ? ` (${que})` : ""}: ${c} E=${e.E.toFixed(2)} L=${e.L.toFixed(3)} U=${e.U.toFixed(3)} · ${nombreEtiqueta(e.etiqueta, lang)}`;
+}
+
+export function instruccionSistema(ctx: ContextoSI, lang: "en" | "es"): string {
+  const f = ctx.ficha;
+  const det = extraerDetalleFuente(f);
+  const ranking = ctx.ranking ?? [];
+  const sombra = (0.5 / Math.tan((ctx.elevacionSolDeg * Math.PI) / 180)).toFixed(2);
+  const tarjeta = f
+    ? JSON.stringify(
+        {
+          id: f.id,
+          nombre: f.lugar.nombre,
+          region: f.lugar.region,
+          lat: f.lugar.lat,
+          lon: f.lugar.lon,
+          veredicto: nombreEtiqueta(f.etiqueta, lang),
+          C: f.C,
+          E: f.E,
+          L: f.L,
+          U: f.U,
+          orden_en_el_ranking: det?.orden ?? null,
+          requisitos: det?.requisitos ?? null,
+          propiedades: det?.propiedades
+            ? Object.fromEntries(
+                Object.entries(det.propiedades as Record<string, Record<string, unknown> | undefined>).map(([k, p]) => [
+                  k,
+                  { estado: p?.estado, distancia: p?.distancia ?? null, utilidad: p?.utilidad ?? null, unidad: p?.unidad ?? null },
+                ]),
+              )
+            : null,
+          dimensiones: f.dimensiones,
+          no_se_reproduce: f.no_transfiere,
+          medir_primero: f.medir_primero,
+          ventanas_de_ensayo_muestra: f.horario.slice(0, 3),
+        },
+        null,
+        1,
+      )
+    : "none selected";
+  const incompatibles = ranking.filter((e) => e.etiqueta === "incompatible").map((e) => e.id);
+  return [
+    "You are the TERRA-X guide, a calm expert who explains a NASA Space Apps 2026 project to visitors, jury members and scientists.",
+    "TERRA-X finds places on Earth where a crew can rehearse work planned for the lunar south pole (a VIPER-class rover at Mons Mouton). It runs the same physics on the same 60 m grid for the Moon (NASA LOLA relief, JPL DE421 ephemerides) and for Earth (Copernicus DEM, Sentinel-2 vegetation).",
+    "",
+    "HOW TO ANSWER",
+    `- Answer in ${lang === "es" ? "Spanish (rioplatense, natural, 'vos' is fine)" : "English"}, in plain language first; add the technical term in parentheses only when useful.`,
+    "- Be short: two to five sentences, or up to four bullet points when listing. No headings. No preamble like 'Great question'.",
+    "- Write 'SI' (Super Intelligence) when referring to this kind of assistant; never 'AI' or 'IA'.",
+    "- Use ONLY numbers that appear in FACTS, RANKING or ACTIVE CARD below (you may round them). If a number is not there, say in words that the published data does not include it. Never estimate, never invent.",
+    "- Compatibility C and evidence E are separate: never describe a candidate as 'X % similar to the Moon'. Never say an Earth site reproduces lunar gravity or vacuum, or certifies a lunar mission.",
+    "- When the visitor asks what to do or where to look, you may end with one or two action tags on their own last line, exactly like these:",
+    "  [ACTION:NAVIGATE:lab] [ACTION:NAVIGATE:compare] [ACTION:NAVIGATE:card] [ACTION:NAVIGATE:explore] [ACTION:NAVIGATE:checks] [ACTION:SELECT_CANDIDATE:P-27] [ACTION:SET_SUN:1.5]",
+    "",
+    "FACTS (published by the engine)",
+    "- Destination: Mons Mouton, 84.6°S 31.0°E, lunar south pole. The Sun never rises above about 7° there (6.96° at most in the 2027 lunations). On a flat horizon the night lasts 289 to 418 h per lunation; in the central 30 x 30 km crop the shortest continuous night is 424 h in summer and 622 h in winter.",
+    "- Rover template (public VIPER figures): 320 W of panels on three sides, 5420 Wh battery, survives 50 h of darkness, which implies a 108.4 W survival draw. Only relief (parking on a ridge) can shorten the night; the 3D lab lets the visitor try.",
+    "- Grid: 60 m per pixel for both worlds, never interpolated to a finer resolution. Shadow of a vertical board = height / tan(Sun elevation); a 0.50 m board at " + ctx.elevacionSolDeg + "° casts " + sombra + " m.",
+    "- Earth candidates: 40 parcels of 3 x 3 km in Payunia (Mendoza, Argentina), with 30 km of relief around each. Hard requirements: vegetation NDVI p90 below 0.20 and median slope below 15°; a parcel that fails one is 'incompatible'.",
+    "- Scores: C = compatibility of the terrain footprint (slope, roughness at 200 to 1600 m, grazing-light shadow fraction from 1.5° to 10°); E = how much evidence exists (0.8 means two properties, material and fine traversability, were never measured). Bounds L = C x E and U = L + (1 - E). Verdicts: supported analog (L above 0.70), with gaps, insufficient, cannot conclude, incompatible.",
+    "- Controls: CTRL-MM is Mons Mouton itself and must rank first; CTRL-MM-R1..R3 are copies with 2, 5 and 10 m of noise and must rank in that order; CTRL-MEDANOS (Médanos del Chaco, Paraguay, vegetated) must be rejected. All three checks pass in the published data.",
+    "- Every published file carries its SHA-256 in the manifest; the Verification page re-hashes them in the browser.",
+    "",
+    `RANKING (real, from fichas/indice.json; ${ranking.length} entries, threshold ${ranking.length ? "0.70" : "n/a"})`,
+    ...(ranking.length
+      ? ranking.filter((e) => e.etiqueta !== "incompatible").slice(0, 14).map((e) => "- " + lineaRanking(e, lang))
+      : ["- not loaded yet: say that the ranking is on the Explore page"]),
+    incompatibles.length ? `- Incompatible (fail a hard requirement): ${incompatibles.join(", ")}` : "",
+    "",
+    `CURRENT SCREEN: ${ctx.pagina} · Sun slider ${ctx.elevacionSolDeg}° · live engine ${ctx.motorEnVivo ? "connected" : "off (browser calculation)"}`,
+    "ACTIVE CARD",
+    tarjeta,
+  ].join("\n");
+}
+
+/** A short, honest answer built only from the card and the ranking, used when the model is unavailable. */
+export function respuestaLocal(ctx: ContextoSI, lang: "en" | "es"): string {
+  const f = ctx.ficha;
+  const es = lang === "es";
+  if (!f) return es ? "No hay una candidata abierta. Abrí una desde Explorar y te la explico." : "No candidate is open. Pick one on Explore and I will walk you through it.";
+  const c = f.C === null ? "—" : f.C.toFixed(2);
+  const pos = ctx.ranking?.find((e) => e.id === f.id)?.orden;
+  const lineaPos = pos ? (es ? ` Está en el puesto ${pos} del ranking.` : ` It ranks #${pos}.`) : "";
+  return es
+    ? `${f.id} (${f.lugar.nombre}) tiene compatibilidad C = ${c} y evidencia E = ${f.E.toFixed(2)}, con límites ${f.L.toFixed(2)} a ${f.U.toFixed(2)}: veredicto "${nombreEtiqueta(f.etiqueta, "es")}".${lineaPos} No se reproduce: ${f.no_transfiere.join(", ")}. Lo primero que habría que medir: ${f.medir_primero}.`
+    : `${f.id} (${f.lugar.nombre}) has compatibility C = ${c} and evidence E = ${f.E.toFixed(2)}, bounds ${f.L.toFixed(2)} to ${f.U.toFixed(2)}: verdict "${nombreEtiqueta(f.etiqueta, "en")}".${lineaPos} What does not transfer: ${f.no_transfiere.join(", ")}. First thing to measure: ${f.medir_primero}.`;
+}
+
+export function extraerAcciones(texto: string): { textoLimpio: string; acciones: AccionRapidaSI[] } {
+  const acciones: AccionRapidaSI[] = [];
+  const nav: Record<string, [string, string]> = {
+    lab: ["Open the 3D lab", "Abrir el laboratorio 3D"],
+    compare: ["Compare the two worlds", "Comparar los dos mundos"],
+    card: ["Open the candidate card", "Abrir la ficha"],
+    explore: ["Browse the candidates", "Ver las candidatas"],
+    checks: ["Open Verification", "Abrir Verificación"],
+  };
+  for (const m of texto.matchAll(/\[ACTION:NAVIGATE:([a-z]+)\]/gi)) {
+    const d = m[1].toLowerCase();
+    if (nav[d]) acciones.push({ tipo: "navegar", valor: d, etiquetaEn: nav[d][0], etiquetaEs: nav[d][1] });
+  }
+  for (const m of texto.matchAll(/\[ACTION:SELECT_CANDIDATE:([A-Z0-9-]+)\]/gi)) {
+    const id = m[1].toUpperCase();
+    acciones.push({ tipo: "seleccionar_candidata", valor: id, etiquetaEn: `Open ${id}`, etiquetaEs: `Abrir ${id}` });
+  }
+  for (const m of texto.matchAll(/\[ACTION:SET_SUN:([\d.]+)\]/gi)) {
+    const deg = Number(m[1]);
+    if (deg >= 1.5 && deg <= 10) acciones.push({ tipo: "ajustar_sol", valor: deg, etiquetaEn: `Sun to ${deg}°`, etiquetaEs: `Sol a ${deg}°` });
+  }
+  return { textoLimpio: texto.replace(/\[ACTION:[^\]]+\]/gi, "").replace(/\n{3,}/g, "\n\n").trim(), acciones: acciones.slice(0, 3) };
+}
+
+/** Through the TERRA-X server (the key stays there). Not streamed: the answer arrives whole. */
+async function llamarServidor(
+  instruccion: string,
+  historial: { rol: "user" | "model"; texto: string }[],
+  pregunta: string,
+  onDelta?: (acumulado: string) => void,
+): Promise<string> {
+  const r = await fetch("/api/si/chat", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json", "X-TerraX": "1" },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: instruccion }] },
+      contents: [...historial.slice(-8).map((h) => ({ role: h.rol, parts: [{ text: h.texto }] })), { role: "user", parts: [{ text: pregunta }] }],
+    }),
+  });
+  let j: { texto?: string; error?: string } = {};
+  try {
+    j = await r.json();
+  } catch {
+    // proxy error page: no server behind /api
+  }
+  if (!r.ok || !j.texto) throw new Error(j.error || `HTTP ${r.status}`);
+  onDelta?.(j.texto);
+  return j.texto;
+}
+
+async function llamar(
+  apiKey: string,
+  instruccion: string,
+  historial: { rol: "user" | "model"; texto: string }[],
+  pregunta: string,
+  onDelta?: (acumulado: string) => void,
+): Promise<string> {
+  if (!apiKey) return llamarServidor(instruccion, historial, pregunta, onDelta);
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:streamGenerateContent?alt=sse`;
+  const r = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: instruccion }] },
+      contents: [...historial.slice(-8).map((h) => ({ role: h.rol, parts: [{ text: h.texto }] })), { role: "user", parts: [{ text: pregunta }] }],
+      // Gemini 3.x counts its internal reasoning against maxOutputTokens: a low budget cut answers mid-word.
+      generationConfig: { temperature: 0.3, maxOutputTokens: 4096, thinkingConfig: { thinkingLevel: "low" } },
+    }),
+  });
+  if (!r.ok || !r.body) throw new Error(`HTTP ${r.status}`);
+  const reader = r.body.getReader();
+  const dec = new TextDecoder();
+  let buffer = "";
+  let texto = "";
+  const procesar = (l: string) => {
+    if (!l.startsWith("data:")) return;
+    const cuerpo = l.slice(5).trim();
+    if (!cuerpo || cuerpo === "[DONE]") return;
+    try {
+      const j = JSON.parse(cuerpo);
+      const partes = j?.candidates?.[0]?.content?.parts ?? [];
+      for (const p of partes) if (typeof p.text === "string") texto += p.text;
+      onDelta?.(texto);
+    } catch {
+      // a partial JSON line: wait for the rest
+    }
+  };
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += dec.decode(value, { stream: true });
+    const lineas = buffer.split("\n");
+    buffer = lineas.pop() ?? "";
+    lineas.forEach(procesar);
+  }
+  buffer += dec.decode();
+  buffer.split("\n").forEach(procesar);                 // the last event may arrive without a trailing newline
+  if (!texto.trim()) throw new Error("empty answer");
+  return texto;
 }
 
 export async function consultarSI(
@@ -454,109 +245,43 @@ export async function consultarSI(
   ctx: ContextoSI,
   lang: "en" | "es",
   historial: { rol: "user" | "model"; texto: string }[],
-  apiKeyOverride?: string,
-  modeloOverride?: GeminiModelId,
   onDelta?: (parcial: string) => void,
 ): Promise<RespuestaChatSI> {
   const t0 = performance.now();
-  const apiKey = (apiKeyOverride ?? obtenerApiKeyGuardada()).trim();
-  const modelo = modeloOverride ?? obtenerModeloGuardado();
-  const baseLocal = respuestaDeterministaRica(pregunta, ctx, lang);
-
-  if (!apiKey) {
-    return {
-      texto: baseLocal.texto,
-      origen: "determinista-local",
-      modeloUsado: "deterministic-verified",
-      latenciaMs: Math.max(1, Math.round(performance.now() - t0)),
-      verificacion: verificarRespuestaSI(baseLocal.texto, ctx),
-      widgets: baseLocal.widgets,
-      acciones: baseLocal.acciones,
-    };
-  }
-
-  const instruccion = construirInstruccionSistema(ctx, lang);
-  let textoCrudo = "";
-  let modeloReal: string = modelo;
-
+  // With a key in this build (local .env.local): call Gemini directly. Without one: through the server.
+  const apiKey = claveGemini();
+  const local = (aviso?: string): RespuestaChatSI => {
+    const texto = respuestaLocal(ctx, lang);
+    return { texto, origen: "local", modeloUsado: "card only", latenciaMs: Math.round(performance.now() - t0), verificacion: verificarRespuestaSI(texto, ctx), acciones: [], aviso };
+  };
+  const instruccion = instruccionSistema(ctx, lang);
   try {
-    const infoModelo = MODELOS_GEMINI.find((m) => m.id === modelo);
-    if (infoModelo?.api === "interactions") {
-      try {
-        textoCrudo = await llamarInteractionsApi(
-          apiKey,
-          modelo,
-          instruccion,
-          pregunta,
-        );
-      } catch {
-        modeloReal = "gemini-2.5-flash";
-        textoCrudo = await llamarStreamGenerateContent(
-          apiKey,
-          "gemini-2.5-flash",
-          instruccion,
-          pregunta,
-          historial,
-          onDelta,
-        );
+    let crudo = await llamar(apiKey, instruccion, historial, pregunta, onDelta);
+    let { textoLimpio, acciones } = extraerAcciones(crudo);
+    let verif = verificarRespuestaSI(textoLimpio, ctx);
+    if (!verif.valido) {
+      // One rewrite: same conversation, the model is told which figures it may not use.
+      const pedido = lang === "es"
+        ? `Reescribí tu última respuesta sin usar estas cifras, que no están en los datos publicados: ${verif.numerosNoVerificados.join(", ")}. Si hace falta, decí en palabras que ese dato no está publicado.`
+        : `Rewrite your last answer without these figures, which are not in the published data: ${verif.numerosNoVerificados.join(", ")}. If needed, say in words that the figure is not published.`;
+      crudo = await llamar(apiKey, instruccion, [...historial, { rol: "user", texto: pregunta }, { rol: "model", texto: crudo }], pedido, onDelta);
+      ({ textoLimpio, acciones } = extraerAcciones(crudo));
+      verif = verificarRespuestaSI(textoLimpio, ctx);
+      if (!verif.valido) {
+        return local(lang === "es"
+          ? "La respuesta del modelo traía cifras que no están en los datos publicados, así que se muestra solo lo que dice la ficha."
+          : "The model's answer carried figures that are not in the published data, so only what the card says is shown.");
       }
-    } else {
-      textoCrudo = await llamarStreamGenerateContent(
-        apiKey,
-        modelo,
-        instruccion,
-        pregunta,
-        historial,
-        onDelta,
-      );
     }
+    return { texto: textoLimpio, origen: "gemini", modeloUsado: NOMBRE_MODELO, latenciaMs: Math.round(performance.now() - t0), verificacion: verif, acciones };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    return {
-      texto: baseLocal.texto,
-      origen: "respaldo-verificado",
-      modeloUsado: "deterministic-fallback",
-      latenciaMs: Math.round(performance.now() - t0),
-      verificacion: verificarRespuestaSI(baseLocal.texto, ctx),
-      widgets: baseLocal.widgets,
-      acciones: baseLocal.acciones,
-      aviso:
-        lang === "es"
-          ? `Fallo de conexión con Gemini (${msg}). Se muestra la telemetría determinista verificada.`
-          : `Gemini connection error (${msg}). Showing verified deterministic telemetry.`,
-    };
+    return local(
+      apiKey
+        ? lang === "es" ? `Sin conexión con Gemini (${msg}). Se muestra lo que dice la ficha.` : `Gemini is unreachable (${msg}). Showing what the card says.`
+        : lang === "es"
+          ? "La guía SI con Gemini funciona cuando el servidor de TERRA-X está publicado. Mientras tanto, esto es lo que dice la ficha."
+          : "The Gemini SI guide works once the TERRA-X server is published. Meanwhile, this is what the card says.",
+    );
   }
-
-  const { textoLimpio, widgets, acciones } = extraerEtiquetasAccion(
-    textoCrudo,
-    baseLocal.widgets,
-    baseLocal.acciones,
-  );
-
-  const verif = verificarRespuestaSI(textoLimpio, ctx);
-  if (!verif.valido) {
-    return {
-      texto: baseLocal.texto,
-      origen: "respaldo-verificado",
-      modeloUsado: modeloReal,
-      latenciaMs: Math.round(performance.now() - t0),
-      verificacion: verificarRespuestaSI(baseLocal.texto, ctx),
-      widgets: baseLocal.widgets,
-      acciones: baseLocal.acciones,
-      aviso:
-        lang === "es"
-          ? `El verificador SI interceptó una cifra fuera de la ficha (${verif.resumenVerificacion}). Se reemplazó por la explicación determinista verificada.`
-          : `SI verifier intercepted an out-of-card figure (${verif.resumenVerificacion}). Replaced with verified deterministic telemetry.`,
-    };
-  }
-
-  return {
-    texto: textoLimpio,
-    origen: "gemini-api",
-    modeloUsado: modeloReal,
-    latenciaMs: Math.round(performance.now() - t0),
-    verificacion: verif,
-    widgets,
-    acciones,
-  };
 }

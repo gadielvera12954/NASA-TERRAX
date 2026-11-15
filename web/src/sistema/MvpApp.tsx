@@ -1,5 +1,11 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { ArrowRight, Earth, MapPin, Moon, Sunset } from "lucide-react";
+import { ArrowRight, BookOpen, Box, Compass, Earth, House, LogIn, MapPin, Moon, ShieldCheck, Sun, Sunset, Users } from "lucide-react";
+import { Logotipo } from "./Logo";
+import { Usuario, cuentas } from "../datos/cuentas";
+import Comunidad from "../pantallas/comunidad/Comunidad";
+import Cuenta from "../pantallas/comunidad/Cuenta";
+import Admin from "../pantallas/comunidad/Admin";
+import "../pantallas/comunidad/comunidad.css";
 import { LanguageProvider, useLanguage } from "../i18n/Language";
 import { Ficha, Manifest } from "../datos/contract";
 import {
@@ -9,6 +15,10 @@ import {
   IndexEntry,
 } from "../datos/integration";
 import { ScientificData } from "./ScientificData";
+import { Marca } from "./Marca";
+import { Integridad } from "./Integridad";
+import { Contador } from "./Contador";
+import { EntradaRanking, readRanking } from "../datos/ranking";
 import { SolProvider, useSol } from "../luz/SolContext";
 import { EstadoMotor, estadoMotor } from "../datos/laboratorio";
 import DosMundos from "../pantallas/operacion/DosMundos";
@@ -29,7 +39,10 @@ type Page =
   | "compare"
   | "lab"
   | "checks"
-  | "guide";
+  | "guide"
+  | "community"
+  | "account"
+  | "admin";
 const pages: Page[] = [
   "home",
   "explore",
@@ -38,6 +51,9 @@ const pages: Page[] = [
   "lab",
   "checks",
   "guide",
+  "community",
+  "account",
+  "admin",
 ];
 const tourPages: Page[] = [
   "home",
@@ -77,6 +93,33 @@ function AppContent() {
     () => new URLSearchParams(location.search).get("candidate") || "P-07",
   );
   const [candidateIndex, setCandidateIndex] = useState<IndexEntry[]>([]);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [ranking, setRanking] = useState<EntradaRanking[]>([]);
+  const [umbral, setUmbral] = useState(0.7);
+  const [mostrarControles, setMostrarControles] = useState(true);
+  useEffect(() => {
+    let active = true;
+    readRanking()
+      .then((r) => {
+        if (active) {
+          setRanking(r.entradas);
+          setUmbral(r.umbral);
+          // Without an explicit ?candidate=, open on the best-ranked parcel rather than a fixed id.
+          const mejor = r.entradas.find((e) => !e.control && e.etiqueta !== "incompatible");
+          if (mejor && !new URLSearchParams(location.search).get("candidate")) setCandidateId(mejor.id);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+  const elegirCandidata = (id: string) => {
+    setCandidateId(id);
+    const url = new URL(location.href);
+    url.searchParams.set("candidate", id);
+    history.replaceState(null, "", url);
+  };
   useEffect(() => {
     let active = true;
     readIndex()
@@ -109,6 +152,15 @@ function AppContent() {
       window.clearInterval(timer);
     };
   }, []);
+  // Accounts live in the TERRA-X server: ask who is signed in once it answers.
+  const servidor = motor !== null;
+  useEffect(() => {
+    if (!servidor) {
+      setUsuario(null);
+      return;
+    }
+    cuentas.yo().then((r) => setUsuario(r.usuario)).catch(() => setUsuario(null));
+  }, [servidor]);
   const [query, setQuery] = useState("");
   const [operation, setOperation] = useState("shadow");
   const [tour, setTour] = useState<number | null>(null);
@@ -250,13 +302,17 @@ function AppContent() {
       "Start here. No expertise needed.",
       "Empieza aquí. No necesitas ser especialista.",
     ),
+    community: t("Science, explained by verified people.", "Ciencia, explicada por personas verificadas."),
+    account: usuario ? t("Your account.", "Tu cuenta.") : t("Sign in to write.", "Entrá para escribir."),
+    admin: t("Admin panel.", "Panel admin."),
   };
   const nav = [
-    { page: "home" as Page, label: t("Home", "Inicio") },
-    { page: "explore" as Page, label: t("Explore", "Explorar") },
-    { page: "lab" as Page, label: t("3D lab", "Laboratorio 3D") },
-    { page: "checks" as Page, label: t("Verification", "Verificación") },
-    { page: "guide" as Page, label: t("Guide", "Guía") },
+    { page: "home" as Page, label: t("Home", "Inicio"), Icono: House },
+    { page: "explore" as Page, label: t("Explore", "Explorar"), Icono: Compass },
+    { page: "lab" as Page, label: t("3D lab", "Laboratorio 3D"), Icono: Box },
+    { page: "community" as Page, label: t("Community", "Comunidad"), Icono: Users },
+    { page: "checks" as Page, label: t("Verification", "Verificación"), Icono: ShieldCheck },
+    { page: "guide" as Page, label: t("Guide", "Guía"), Icono: BookOpen },
   ];
   const mock = manifest?.maqueta || ficha?.maqueta;
   // Minutes of the Earth rehearsal window (Sun from 7° to 1.5°), from the open card.
@@ -268,11 +324,6 @@ function AppContent() {
     const minutes = h2 * 60 + m2 - (h1 * 60 + m1);
     return Number.isFinite(minutes) && minutes > 0 ? minutes : null;
   })();
-  const matches =
-    ficha &&
-    `${ficha.id} ${ficha.lugar.region} ${ficha.lugar.nombre}`
-      .toLocaleLowerCase()
-      .includes(query.trim().toLocaleLowerCase());
   const number = (value: number | null) =>
     value === null
       ? t("Unknown", "Desconocido")
@@ -296,11 +347,11 @@ function AppContent() {
     "Not comparable": t("Not comparable", "No comparable"),
   };
   const verdicts: Record<string, string> = {
-    con_huecos: t("◐ With gaps", "◐ Con vacíos de información"),
-    sostenido: t("● Supported", "● Respaldado"),
-    no_alcanza: t("○ Insufficient", "○ Insuficiente"),
-    no_puede: t("? Unknown", "? Desconocido"),
-    incompatible: t("× Incompatible", "× Incompatible"),
+    con_huecos: t("With gaps", "Con vacíos de información"),
+    sostenido: t("Supported", "Respaldado"),
+    no_alcanza: t("Insufficient", "Insuficiente"),
+    no_puede: t("Unknown", "Desconocido"),
+    incompatible: t("Incompatible", "Incompatible"),
   };
   const translations: Record<string, string> = {
     "Shadow contrast": "Contraste de sombras",
@@ -347,46 +398,61 @@ function AppContent() {
           onClick={() => setTour(null)}
           aria-label={t("TERRA-X home", "Inicio de TERRA-X")}
         >
-          <MarcaMeridiana />
-          TERRA-X
+          <Logotipo claro />
+          <span className="brand-sub">{t("Lunar analog finder", "Buscador de análogos lunares")}</span>
         </a>
         <nav aria-label={t("Main navigation", "Navegación principal")}>
-          {nav.map((n) => (
+          {nav.map(({ page: destino, label, Icono }) => (
             <a
-              key={n.page}
-              href={`#${n.page}`}
+              key={destino}
+              href={`#${destino}`}
               onClick={() => setTour(null)}
               aria-current={
-                page === n.page ||
-                ((page === "card" || page === "compare") &&
-                  n.page === "explore")
+                page === destino ||
+                ((page === "card" || page === "compare") && destino === "explore") ||
+                ((page === "account" || page === "admin") && destino === "community")
                   ? "page"
                   : undefined
               }
             >
-              {n.label}
+              <Icono aria-hidden="true" size={16} strokeWidth={2} />
+              <span>{label}</span>
             </a>
           ))}
         </nav>
-        <div
-          className="language"
-          role="group"
-          aria-label={t("Language", "Idioma")}
-        >
-          <button
-            aria-pressed={language === "en"}
-            onClick={() => setLanguage("en")}
-            lang="en"
+        <div className="cabeza-derecha">
+          <span className="chip chip-sol" title={t("Sun elevation used for the shadows on screen", "Elevación del Sol usada para las sombras en pantalla")}>
+            <Sun aria-hidden="true" size={14} />
+            {sol.elevacion.toLocaleString(language, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}°
+          </span>
+          <span className="chip chip-motor" title={motor ? t("Live engine connected", "Motor en vivo conectado") : t("Using the exported data", "Usando los datos exportados")}>
+            <span className={motor ? "luz vivo" : "luz"} aria-hidden="true" />
+            {motor ? t("Live", "En vivo") : t("Offline data", "Datos exportados")}
+          </span>
+          <div
+            className="language"
+            role="group"
+            aria-label={t("Language", "Idioma")}
           >
-            English
-          </button>
-          <button
-            aria-pressed={language === "es"}
-            onClick={() => setLanguage("es")}
-            lang="es"
-          >
-            Español
-          </button>
+            <button aria-pressed={language === "en"} onClick={() => setLanguage("en")} lang="en" aria-label="English">
+              EN
+            </button>
+            <button aria-pressed={language === "es"} onClick={() => setLanguage("es")} lang="es" aria-label="Español">
+              ES
+            </button>
+          </div>
+          {usuario ? (
+            <a className="boton-cuenta" href={usuario.rol === "admin" ? "#admin" : "#account"} title={usuario.nombre}>
+              <span className="avatar" aria-hidden="true">{usuario.nombre.trim().charAt(0).toUpperCase()}</span>
+              <span className="nombre-cuenta">{usuario.nombre.split(" ")[0]}</span>
+              {usuario.rol === "admin" && <span className="insignia">ADMIN</span>}
+            </a>
+          ) : (
+            <a className="boton-cuenta sin-sesion" href="#account">
+              <LogIn aria-hidden="true" size={16} />
+              <span className="nombre-cuenta">{t("Sign in", "Entrar")}</span>
+            </a>
+          )}
         </div>
       </header>
       {mock && (
@@ -438,7 +504,7 @@ function AppContent() {
           </div>
         </aside>
       )}
-      <main id="main-content" className="mvp-main">
+      <main id="main-content" className="mvp-main" key={page}>
         {page !== "home" && (
           <h1 ref={heading} tabIndex={-1}>
             {titles[page]}
@@ -659,8 +725,8 @@ function AppContent() {
           <>
             <p className="lead">
               {t(
-                "Choose what you want to rehearse and explore the exported candidates. This interface does not calculate a new ranking.",
-                "Elige qué quieres ensayar y explora las candidatas exportadas. Esta interfaz no calcula una clasificación nueva.",
+                "Forty parcels of 3 × 3 km in Payunia, plus the controls, ranked by the scoring engine. Pick one to read its card. This page shows the published ranking; it does not compute a new one.",
+                "Cuarenta parcelas de 3 × 3 km en Payunia, más los controles, ordenadas por el motor de puntaje. Elegí una para leer su ficha. Esta página muestra el ranking publicado; no calcula uno nuevo.",
               )}
             </p>
             <div className="filters">
@@ -693,108 +759,139 @@ function AppContent() {
                   type="search"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Payunia / P-07"
+                  placeholder="Payunia / P-27"
                 />
               </label>
             </div>
-            {candidateIndex.length > 1 && (
-              <label>
-                {t(
-                  "Available candidates and controls",
-                  "Candidatas y controles disponibles",
-                )}
-                <select
-                  value={candidateId}
-                  onChange={(e) => {
-                    const id = e.target.value;
-                    setCandidateId(id);
-                    const url = new URL(location.href);
-                    url.searchParams.set("candidate", id);
-                    history.replaceState(null, "", url);
-                  }}
-                >
-                  {candidateIndex.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.id} ·{" "}
-                      {c.nombre.replace(
-                        " (maqueta)",
-                        t(" (mock)", " (maqueta)"),
-                      )}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
             <p className="notice">
               {operation === "materials"
                 ? t(
-                    "Materials are marked as not comparable. This candidate cannot establish material similarity.",
-                    "Los materiales figuran como no comparables. Esta candidata no permite afirmar similitud de materiales.",
+                    "Materials are marked as not comparable: no candidate can establish material similarity until it is measured on the ground.",
+                    "Los materiales figuran como no comparables: ninguna candidata permite afirmar similitud de materiales hasta medirlos en el terreno.",
                   )
                 : t(
                     "Terrain and illumination can support a rehearsal. Earth’s atmosphere and gravity remain different.",
                     "El relieve y la iluminación pueden servir para un ensayo. La atmósfera y la gravedad terrestres siguen siendo diferentes.",
                   )}
             </p>
-            {status === "ready" &&
-              (matches && ficha ? (
-                <div className="two-grid">
-                  <figure className="terrain-preview">
-                    <img
-                      src="/img/ui_tierra_top.png"
-                      alt={t(
-                        "Illustrative terrain preview of the candidate region",
-                        "Vista ilustrativa del relieve de la región candidata",
-                      )}
-                    />
-                    <figcaption>
-                      {t(
-                        "Synthetic illustration · Location is listed on the card, not plotted on this image",
-                        "Ilustración sintética · La ubicación está en la ficha; no está trazada sobre esta imagen",
-                      )}
-                    </figcaption>
-                  </figure>
-                  <section className="panel">
-                    <span className="eyebrow">
-                      {t("Selected candidate", "Candidata seleccionada")}
-                    </span>
-                    <h2>
-                      {ficha.id} · {ficha.lugar.nombre}
-                    </h2>
-                    <p>{ficha.lugar.region}</p>
-                    <p className="mono">
-                      {ficha.lugar.lat}, {ficha.lugar.lon}
-                    </p>
-                    <span className="verdict" data-tono={ficha.etiqueta}>
-                      {verdicts[ficha.etiqueta] ?? ficha.etiqueta}
-                    </span>
-                    <p>
-                      {t(
-                        "Review the verdict and evidence before choosing a rehearsal site.",
-                        "Revisa el veredicto y la evidencia antes de elegir un lugar de ensayo.",
-                      )}
-                    </p>
-                    <button className="btn" onClick={() => go("card")}>
-                      {t(
-                        "Open candidate card →",
-                        "Abrir ficha de la candidata →",
-                      )}
-                    </button>
-                  </section>
-                </div>
-              ) : (
-                <div role="status" className="notice">
-                  <p>
-                    {t(
-                      "No matching candidates.",
-                      "No hay candidatas que coincidan.",
+            {(() => {
+              const normal = (e: string) =>
+                e === "analogo_sostenido" ? "sostenido" : e === "no_podemos_concluir" ? "no_puede" : e;
+              const q = query.trim().toLocaleLowerCase();
+              const lista = ranking.filter(
+                (e) =>
+                  (mostrarControles || !e.control) &&
+                  (!q || `${e.id} ${e.nombre}`.toLocaleLowerCase().includes(q)),
+              );
+              const controlNombre = (e: EntradaRanking) =>
+                e.control === "positivo"
+                  ? t("Mons Mouton itself · positive control", "Mons Mouton mismo · control positivo")
+                  : e.control === "positivo_ruido"
+                    ? t("Mons Mouton with noise · control", "Mons Mouton con ruido · control")
+                    : e.control
+                      ? t("Médanos del Chaco · negative control", "Médanos del Chaco · control negativo")
+                      : e.nombre.replace(/^Payunia /, "Payunia · ");
+              return (
+                <div className="explorar">
+                  <div className="ranking-caja">
+                    <div className="ranking-cabeza">
+                      <span>
+                        {t(`${lista.length} of ${ranking.length}`, `${lista.length} de ${ranking.length}`)} ·{" "}
+                        {t("compatibility C, threshold", "compatibilidad C, umbral")} {umbral.toLocaleString(language)}
+                      </span>
+                      <label className="casilla">
+                        <input
+                          type="checkbox"
+                          checked={mostrarControles}
+                          onChange={(e) => setMostrarControles(e.target.checked)}
+                        />
+                        {t("Show controls", "Mostrar controles")}
+                      </label>
+                    </div>
+                    {ranking.length === 0 ? (
+                      <p className="muted" role="status">
+                        {t("Loading the ranking…", "Cargando el ranking…")}
+                      </p>
+                    ) : lista.length === 0 ? (
+                      <div role="status" className="notice">
+                        <p>{t("No matching candidates.", "No hay candidatas que coincidan.")}</p>
+                        <button className="btn sec" onClick={() => setQuery("")}>
+                          {t("Clear search", "Limpiar búsqueda")}
+                        </button>
+                      </div>
+                    ) : (
+                      <ol className="ranking" aria-label={t("Ranked candidates and controls", "Candidatas y controles ordenados")}>
+                        {lista.map((e) => (
+                          <li key={e.id}>
+                            <button
+                              type="button"
+                              className={e.id === candidateId ? "fila-rank activa" : "fila-rank"}
+                              aria-current={e.id === candidateId ? "true" : undefined}
+                              onClick={() => elegirCandidata(e.id)}
+                            >
+                              <span className="rank-pos mono">{e.orden ?? "—"}</span>
+                              <span className="rank-nombre">
+                                <strong>{e.id}</strong>
+                                <span>{controlNombre(e)}</span>
+                              </span>
+                              <span className="rank-barra" aria-hidden="true">
+                                <i style={{ width: `${100 * Math.max(0, Math.min(1, e.C ?? 0))}%` }} />
+                                <b style={{ left: `${100 * umbral}%` }} />
+                              </span>
+                              <span className="rank-c mono">{e.C === null ? "—" : e.C.toLocaleString(language, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                              <span className="rank-etq" data-tono={normal(e.etiqueta)}>
+                                <Marca tono={normal(e.etiqueta)} size={14} />
+                                <span>{verdicts[normal(e.etiqueta)] ?? e.etiqueta}</span>
+                              </span>
+                            </button>
+                          </li>
+                        ))}
+                      </ol>
                     )}
-                  </p>
-                  <button className="btn sec" onClick={() => setQuery("")}>
-                    {t("Clear search", "Limpiar búsqueda")}
-                  </button>
+                  </div>
+                  <aside className="panel elegida" aria-live="polite">
+                    {status === "ready" && ficha ? (
+                      <>
+                        <h2>
+                          {ficha.id} · {ficha.lugar.nombre}
+                        </h2>
+                        <p className="mono muted">
+                          {ficha.lugar.region} · {ficha.lugar.lat}, {ficha.lugar.lon}
+                        </p>
+                        <span className="verdict" data-tono={ficha.etiqueta} key={ficha.id}>
+                          <Marca tono={ficha.etiqueta} />
+                          {verdicts[ficha.etiqueta] ?? ficha.etiqueta}
+                        </span>
+                        <div className="metrics chicas">
+                          <div>
+                            <strong key={`c${ficha.id}`}>{ficha.C === null ? number(null) : <Contador valor={ficha.C} formato={number} />}</strong>
+                            <span>{t("Compatibility (C)", "Compatibilidad (C)")}</span>
+                          </div>
+                          <div>
+                            <strong key={`e${ficha.id}`}><Contador valor={ficha.E} formato={number} /></strong>
+                            <span>{t("Evidence (E)", "Evidencia (E)")}</span>
+                          </div>
+                        </div>
+                        <p>{dataText(ficha.resumen)}</p>
+                        <div className="actions">
+                          <button className="btn" onClick={() => go("card")}>
+                            {t("Open the card", "Abrir la ficha")}
+                            <ArrowRight aria-hidden="true" size={16} />
+                          </button>
+                          <a href="#compare">{t("Compare with the Moon", "Comparar con la Luna")}</a>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="muted" role="status">
+                        {status === "error"
+                          ? t("The card could not be loaded.", "No se pudo cargar la ficha.")
+                          : t("Loading the card…", "Cargando la ficha…")}
+                      </p>
+                    )}
+                  </aside>
                 </div>
-              ))}
+              );
+            })()}
           </>
         )}
         {page === "card" && ficha && status === "ready" && (
@@ -807,6 +904,7 @@ function AppContent() {
                 {ficha.id} · {ficha.lugar.nombre}
               </h2>
               <span className="verdict" data-tono={ficha.etiqueta}>
+                <Marca tono={ficha.etiqueta} />
                 {verdicts[ficha.etiqueta] ?? ficha.etiqueta}
               </span>
               <p>
@@ -822,11 +920,11 @@ function AppContent() {
                 <h2>{t("How well does it fit?", "¿Qué tan bien encaja?")}</h2>
                 <div className="metrics">
                   <div>
-                    <strong>{number(ficha.C)}</strong>
+                    <strong>{ficha.C === null ? number(null) : <Contador valor={ficha.C} formato={number} />}</strong>
                     <span>{t("Compatibility (C)", "Compatibilidad (C)")}</span>
                   </div>
                   <div>
-                    <strong>{number(ficha.E)}</strong>
+                    <strong><Contador valor={ficha.E} formato={number} /></strong>
                     <span>{t("Evidence (E)", "Evidencia (E)")}</span>
                   </div>
                 </div>
@@ -940,6 +1038,13 @@ function AppContent() {
             </div>
           </>
         )}
+        {page === "community" && (
+          <Comunidad servidor={servidor} usuario={usuario} onUsuario={setUsuario} irA={(p) => go(p as Page)} />
+        )}
+        {page === "account" && (
+          <Cuenta servidor={servidor} usuario={usuario} onUsuario={setUsuario} irA={(p) => go(p as Page)} />
+        )}
+        {page === "admin" && <Admin servidor={servidor} usuario={usuario} irA={(p) => go(p as Page)} />}
         {page === "checks" && (
           <>
             <p className="lead">
@@ -951,13 +1056,11 @@ function AppContent() {
             <div className="two-grid">
               <section className="panel">
                 <h2>{t("Data loading", "Carga de datos")}</h2>
-                <span className="verdict">
+                <span className="verdict" data-tono={status === "ready" ? "sostenido" : undefined}>
+                  <Marca tono={status === "ready" ? "pasa" : "pendiente"} />
                   {status === "ready"
-                    ? t(
-                        "✓ File structure checked",
-                        "✓ Estructura de archivos comprobada",
-                      )
-                    : t("? Not checked", "? Sin comprobar")}
+                    ? t("File structure checked", "Estructura de archivos comprobada")
+                    : t("Not checked", "Sin comprobar")}
                 </span>
                 <p>
                   {t(
@@ -968,6 +1071,7 @@ function AppContent() {
               </section>
               <ScientificData />
             </div>
+            <Integridad />
             <section className="panel sources">
               <h2>
                 {t(
@@ -1069,6 +1173,32 @@ function AppContent() {
                 </div>
               ))}
             </dl>
+            <section className="impacto" aria-labelledby="impacto-titulo">
+              <div>
+                <h2 id="impacto-titulo">{t("Why this matters", "Por qué importa")}</h2>
+                <p>
+                  {t(
+                    "Artemis and its robotic precursors will work where the Sun grazes the ground and the night can outlast any battery. Teams rehearse those operations on Earth, but choosing the site is usually a matter of tradition and travel budget. TERRA-X turns it into a measurement: the same code, the same 60 m grid, the same Sun geometry on both worlds, and an honest list of what a site cannot teach.",
+                    "Artemis y sus robots precursores van a trabajar donde el Sol roza el suelo y la noche puede durar más que cualquier batería. Los equipos ensayan esas operaciones en la Tierra, pero el lugar se elige por costumbre o por presupuesto de viaje. TERRA-X lo convierte en una medición: el mismo código, la misma grilla de 60 m, la misma geometría solar en los dos mundos, y una lista honesta de lo que un sitio no puede enseñar.",
+                  )}
+                </p>
+                <p>
+                  {t(
+                    "Because every step is open and every file is hashed, a space agency, a university or a rover team anywhere can rerun it for their own candidate region in an afternoon.",
+                    "Como cada paso es abierto y cada archivo lleva su huella, una agencia, una universidad o un equipo de rover en cualquier lugar puede repetirlo para su propia región candidata en una tarde.",
+                  )}
+                </p>
+              </div>
+              <div>
+                <h2>{t("What comes next", "Qué sigue")}</h2>
+                <ul>
+                  <li>{t("Measure the two missing properties on the ground (surface material, fine traversability): evidence E would rise from 0.8 to 1.0 and the bounds L–U would close.", "Medir en el terreno las dos propiedades que faltan (material superficial, transitabilidad fina): la evidencia E subiría de 0,8 a 1,0 y los límites L–U se cerrarían.")}</li>
+                  <li>{t("Earth terrain in 3D from the same Copernicus grid, so the Two Worlds stage shows a real parcel instead of a flat stand-in.", "Terreno terrestre en 3D desde la misma grilla de Copernicus, para que Dos Mundos muestre una parcela real en vez de un plano ilustrativo.")}</li>
+                  <li>{t("More regions through the same pipeline (the Puna and the Atacama are already in the Sun queries), and a field campaign with the 0.50 m board to close the loop on real shadows.", "Más regiones por la misma cadena (la Puna y Atacama ya están en las consultas del Sol), y una campaña de campo con la tablita de 0,50 m para cerrar el círculo con sombras reales.")}</li>
+                  <li>{t("A live engine deployed next to the site, so any date between 1901 and 2049 can be explored online, not only the two exported lunations.", "Un motor en vivo desplegado junto al sitio, para explorar en línea cualquier fecha entre 1901 y 2049, no solo las dos lunaciones exportadas.")}</li>
+                </ul>
+              </div>
+            </section>
             <SunLab />
             <SombraCampo motor={motor} />
             <details className="notice">
@@ -1198,17 +1328,6 @@ function SunLab() {
 /** Shadow of a vertical 0.50 m board on flat ground: height / tan(Sun elevation). */
 function sombraTablita(elevacionDeg: number) {
   return 0.5 / Math.tan((elevacionDeg * Math.PI) / 180);
-}
-function MarcaMeridiana() {
-  return (
-    <svg className="brand-mark" viewBox="0 0 26 26" aria-hidden="true">
-      <rect x="0.5" y="0.5" width="25" height="25" fill="none" stroke="currentColor" />
-      <path d="M4 17.5h18" stroke="currentColor" />
-      <path d="M7 17.5a6 6 0 0 1 12 0" fill="var(--oxido)" />
-      <path d="M13 17.5v-6" stroke="var(--muro)" strokeWidth="1.5" />
-      <path d="M13 17.5l9 3" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  );
 }
 /**
  * Home: a side-view shadow nomogram. A vertical 0.50 m board stands on the horizon; rays at
