@@ -2,3 +2,5 @@
 parametros/parametros.yaml -text
 web/public/data/** -text
 motor/sol/referencia_horizons/** -text
+web/public/modelos/** -text
+web/public/laboratorio/** -text
