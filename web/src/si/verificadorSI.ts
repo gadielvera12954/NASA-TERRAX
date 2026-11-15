@@ -1,5 +1,6 @@
 import { Ficha, Manifest } from "../datos/contract";
 import { IndexEntry } from "../datos/integration";
+import type { EscenarioMotorSI, ResultadoMotorSI } from "../datos/siMotor";
 
 export interface FichaFuenteDetallada {
   id?: string;
@@ -60,7 +61,10 @@ export interface ContextoSI {
   /** The real published ranking (fichas/indice.json); its numbers count as verified. */
   ranking?: import("../datos/ranking").EntradaRanking[];
   elevacionSolDeg: number;
+  alturaObjetoM?: number;
+  instante?: string;
   motorEnVivo?: boolean;
+  resultadosMotor?: ResultadoMotorSI[];
 }
 
 export interface ResultadoVerificacionSI {
@@ -69,6 +73,35 @@ export interface ResultadoVerificacionSI {
   numerosNoVerificados: number[];
   fraseProhibida: string | null;
   resumenVerificacion: string;
+  cifrasMotorVerificadas?: number;
+}
+
+export const METRICAS_MOTOR_SI = {
+  noche_geometrica_h: { unidad: "h", en: "Geometric night", es: "Noche geométrica" },
+  tramo_oscuro_mas_largo_h: { unidad: "h", en: "Longest continuous darkness", es: "Oscuridad continua más larga" },
+  potencia_media_w: { unidad: "W", en: "Mean power", es: "Potencia media" },
+  bateria_minima_wh: { unidad: "Wh", en: "Minimum battery energy", es: "Energía mínima de batería" },
+} as const;
+export type MetricaMotorSI = keyof typeof METRICAS_MOTOR_SI;
+export interface CifraMotorSI {
+  campo: MetricaMotorSI;
+  valor: string;
+  unidad: string;
+}
+
+/** Field + unit + signed rounded value, bound to this engine response only. */
+export function verificarCifrasMotorSI(escenario: EscenarioMotorSI, cifras: CifraMotorSI[]): ResultadoVerificacionSI {
+  const fallidas = cifras.filter(c => !METRICAS_MOTOR_SI[c.campo]
+    || c.unidad !== METRICAS_MOTOR_SI[c.campo].unidad
+    || !Number.isFinite(escenario.resultado[c.campo])
+    || c.valor !== escenario.resultado[c.campo].toFixed(2));
+  const valido = cifras.length > 0 && fallidas.length === 0;
+  return {
+    valido, numerosExtraidos: cifras.map(c => Number(c.valor)),
+    numerosNoVerificados: fallidas.map(c => Number(c.valor)), fraseProhibida: null,
+    cifrasMotorVerificadas: valido ? cifras.length : 0,
+    resumenVerificacion: valido ? "Engine fields, units and rounded values verified" : "Unverified engine claim blocked",
+  };
 }
 
 export function extraerDetalleFuente(ficha?: Ficha): FichaFuenteDetallada | null {
@@ -121,7 +154,8 @@ function recolectarNumerosVerificados(ctx: ContextoSI): number[] {
   };
 
   agregar(ctx.elevacionSolDeg);
-  const sombra = 0.5 / Math.tan((ctx.elevacionSolDeg * Math.PI) / 180);
+  agregar(ctx.alturaObjetoM);
+  const sombra = (ctx.alturaObjetoM ?? 0.5) / Math.tan((ctx.elevacionSolDeg * Math.PI) / 180);
   agregar(sombra);
   for (const e of ctx.ranking ?? []) {
     agregar(e.C);
@@ -183,12 +217,7 @@ function recolectarNumerosVerificados(ctx: ContextoSI): number[] {
 }
 
 function coincideNumero(n: number, permitidos: number[]): boolean {
-  const absN = Math.abs(n);
-  return permitidos.some((p) => {
-    const absP = Math.abs(p);
-    const tol = Math.max(0.02, absP * 0.02);
-    return Math.abs(absN - absP) <= tol;
-  });
+  return permitidos.some(p => Math.abs(n - p) < 1e-9);
 }
 
 export function verificarRespuestaSI(
@@ -222,7 +251,9 @@ export function verificarRespuestaSI(
     .replace(/\b\d{1,2}:\d{2}\b/g, " ");
 
   const coincidencias = limpio.match(/-?\d+(?:[.,]\d+)?/g) ?? [];
-  const permitidos = recolectarNumerosVerificados(ctx);
+  // Engine numbers are rendered through field-bound claims. Model prose may explain them
+  // qualitatively but cannot relabel a value from another metric or scenario.
+  const permitidos = ctx.resultadosMotor?.length ? [] : recolectarNumerosVerificados(ctx);
   const extraidos: number[] = [];
   const noVerificados: number[] = [];
 
