@@ -15,6 +15,7 @@ import Cuenta from "../pantallas/comunidad/Cuenta";
 import Admin from "../pantallas/comunidad/Admin";
 import "../pantallas/comunidad/comunidad.css";
 import AsistenteSI from "../si/AsistenteSI";
+import { abrirSI } from "../si/abrirSI";
 import { Integridad } from "./Integridad";
 import { SolProvider, useSol } from "../luz/SolContext";
 import { EstadoMotor, estadoMotor } from "../datos/laboratorio";
@@ -42,6 +43,7 @@ import {
   PlayCircle,
   SlidersHorizontal,
   LogIn,
+  MessageCircle,
 } from "lucide-react";
 import "./tokens.css";
 import "./mvp.css";
@@ -761,6 +763,13 @@ function AppContent() {
                     <PlayCircle size={19} />
                     {t("90-second tour", "Recorrido de 90 segundos")}
                   </button>
+                  <button className="text-btn" type="button" onClick={() => abrirSI(
+                    t("How can the SI help me choose a rehearsal site?", "¿Cómo me ayuda la SI a elegir un sitio de ensayo?"),
+                    { pagina: "home" },
+                  )}>
+                    <MessageCircle size={19} aria-hidden="true" />
+                    {t("Ask the SI about a site", "Preguntale a la SI sobre un sitio")}
+                  </button>
                 </div>
                 <p className="audience">
                   <BookOpen size={16} />
@@ -822,6 +831,17 @@ function AppContent() {
                     </small>
                   </span>
                   <ArrowRight />
+                </a>
+                <a href="#terrax-guia" aria-controls="terrax-guia" onClick={e => {
+                  e.preventDefault();
+                  abrirSI(t("How does the SI explain results with engine data?", "¿Cómo explica la SI los resultados con datos del motor?"), { pagina: "home" });
+                }}>
+                  <MessageCircle aria-hidden="true" />
+                  <span>
+                    <strong>{t("SI assistant", "Asistente SI")}</strong>
+                    <small>{t("Explains results with engine data", "Explica resultados con datos del motor")}</small>
+                  </span>
+                  <ArrowRight aria-hidden="true" />
                 </a>
               </aside>
             </div>
@@ -947,6 +967,13 @@ function AppContent() {
               <button className="btn" onClick={compareWithSite}>
                 {t("Compare this record", "Comparar esta ficha")}{" "}
                 <ArrowRight size={17} />
+              </button>
+              <button className="text-btn" type="button" onClick={() => abrirSI(
+                t(`What supports the result for ${ficha.id}, and what evidence is missing?`, `¿Qué respalda el resultado de ${ficha.id} y qué evidencia falta?`),
+                { pagina: "card", candidataId: ficha.id },
+              )}>
+                <MessageCircle size={18} aria-hidden="true" />
+                {t("Explain with SI", "Explicar con SI")}
               </button>
             </div>
             <div className="two-grid record-body">

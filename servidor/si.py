@@ -41,7 +41,7 @@ def _permitido(ip: str) -> bool:
 
 @bp.get("/api/si/estado")
 def estado():
-    return jsonify({"disponible": bool(os.environ.get("TERRAX_GEMINI_KEY")), "modelo": MODELO})
+    return jsonify({"disponible": bool(os.environ.get("TERRAX_GEMINI_KEY", "").strip()), "modelo": MODELO})
 
 
 @bp.post("/api/si/chat")

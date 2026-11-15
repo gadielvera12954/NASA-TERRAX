@@ -7,8 +7,13 @@ import { ArrowUp, RotateCcw, X } from "lucide-react";
 import { Ficha, Manifest } from "../datos/contract";
 import { IndexEntry } from "../datos/integration";
 import { EntradaRanking, readRanking } from "../datos/ranking";
-import { NOMBRE_MODELO, RespuestaChatSI, consultarSI } from "./geminiClient";
+import { RespuestaChatSI, consultarSI } from "./geminiClient";
 import { AccionRapidaSI, ContextoSI } from "./verificadorSI";
+import { AperturaSI, EVENTO_SI } from "./abrirSI";
+import { bienvenidaSI, normalizarContextoSI, sugerenciasSI } from "./contextoSI";
+import { explicarMotorSI } from "./motorSI";
+import { analizarPuntoSI, compararEscenariosSI, ErrorMotorSI, estadoSI, ResultadoMotorSI } from "../datos/siMotor";
+import { readFicha } from "../datos/integration";
 import "./asistente-si.css";
 
 interface Props {
@@ -84,10 +89,92 @@ export default function AsistenteSI(p: Props) {
   const [turnos, setTurnos] = useState<Turno[]>([]);
   const [entrada, setEntrada] = useState("");
   const [cargando, setCargando] = useState(false);
-  const [parcial, setParcial] = useState("");
+  const [contextoExterno, setContextoExterno] = useState<Record<string, unknown>>({});
+  const [fichaEvento, setFichaEvento] = useState<Ficha>();
+  const [fichasComparacion, setFichasComparacion] = useState<Ficha[]>([]);
+  const [conectada, setConectada] = useState<boolean | null>(null);
+  const [resultadosMotor, setResultadosMotor] = useState<ResultadoMotorSI[]>([]);
   const [ranking, setRanking] = useState<EntradaRanking[]>([]);
   const finRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const origenRef = useRef<HTMLElement | null>(null);
+  const generacionRef = useRef(0);
+  const ocupadoRef = useRef(false);
+  const pantallaAnteriorRef = useRef({ pagina: p.pagina, id: p.ficha?.id });
+  const aperturaExternaRef = useRef(false);
+
+  const cerrar = () => {
+    setAbierto(false);
+    origenRef.current?.focus();
+  };
+
+  useEffect(() => {
+    let vigente = true;
+    setConectada(null);
+    estadoSI().then(v => { if (vigente) setConectada(v); });
+    return () => { vigente = false; };
+  }, [abierto]);
+
+  useEffect(() => {
+    const anterior = pantallaAnteriorRef.current;
+    const cambia = anterior.pagina !== p.pagina
+      || (!aperturaExternaRef.current && !!anterior.id && !!p.ficha?.id && anterior.id !== p.ficha.id);
+    pantallaAnteriorRef.current = { pagina: p.pagina, id: p.ficha?.id ?? anterior.id };
+    // Initial async loading of the atlas record must not erase an external opening.
+    if (!cambia) return;
+    aperturaExternaRef.current = false;
+    generacionRef.current++;
+    ocupadoRef.current = false;
+    setCargando(false);
+    setContextoExterno({});
+    setTurnos([]);
+    setEntrada("");
+    setResultadosMotor([]);
+  }, [p.pagina, p.ficha?.id]);
+
+  useEffect(() => {
+    let vigente = true;
+    setFichaEvento(undefined);
+    const id = contextoExterno.candidataId;
+    if (typeof id === "string" && id !== p.ficha?.id) {
+      readFicha(id).then(f => { if (vigente) setFichaEvento(f); }).catch(() => {});
+    }
+    return () => { vigente = false; };
+  }, [contextoExterno, p.ficha?.id]);
+
+  useEffect(() => {
+    let vigente = true;
+    setFichasComparacion([]);
+    const ids = contextoExterno.sitiosComparados;
+    if (Array.isArray(ids)) Promise.allSettled(ids.filter((id): id is string => typeof id === "string").map(readFicha))
+      .then(resultados => {
+        if (vigente) setFichasComparacion(resultados.flatMap(r => r.status === "fulfilled" ? [r.value] : []));
+      });
+    return () => { vigente = false; };
+  }, [contextoExterno]);
+
+  useEffect(() => {
+    const abrir = (evento: Event) => {
+      const d = (evento as CustomEvent<AperturaSI>).detail;
+      if (!d || typeof d.pregunta !== "string") return;
+      aperturaExternaRef.current = true;
+      generacionRef.current++;
+      ocupadoRef.current = false;
+      setCargando(false);
+      setTurnos([]);
+      setResultadosMotor([]);
+      origenRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      setContextoExterno(normalizarContextoSI(d.contexto && typeof d.contexto === "object" && !Array.isArray(d.contexto) ? d.contexto : {}));
+      setEntrada(d.pregunta.slice(0, 600));
+      setAbierto(true);
+    };
+    window.addEventListener(EVENTO_SI, abrir);
+    return () => { window.removeEventListener(EVENTO_SI, abrir); generacionRef.current++; };
+  }, []);
+
+  useEffect(() => {
+    if (abierto) inputRef.current?.focus();
+  }, [abierto, contextoExterno]);
 
   useEffect(() => {
     readRanking()
@@ -95,28 +182,41 @@ export default function AsistenteSI(p: Props) {
       .catch(() => {});
   }, []);
   useEffect(() => {
-    if (abierto) finRef.current?.scrollIntoView({ block: "end" });
-  }, [turnos, parcial, abierto]);
+    if (abierto) finRef.current?.scrollIntoView({ block: "nearest" });
+  }, [turnos, abierto]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        setAbierto((v) => !v);
-        setTimeout(() => inputRef.current?.focus(), 30);
-      } else if (e.key === "Escape") setAbierto(false);
+        setAbierto((v) => {
+          if (!v) origenRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+          else origenRef.current?.focus();
+          return !v;
+        });
+      } else if (e.key === "Escape") {
+        setAbierto(false);
+        if (document.activeElement?.closest(".si-raiz")) origenRef.current?.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
   const ctx: ContextoSI = {
-    pagina: p.pagina,
-    ficha: p.ficha,
+    pagina: typeof contextoExterno.pagina === "string" ? contextoExterno.pagina : p.pagina,
+    ficha: (contextoExterno.pagina ?? p.pagina) === "lab" ? undefined
+      : typeof contextoExterno.candidataId === "string" && contextoExterno.candidataId !== p.ficha?.id ? fichaEvento : p.ficha,
     manifest: p.manifest,
     indice: p.indice,
     ranking,
-    elevacionSolDeg: p.elevacionSolDeg,
+    elevacionSolDeg: typeof contextoExterno.elevacionSolDeg === "number" && Number.isFinite(contextoExterno.elevacionSolDeg)
+      ? contextoExterno.elevacionSolDeg : p.elevacionSolDeg,
+    alturaObjetoM: typeof contextoExterno.alturaObjetoM === "number" && Number.isFinite(contextoExterno.alturaObjetoM) && contextoExterno.alturaObjetoM > 0
+      ? contextoExterno.alturaObjetoM : undefined,
+    instante: typeof contextoExterno.instante === "string" && Number.isFinite(Date.parse(contextoExterno.instante)) ? contextoExterno.instante : undefined,
     motorEnVivo: p.motorEnVivo,
+    resultadosMotor,
+    fichasComparacion: fichasComparacion.filter(f => Array.isArray(contextoExterno.sitiosComparados) && contextoExterno.sitiosComparados.includes(f.id)),
   };
 
   const ejecutar = (a: AccionRapidaSI) => {
@@ -128,7 +228,9 @@ export default function AsistenteSI(p: Props) {
 
   const enviar = async (texto: string) => {
     const limpia = texto.trim();
-    if (!limpia || cargando) return;
+    if (!limpia || ocupadoRef.current) return;
+    ocupadoRef.current = true;
+    const generacion = generacionRef.current;
     const historial = turnos.map((x) => ({
       rol: x.rol === "user" ? ("user" as const) : ("model" as const),
       texto: x.texto,
@@ -138,40 +240,57 @@ export default function AsistenteSI(p: Props) {
       { id: `u${Date.now()}`, rol: "user", texto: limpia },
     ]);
     setEntrada("");
-    setParcial("");
     setCargando(true);
     try {
-      const r = await consultarSI(limpia, ctx, p.idioma, historial, setParcial);
+      const r = await consultarSI(limpia, ctx, p.idioma, historial);
+      if (generacion !== generacionRef.current) return;
+      if (r.aviso) setConectada(false);
       setTurnos((prev) => [
         ...prev,
         { id: `a${Date.now()}`, rol: "assistant", texto: r.texto, meta: r },
       ]);
     } finally {
-      setParcial("");
-      setCargando(false);
-      setTimeout(() => inputRef.current?.focus(), 0);
+      if (generacion === generacionRef.current) {
+        ocupadoRef.current = false;
+        setCargando(false);
+        inputRef.current?.focus();
+      }
     }
   };
 
-  const id = p.ficha?.id ?? "P-27";
-  const sugerencias = [
-    t(
-      `What can a crew rehearse at ${id}, and what can't it?`,
-      `¿Qué puede ensayar un equipo en ${id} y qué no?`,
-    ),
-    t(
-      "Why does a low Sun matter so much on the Moon?",
-      "¿Por qué importa tanto el Sol bajo en la Luna?",
-    ),
-    t(
-      "How do you know the ranking is not rigged?",
-      "¿Cómo sé que el ranking no está arreglado?",
-    ),
-    t(
-      "What do C and E mean, in simple words?",
-      "¿Qué significan C y E, en palabras simples?",
-    ),
-  ];
+  const correrMotor = async (comparar: boolean, pedidos?: unknown[]) => {
+    if (ocupadoRef.current) return;
+    ocupadoRef.current = true;
+    const generacion = generacionRef.current;
+    setCargando(true);
+    const texto = comparar ? t("Compare these scenarios with the engine", "Comparar estos escenarios con el motor")
+      : t("Analyze this point with the engine", "Analizar este punto con el motor");
+    setTurnos(prev => [...prev, { id: `u${Date.now()}`, rol: "user", texto }]);
+    try {
+      const resultados = comparar ? await compararEscenariosSI(pedidos ?? contextoExterno.pedidos) : await analizarPuntoSI(contextoExterno.pedido);
+      if (generacion !== generacionRef.current) return;
+      const respuesta = explicarMotorSI(resultados, p.idioma);
+      setResultadosMotor(resultados);
+      setTurnos(prev => [...prev, { id: `a${Date.now()}`, rol: "assistant", texto: respuesta.texto, meta: respuesta }]);
+    } catch (error) {
+      if (generacion !== generacionRef.current) return;
+      const textoError = error instanceof ErrorMotorSI && error.motivo === "contexto"
+        ? t("The screen has not supplied valid point and period parameters. Open a laboratory point and use Explain with SI.", "La pantalla no envió parámetros válidos de punto y período. Abrí un punto del laboratorio y usá Explicar con SI.")
+        : error instanceof ErrorMotorSI && error.motivo === "comparacion"
+          ? t("Engine comparison is not available on this server yet. No comparison was calculated.", "La comparación del motor todavía no está disponible en este servidor. No se calculó una comparación.")
+          : t("The engine did not return a verifiable result. Check the connection and try again. No calculation is shown.", "El motor no devolvió un resultado verificable. Revisá la conexión e intentá de nuevo. No se muestra un cálculo.");
+      setTurnos(prev => [...prev, { id: `a${Date.now()}`, rol: "assistant", texto: textoError }]);
+    } finally {
+      if (generacion === generacionRef.current) {
+        ocupadoRef.current = false; setCargando(false); inputRef.current?.focus();
+      }
+    }
+  };
+
+  const sugerencias = sugerenciasSI(ctx, p.idioma);
+  const pedidoActual = contextoExterno.pedido as Record<string, unknown> | undefined;
+  const comparacionEstacional = pedidoActual && ["verano", "invierno"].includes(String(pedidoActual.lunacion))
+    ? [{ ...pedidoActual, lunacion: "verano" }, { ...pedidoActual, lunacion: "invierno" }] : undefined;
   const n = (v: number, d: number) =>
     v.toLocaleString(p.idioma, {
       maximumFractionDigits: d,
@@ -186,32 +305,39 @@ export default function AsistenteSI(p: Props) {
         aria-expanded={abierto}
         aria-controls="terrax-guia"
         onClick={() => {
-          setAbierto((v) => !v);
-          setTimeout(() => inputRef.current?.focus(), 60);
+          if (abierto) cerrar();
+          else { origenRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; setAbierto(true); }
         }}
       >
         <Marca />
-        <span>{t("Ask TERRA-X", "Preguntale a TERRA-X")}</span>
+        <span>{t("Ask the SI", "Preguntale a la SI")}</span>
         <kbd className="si-trigger-kbd">Ctrl K</kbd>
       </button>
 
       <section
         id="terrax-guia"
+        role="dialog"
         className="si-console"
         data-open={abierto ? "true" : "false"}
-        aria-label={t("TERRA-X guide (SI)", "Guía de TERRA-X (SI)")}
+        aria-label={t("TERRA-X SI assistant", "Asistente SI de TERRA-X")}
         aria-hidden={!abierto}
       >
         <header className="si-cabeza">
           <div className="si-titulo">
             <Marca />
             <div>
-              <strong>{t("TERRA-X guide", "Guía de TERRA-X")}</strong>
+              <strong>{t("TERRA-X SI assistant", "Asistente SI de TERRA-X")}</strong>
+              <span className="si-contexto mono" role="status">
+                {conectada === null ? t("Checking SI connection…", "Comprobando conexión de la SI…")
+                  : conectada ? t("SI connected", "SI conectada") : t("SI using local data", "SI con datos locales")}
+              </span>
               <span className="si-contexto mono">
-                {p.ficha
-                  ? `${p.ficha.id} · ${p.ficha.lugar.nombre}`
+                {contextoExterno.pedido
+                  ? t("Point parameters loaded", "Parámetros del punto cargados")
+                  : contextoExterno.pedidos ? t("Comparison parameters loaded", "Parámetros de comparación cargados") : ctx.ficha
+                  ? `${ctx.ficha.id} · ${ctx.ficha.lugar.nombre}`
                   : t("no candidate open", "sin candidata abierta")}{" "}
-                · {t("Sun", "Sol")} {n(p.elevacionSolDeg, 1)}°
+                · {ctx.pagina === "lab" ? t("Engine inputs", "Entradas del motor") : `${t("Sun", "Sol")} ${n(ctx.elevacionSolDeg, 1)}°`}
               </span>
             </div>
           </div>
@@ -220,7 +346,11 @@ export default function AsistenteSI(p: Props) {
               <button
                 type="button"
                 className="si-icono"
-                onClick={() => setTurnos([])}
+                onClick={() => {
+                  generacionRef.current++; ocupadoRef.current = false;
+                  setCargando(false); setTurnos([]); setResultadosMotor([]);
+                  inputRef.current?.focus();
+                }}
                 aria-label={t("New conversation", "Conversación nueva")}
                 title={t("New conversation", "Conversación nueva")}
               >
@@ -230,7 +360,7 @@ export default function AsistenteSI(p: Props) {
             <button
               type="button"
               className="si-icono"
-              onClick={() => setAbierto(false)}
+              onClick={cerrar}
               aria-label={t("Close", "Cerrar")}
             >
               <X size={18} />
@@ -242,10 +372,7 @@ export default function AsistenteSI(p: Props) {
           {turnos.length === 0 && (
             <div className="si-bienvenida">
               <p>
-                {t(
-                  "I explain what you are looking at, in plain words, using only the published data. Every number I say is checked against the candidate card before you see it.",
-                  "Te explico lo que estás viendo, en palabras simples y solo con los datos publicados. Cada cifra que digo se compara con la ficha antes de que la veas.",
-                )}
+                {bienvenidaSI(ctx, p.idioma, !!contextoExterno.pedido || !!contextoExterno.pedidos)}
               </p>
               <div className="si-sugerencias">
                 {sugerencias.map((s) => (
@@ -253,12 +380,26 @@ export default function AsistenteSI(p: Props) {
                     key={s}
                     type="button"
                     className="si-chip"
+                    disabled={cargando}
                     onClick={() => enviar(s)}
                   >
                     {s}
                   </button>
                 ))}
               </div>
+            </div>
+          )}
+          {(!!contextoExterno.pedido || !!contextoExterno.pedidos) && (
+            <div className="si-acciones">
+              {!!contextoExterno.pedido && <button className="si-chip accion" type="button" disabled={cargando} onClick={() => correrMotor(false)}>
+                {t("Analyze this point", "Analizar este punto")}
+              </button>}
+              {!!contextoExterno.pedidos && <button className="si-chip accion" type="button" disabled={cargando} onClick={() => correrMotor(true)}>
+                {t("Compare scenarios with the engine", "Comparar escenarios con el motor")}
+              </button>}
+              {!contextoExterno.pedidos && comparacionEstacional && <button className="si-chip accion" type="button" disabled={cargando} onClick={() => correrMotor(true, comparacionEstacional)}>
+                {t("Compare summer and winter at this point", "Comparar verano e invierno en este punto")}
+              </button>}
             </div>
           )}
           {turnos.map((x) => (
@@ -286,21 +427,33 @@ export default function AsistenteSI(p: Props) {
               {x.meta && (
                 <p className="si-meta mono">
                   {x.meta.origen === "gemini"
-                    ? `${NOMBRE_MODELO} · ${n(x.meta.latenciaMs / 1000, 1)} s · ${x.meta.verificacion.numerosExtraidos.length} ${t("figures checked against the data", "cifras comprobadas con los datos")}`
-                    : t(
+                    ? x.meta.modeloUsado
+                    : x.meta.origen === "motor" ? (x.meta.resultadosMotor?.some(r => r.escenario)
+                      ? t("Calculated by the TERRA-X engine", "Calculado por el motor de TERRA-X")
+                      : t("No verified engine result", "Sin resultado verificado del motor")) : t(
                         "Answer built from the card only",
                         "Respuesta armada solo con la ficha",
                       )}
                   {x.meta.aviso ? ` · ${x.meta.aviso}` : ""}
+                  {x.meta.verificacion.valido && (x.meta.verificacion.cifrasMotorVerificadas ?? 0) > 0 && <>
+                    <br />✓ {x.meta.verificacion.cifrasMotorVerificadas} {t("figures verified against TERRA-X engine data", "cifras verificadas contra datos del motor de TERRA-X")}
+                  </>}
                 </p>
               )}
+              {x.meta?.resultadosMotor?.some(r => r.escenario) && <details className="si-meta mono">
+                <summary>{t("Engine provenance", "Procedencia del motor")}</summary>
+                {x.meta.resultadosMotor.map((r, i) => r.escenario && <div key={i}>
+                  <p>{t("Scenario", "Escenario")} {String.fromCharCode(65 + i)} · {r.escenario.punto.fila}, {r.escenario.punto.col} · {r.escenario.periodo.desde} / {r.escenario.periodo.hasta}</p>
+                  <p>scenario_id: <code>{r.escenario.scenario_id ?? t("not supplied by the point endpoint", "no suministrado por el endpoint de punto")}</code></p>
+                  <p>{t("Engine", "Motor")}: {r.escenario.meta.motor_version}</p>
+                  {typeof r.escenario.punto.horizonte?.detalle === "string" && <p>{r.escenario.punto.horizonte.detalle}</p>}
+                  <p>{t("Parameter SHA-256", "SHA-256 de parámetros")}: <code>{r.escenario.meta.parametros_sha256}</code></p>
+                </div>)}
+              </details>}
             </div>
           ))}
           {cargando && (
             <div className="si-turno guia">
-              {parcial ? (
-                <Prosa texto={parcial} />
-              ) : (
                 <span
                   className="si-puntos"
                   aria-label={t("Thinking", "Pensando")}
@@ -309,7 +462,6 @@ export default function AsistenteSI(p: Props) {
                   <i />
                   <i />
                 </span>
-              )}
             </div>
           )}
           <div ref={finRef} />
