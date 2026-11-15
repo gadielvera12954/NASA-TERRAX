@@ -1,5 +1,6 @@
 /** Home hero: the real relief of Mons Mouton with the Sun of one real lunation moving over it. */
 import { useEffect, useMemo, useState } from "react";
+import { ArrowRight, Pause, Play } from "lucide-react";
 import { useLanguage } from "../../i18n/Language";
 import { EstadoMotor, SerieSol, SolAhora, leerSerieSol, pedirSolAhora } from "../../datos/laboratorio";
 import TerrenoLunar from "../../escena3d/TerrenoLunar";
@@ -70,7 +71,7 @@ export default function HeroTerreno({ motor, onAbrir }: { motor: EstadoMotor | n
         elevacion={serie ? serie.elevacion_deg[i] : 5}
         capa="sombra"
         punto={{ fila: 249, col: 249 }}
-        alto="clamp(300px, 46vh, 430px)"
+        alto="clamp(320px, 60vh, 580px)"
         etiqueta={t(
           "3D relief of Mons Mouton at the lunar south pole; the shadows move with the Sun of the summer lunation of 2027",
           "Relieve 3D de Mons Mouton en el polo sur lunar; las sombras se mueven con el Sol de la lunación de verano de 2027",
@@ -89,7 +90,8 @@ export default function HeroTerreno({ motor, onAbrir }: { motor: EstadoMotor | n
       </div>
       <div className="hero-mandos">
         <button className="btn sec chico" onClick={() => setAndando((a) => !a)} aria-pressed={andando}>
-          {andando ? t("❚❚ Pause the Sun", "❚❚ Pausar el Sol") : t("▶ Move the Sun", "▶ Mover el Sol")}
+          {andando ? <Pause aria-hidden="true" size={15} /> : <Play aria-hidden="true" size={15} />}
+          {andando ? t("Pause the lunation", "Pausar la lunación") : t("Play the lunation", "Reproducir la lunación")}
         </button>
         <label htmlFor="hero-sol" className="sr-only">
           {t("Hour of the lunation", "Hora de la lunación")}
@@ -124,8 +126,9 @@ export default function HeroTerreno({ motor, onAbrir }: { motor: EstadoMotor | n
           {ahora.luna.sobre_horizonte_liso ? "" : ` (${t("below the horizon", "bajo el horizonte")})`}
         </p>
       )}
-      <button className="btn" onClick={onAbrir}>
-        {t("Park a rover on this terrain →", "Estacionar un rover en este terreno →")}
+      <button className="btn sec" onClick={onAbrir}>
+        {t("Park a rover on this terrain", "Estacionar un rover en este terreno")}
+        <ArrowRight aria-hidden="true" size={16} />
       </button>
     </div>
   );

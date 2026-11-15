@@ -15,7 +15,7 @@ a {
 }
 .placa a {
   color: var(--texto);
-  text-decoration-color: var(--luz-solar);
+  text-decoration-color: currentColor;
 }
 button,
 a,
@@ -28,15 +28,13 @@ button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 select:focus-visible,
-summary:focus-visible {
+summary:focus-visible,
+svg[role="slider"]:focus-visible {
   outline: 2px solid var(--oxido);
   outline-offset: 3px;
 }
-.placa :focus-visible,
-.escena :focus-visible,
-.panel.reloj :focus-visible,
-.panel.comparador :focus-visible {
-  outline-color: var(--luz-solar);
+.placa :focus-visible {
+  outline-color: #eceae4;
 }
 .skip-link {
   position: fixed;
@@ -91,32 +89,18 @@ summary:focus-visible {
 .mvp-header nav a {
   display: inline-flex;
   align-items: center;
-  position: relative;
   padding: 0 14px;
   color: var(--tinta-2);
   font-weight: 600;
   font-size: 15px;
   white-space: nowrap;
   text-decoration: none;
-  transition: color 160ms ease;
-}
-.mvp-header nav a::after {
-  content: "";
-  position: absolute;
-  left: 14px;
-  right: 14px;
-  bottom: -1px;
-  height: 3px;
-  background: var(--oxido);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 220ms var(--ease-out);
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
 }
 .mvp-header nav a[aria-current] {
   color: var(--tinta);
-}
-.mvp-header nav a[aria-current]::after {
-  transform: scaleX(1);
+  border-bottom-color: var(--oxido);
 }
 @media (hover: hover) and (pointer: fine) {
   .mvp-header nav a:hover {
@@ -143,20 +127,6 @@ summary:focus-visible {
   background: var(--tinta);
   color: var(--muro-luz);
 }
-
-/* Instrument strip: connection and engine state */
-.connection {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px 0;
-  padding: 8px var(--gutter);
-  color: var(--tinta-3);
-  font-family: var(--mono);
-  font-size: 12px;
-  border-bottom: 1px solid var(--regla-suave);
-}
 .mock-notice {
   margin: 16px auto 0;
   max-width: var(--ancho);
@@ -176,16 +146,17 @@ summary:focus-visible {
   padding: 56px var(--gutter) 120px;
   min-height: 75vh;
 }
+.mvp-main:has(.dial-inicio) {
+  padding-bottom: 0;
+}
 .mvp-main h1 {
-  --largo: 1;
   font-size: clamp(40px, 5.2vw, 76px);
-  font-weight: 900;
+  font-weight: 800;
   font-stretch: 125%;
   line-height: 0.98;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   max-width: 17ch;
   margin-bottom: 32px;
-  text-shadow: calc(var(--sx) * 0.9 * var(--largo)) calc(var(--sy) * 0.5 * var(--largo)) 1px var(--sombra-letra);
 }
 .mvp-main h1:focus {
   outline: none;
@@ -277,7 +248,6 @@ select {
   background: var(--muro-luz);
   color: var(--tinta);
   font-weight: 400;
-  transition: box-shadow 160ms ease;
 }
 input::placeholder {
   color: var(--tinta-3);
@@ -300,9 +270,8 @@ select {
 input[type="range"] {
   accent-color: var(--oxido);
 }
-.placa input[type="range"],
-.panel.reloj input[type="range"] {
-  accent-color: var(--luz-solar);
+.placa input[type="range"] {
+  accent-color: #eceae4;
 }
 
 /* ---------------------------------------------------------------- notes and verdicts */
@@ -320,7 +289,7 @@ input[type="range"] {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid var(--tinta);
+  border: 1px solid currentColor;
   color: var(--tinta);
   padding: 6px 12px;
   font-family: var(--tit);
@@ -414,47 +383,29 @@ summary::marker {
   min-height: 44px;
 }
 
-/* ---------------------------------------------------------------- home: the wall */
-.muro-hero {
+/* ---------------------------------------------------------------- home: the dial, then the lunar night */
+.dial-texto {
   display: grid;
-  grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
-  gap: clamp(28px, 4vw, 64px);
-  align-items: start;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 24px clamp(32px, 5vw, 80px);
+  align-items: end;
 }
-.muro-hero h1 {
-  font-size: clamp(46px, 6.4vw, 96px);
-  max-width: 11ch;
-  margin-bottom: 14px;
+.dial-texto h1 {
+  font-size: clamp(44px, 6.2vw, 92px);
+  font-weight: 700;
+  max-width: 12ch;
+  margin-bottom: 0;
 }
-.cota {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 0 0 28px;
-  font-family: var(--mono);
-  font-size: 13px;
-  color: var(--oxido);
-}
-.cota::before {
-  content: "";
-  flex: 0 0 auto;
-  width: clamp(56px, calc(var(--sx) * 2.6), 260px);
-  height: 9px;
-  border-left: 1px solid var(--oxido);
-  border-right: 1px solid var(--oxido);
-  background: linear-gradient(var(--oxido), var(--oxido)) center / 100% 1px no-repeat;
-  transition: width 120ms linear;
-}
-.muro-hero .lead {
+.dial-lado .lead {
   margin-top: 0;
 }
-.muro-hero .actions {
-  margin: 32px 0 20px;
+.dial-lado .actions {
+  margin: 24px 0 14px;
 }
 .texto-boton {
   font-size: 15px;
   font-weight: 600;
-  padding: 0 4px;
+  padding: 0;
   background: none;
   border: 0;
   cursor: pointer;
@@ -462,68 +413,238 @@ summary::marker {
   text-decoration-color: var(--oxido);
   text-underline-offset: 5px;
 }
-.nota-analogo {
-  color: var(--tinta-3);
+
+/* The nomogram runs edge to edge; below its horizon the page is night. */
+.nomograma {
+  margin: 28px calc(50% - 50vw) 0;
+  width: 100vw;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+.nomograma svg {
+  display: block;
+  cursor: ew-resize;
+  user-select: none;
+}
+.nomograma .n-noche {
+  fill: var(--basalto);
+}
+.nomograma .n-horizonte {
+  stroke: var(--tinta);
+  stroke-width: 2;
+}
+.nomograma .n-rayo line {
+  stroke: var(--tinta-3);
+  stroke-width: 1;
+  stroke-dasharray: 2 5;
+}
+.nomograma .n-rayo .n-marca {
+  stroke: #9a978f;
+  stroke-dasharray: none;
+}
+.nomograma .n-etq {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--tinta-2);
+}
+.nomograma .n-rayo .n-etq {
+  fill: #c9c6be;
+}
+.nomograma .n-rayo .n-etq.tenue {
+  fill: #9a978f;
+}
+.nomograma .n-rayo:has(text[text-anchor="end"]) .n-etq {
+  fill: var(--tinta-2);
+}
+.nomograma .n-rayo.activo line {
+  stroke: var(--oxido);
+  stroke-dasharray: none;
+}
+.nomograma .n-rayo.activo .n-etq {
+  fill: #fff;
+  font-weight: 600;
+}
+.nomograma .n-sombra {
+  fill: var(--tinta);
+}
+.nomograma .n-luz {
+  stroke: var(--oxido);
+  stroke-width: 1.5;
+}
+.nomograma .n-tablita {
+  fill: var(--tinta);
+}
+.nomograma .n-sol {
+  fill: var(--oxido);
+  stroke: var(--muro);
+  stroke-width: 3;
+}
+.nomograma .n-punta line {
+  stroke: var(--oxido);
+  stroke-width: 1;
+}
+.nomograma .n-punta text {
+  font-family: var(--mono);
+  font-size: clamp(20px, 2.2vw, 30px);
+  font-weight: 500;
+  fill: var(--tinta);
+  letter-spacing: -0.03em;
+}
+.nomograma .n-lectura {
+  font-family: var(--tit);
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: 18px;
+  fill: var(--oxido);
+}
+.nomograma .n-ayuda {
+  font-family: var(--txt);
+  font-size: 13px;
+  fill: var(--tinta-3);
+}
+
+.noche-lunar {
+  margin: 0 calc(50% - 50vw);
+  padding: 8px max(var(--gutter), calc(50vw - var(--ancho) / 2)) 72px;
+  background: var(--basalto);
+  color: #eceae4;
+}
+.noche-cabeza {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 16px 48px;
+  align-items: end;
+  padding: 40px 0 28px;
+}
+.mvp-main .noche-cabeza h2 {
+  font-size: clamp(28px, 3.4vw, 48px);
+  font-weight: 700;
+  font-stretch: 125%;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: #eceae4;
+}
+.mvp-main .noche-cabeza p {
+  margin: 0;
+  color: var(--texto-sec);
+}
+.noche-lunar .escena {
+  border-color: rgba(236, 234, 228, 0.18);
+  box-shadow: none;
+}
+.mvp-main .noche-lunar .hero-pie,
+.noche-lunar .hero-mandos .mono {
+  color: var(--texto-sec);
+}
+.mvp-main .noche-lunar .nota-analogo {
+  color: var(--texto-sec);
   font-size: 14px;
+  margin: 28px 0 0;
 }
 
 /* Destinations: one full-width row each, ruled like hour lines */
 .puertas {
-  margin-top: 88px;
-  border-top: 1px solid var(--regla);
+  margin-top: 64px;
+  border-top: 1px solid var(--borde-light);
 }
 .puerta {
   display: grid;
   grid-template-columns: 44px minmax(0, 1.1fr) minmax(0, 1.6fr) auto;
   gap: 24px;
   align-items: center;
-  padding: 26px 8px;
-  border-bottom: 1px solid var(--regla);
-  color: var(--tinta);
+  padding: 26px 12px;
+  border-bottom: 1px solid var(--borde-light);
+  color: var(--texto);
   text-decoration: none;
-  position: relative;
-  isolation: isolate;
-}
-.puerta::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: var(--muro-luz);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 260ms var(--ease-out);
+  transition: background-color 160ms ease;
 }
 .puerta svg {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   stroke-width: 1.5;
-  color: var(--oxido);
+  color: var(--texto-sec);
 }
 .puerta strong {
   font-family: var(--tit);
   font-stretch: 118%;
-  font-weight: 800;
+  font-weight: 750;
   font-size: clamp(20px, 1.8vw, 26px);
   line-height: 1.1;
 }
 .puerta span {
-  color: var(--tinta-2);
+  color: var(--texto-sec);
   line-height: 1.5;
 }
 .puerta em {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-style: normal;
   font-weight: 650;
   white-space: nowrap;
-  transition: transform 220ms var(--ease-out);
+}
+.puerta em svg {
+  width: 16px;
+  height: 16px;
+  color: currentColor;
 }
 @media (hover: hover) and (pointer: fine) {
-  .puerta:hover::before {
-    transform: scaleX(1);
+  .puerta:hover {
+    background: var(--noche-panel);
   }
-  .puerta:hover em {
-    transform: translateX(6px);
+  .puerta:hover svg {
+    color: var(--texto);
   }
+}
+
+/* ---------------------------------------------------------------- footer and status */
+.mvp-footer {
+  border-top: 1px solid var(--regla);
+  padding: 22px var(--gutter);
+  margin-bottom: 76px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  color: var(--tinta-2);
+  font-size: 14px;
+}
+body:has(.dial-inicio) .mvp-footer {
+  margin-bottom: 0;
+  background: var(--basalto);
+  border-top-color: rgba(236, 234, 228, 0.18);
+  color: #b3b0a8;
+}
+body:has(.dial-inicio) .mvp-footer a {
+  color: #eceae4;
+}
+.connection {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: inherit;
+}
+
+/* ---------------------------------------------------------------- tour */
+.tour-start {
+  margin-bottom: 24px;
+}
+.tour-bar {
+  border: 1px solid var(--regla);
+  padding: 16px 24px;
+  max-width: var(--ancho);
+  margin: 16px auto;
+  background: var(--muro-luz);
+}
+.tour-bar .actions {
+  margin: 12px 0 0;
+}
+.compare-link {
+  margin: 0 0 24px;
 }
 
 /* Guide: one question per full-width row */
@@ -549,41 +670,6 @@ summary::marker {
   color: var(--tinta-2);
   max-width: 62ch;
 }
-@media (max-width: 760px) {
-  .preguntas > div {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ---------------------------------------------------------------- footer */
-.mvp-footer {
-  border-top: 1px solid var(--regla);
-  padding: 24px var(--gutter);
-  margin-bottom: 76px;
-  display: flex;
-  justify-content: space-between;
-  gap: 24px;
-  color: var(--tinta-2);
-  font-size: 14px;
-}
-
-/* ---------------------------------------------------------------- tour */
-.tour-start {
-  margin-bottom: 24px;
-}
-.tour-bar {
-  border: 1px solid var(--regla);
-  padding: 16px 24px;
-  max-width: var(--ancho);
-  margin: 16px auto;
-  background: var(--muro-luz);
-}
-.tour-bar .actions {
-  margin: 12px 0 0;
-}
-.compare-link {
-  margin: 0 0 24px;
-}
 
 /* ---------------------------------------------------------------- two worlds comparison */
 .comparison {
@@ -604,7 +690,7 @@ summary::marker {
   top: 0;
   bottom: 0;
   width: 2px;
-  background: var(--luz-solar);
+  background: #eceae4;
 }
 .world-label {
   position: absolute;
@@ -630,7 +716,7 @@ summary::marker {
   min-height: 44px;
 }
 
-/* ---------------------------------------------------------------- the gnomon: global Sun scale */
+/* ---------------------------------------------------------------- the gnomon: global Sun scale (inner pages) */
 .mvp-horizon {
   position: fixed;
   bottom: 0;
@@ -693,7 +779,6 @@ input.gnomon::-webkit-slider-runnable-track {
   background:
     linear-gradient(var(--tinta), var(--tinta)) left bottom / 100% 1px no-repeat,
     repeating-linear-gradient(90deg, var(--tinta-3) 0 1px, transparent 1px calc(100% / 17));
-  background-origin: content-box;
 }
 input.gnomon::-moz-range-track {
   height: 14px;
@@ -711,7 +796,6 @@ input.gnomon::-webkit-slider-thumb {
   background: var(--oxido);
   border: 3px solid var(--muro);
   box-shadow: 0 0 0 1px var(--tinta);
-  transition: transform 160ms var(--ease-out);
 }
 input.gnomon::-moz-range-thumb {
   width: 16px;
@@ -721,45 +805,6 @@ input.gnomon::-moz-range-thumb {
   border: 3px solid var(--muro);
   box-shadow: 0 0 0 1px var(--tinta);
 }
-input.gnomon:active::-webkit-slider-thumb {
-  transform: scale(1.12);
-}
-input.gnomon:focus-visible {
-  outline-offset: 2px;
-}
-
-/* ---------------------------------------------------------------- one authored moment: the shadow lands */
-@property --largo {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 1;
-}
-@keyframes sombra-cae {
-  from {
-    --largo: 0;
-  }
-  to {
-    --largo: 1;
-  }
-}
-@keyframes sube {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-}
-.muro-hero h1 {
-  animation: sombra-cae 1100ms var(--ease-out) 180ms both;
-}
-.muro-hero .entra {
-  animation: sube 520ms var(--ease-out) both;
-}
-.muro-hero .entra:nth-child(1) { animation-delay: 0ms; }
-.muro-hero .entra:nth-child(2) { animation-delay: 70ms; }
-.muro-hero .entra:nth-child(3) { animation-delay: 120ms; }
-.muro-hero .entra:nth-child(4) { animation-delay: 160ms; }
-.muro-hero .entra:nth-child(5) { animation-delay: 190ms; }
-.muro-hero .placa-hero.entra { animation-delay: 240ms; }
 
 /* ---------------------------------------------------------------- responsive */
 @media (max-width: 1080px) {
@@ -783,7 +828,7 @@ input.gnomon:focus-visible {
     grid-template-columns: 36px minmax(0, 1fr) auto;
     row-gap: 6px;
   }
-  .puerta svg,
+  .puerta > svg,
   .puerta strong {
     grid-row: 1;
   }
@@ -797,7 +842,8 @@ input.gnomon:focus-visible {
   }
 }
 @media (max-width: 900px) {
-  .muro-hero,
+  .dial-texto,
+  .noche-cabeza,
   .two-grid,
   .three-grid {
     grid-template-columns: 1fr;
@@ -811,31 +857,15 @@ input.gnomon:focus-visible {
   .filters {
     grid-template-columns: 1fr;
   }
-  .mvp-footer {
-    flex-direction: column;
-  }
-  .puertas {
-    margin-top: 56px;
+}
+@media (max-width: 760px) {
+  .preguntas > div {
+    grid-template-columns: 1fr;
   }
 }
 @media (max-width: 600px) {
   .mvp-header {
     position: static;
-  }
-  .connection {
-    justify-content: flex-start;
-    font-size: 11px;
-  }
-  .mvp-main h1 {
-    text-shadow: calc(var(--sx) * 0.45 * var(--largo)) calc(var(--sy) * 0.3 * var(--largo)) 1px var(--sombra-letra);
-  }
-  .mvp-horizon {
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 12px;
-    padding: 8px 16px;
-  }
-  .mvp-horizon output {
-    display: none;
   }
   .mvp-header nav {
     margin: 0 calc(-1 * var(--gutter));
@@ -846,9 +876,13 @@ input.gnomon:focus-visible {
     padding: 0 8px;
     font-size: 14px;
   }
-  .mvp-header nav a::after {
-    left: 8px;
-    right: 8px;
+  .mvp-horizon {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 12px;
+    padding: 8px 16px;
+  }
+  .mvp-horizon output {
+    display: none;
   }
   .comparison {
     height: 280px;
@@ -864,6 +898,10 @@ input.gnomon:focus-visible {
   .metrics > div + div {
     padding-left: 14px;
   }
+  .mvp-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -877,19 +915,16 @@ input.gnomon:focus-visible {
 @media print {
   .mvp-header,
   .mvp-footer,
-  .connection,
   .actions,
   .skip-link,
   .mvp-horizon,
   .tour-bar,
-  .compare-link {
+  .compare-link,
+  .nomograma {
     display: none;
   }
   .mvp-main {
     padding: 16px;
-  }
-  .mvp-main h1 {
-    text-shadow: none;
   }
   .mvp-main .panel,
   .notice,

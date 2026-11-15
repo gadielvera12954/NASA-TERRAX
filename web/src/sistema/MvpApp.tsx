@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { Earth, MapPin, Moon, Sunset } from "lucide-react";
+import { ArrowRight, Earth, MapPin, Moon, Sunset } from "lucide-react";
 import { LanguageProvider, useLanguage } from "../i18n/Language";
 import { Ficha, Manifest } from "../datos/contract";
 import {
@@ -63,6 +63,12 @@ function download(name: string, content: string) {
 
 function AppContent() {
   const { language, setLanguage, t } = useLanguage();
+  const solGlobal = useSol();
+  // Shadow length on the wall: 2 px / tan(elevation), always falling to the lower right.
+  useEffect(() => {
+    const largo = 2 / Math.tan((solGlobal.elevacion * Math.PI) / 180);
+    document.documentElement.style.setProperty("--sombra-l", `${largo.toFixed(1)}px`);
+  }, [solGlobal.elevacion]);
   const [page, setPage] = useState<Page>(currentPage);
   const [manifest, setManifest] = useState<Manifest>();
   const [ficha, setFicha] = useState<Ficha>();
@@ -178,8 +184,8 @@ function AppContent() {
       "El objetivo: encontrar condiciones útiles para practicar en la Tierra y reconocer sus diferencias.",
     ),
     t(
-      "Choose a practice goal and discover the available example candidate.",
-      "Elige un objetivo de ensayo y descubre la candidata de ejemplo disponible.",
+      "Choose a practice goal and open a candidate.",
+      "Elige un objetivo de ensayo y abre una candidata.",
     ),
     t(
       "Read compatibility and evidence separately, then check the limits.",
@@ -382,22 +388,6 @@ function AppContent() {
           </button>
         </div>
       </header>
-      <div className="connection" role="status">
-        {online ? t("Online", "Con conexión") : t("Offline", "Sin conexión")} ·{" "}
-        {offlineReady
-          ? t("Saved for offline use", "Guardado para usar sin conexión")
-          : t(
-              "Offline copy not ready yet",
-              "Copia sin conexión aún no preparada",
-            )}
-        <span className={motor ? "luz vivo" : "luz"} aria-hidden="true" />
-        {motor
-          ? t("Live engine connected", "Motor en vivo conectado")
-          : t(
-              "Live engine off · using exported data",
-              "Motor en vivo apagado · se usan los datos exportados",
-            )}
-      </div>
       {mock && (
         <aside className="mock-notice">
           <strong>
@@ -455,25 +445,27 @@ function AppContent() {
         )}
         {page === "home" && (
           <>
-            <div className="muro-hero">
-              <div>
-                <h1 ref={heading} tabIndex={-1}>
+            <section className="dial-inicio" aria-labelledby="titulo-inicio">
+              <div className="dial-texto">
+                <h1 ref={heading} tabIndex={-1} id="titulo-inicio">
                   {titles.home}
                 </h1>
-                <CotaSombra />
-                <p className="lead entra">
-                  {t(
-                    "Where on Earth could we rehearse work at the lunar south pole? Explore a candidate, understand its limits, and find out what to measure next.",
-                    "¿Dónde podríamos practicar en la Tierra el trabajo en el polo sur lunar? Explora una candidata, entiende sus límites y descubre qué medir después.",
-                  )}
-                </p>
-                <div className="actions entra">
-                  <button className="btn" onClick={() => go("explore")}>
-                    {t("Explore a candidate →", "Explorar una candidata →")}
-                  </button>
-                  <button className="btn sec" onClick={() => go("guide")}>
-                    {t("How it works", "Cómo funciona")}
-                  </button>
+                <div className="dial-lado">
+                  <p className="lead">
+                    {t(
+                      "Where on Earth could we rehearse work at the lunar south pole? Explore a candidate, understand its limits, and find out what to measure next.",
+                      "¿Dónde podríamos practicar en la Tierra el trabajo en el polo sur lunar? Explora una candidata, entiende sus límites y descubre qué medir después.",
+                    )}
+                  </p>
+                  <div className="actions">
+                    <button className="btn" onClick={() => go("explore")}>
+                      {t("Explore a candidate", "Explorar una candidata")}
+                      <ArrowRight aria-hidden="true" size={18} strokeWidth={2} />
+                    </button>
+                    <button className="btn sec" onClick={() => go("guide")}>
+                      {t("How it works", "Cómo funciona")}
+                    </button>
+                  </div>
                   <button
                     className="texto-boton"
                     onClick={() => {
@@ -490,86 +482,104 @@ function AppContent() {
                     {t("Take the 90-second tour", "Recorrido de 90 segundos")}
                   </button>
                 </div>
-                <p className="nota-analogo entra">
+              </div>
+              <Nomograma />
+            </section>
+            <section className="noche-lunar" aria-labelledby="titulo-noche">
+              <div className="noche-cabeza">
+                <h2 id="titulo-noche">
                   {t(
-                    "A terrestrial analog is a practice site. It never reproduces every condition on the Moon.",
-                    "Un análogo terrestre es un lugar de ensayo. Nunca reproduce todas las condiciones de la Luna.",
+                    "At Mons Mouton the Sun never climbs above 7°.",
+                    "En Mons Mouton el Sol nunca sube más de 7°.",
+                  )}
+                </h2>
+                <p>
+                  {t(
+                    "So every hill throws a shadow kilometres long. Below is the real relief (LOLA, 60 m) under the Sun of the 2027 summer lunation.",
+                    "Por eso cada colina proyecta una sombra de kilómetros. Abajo está el relieve real (LOLA, 60 m) bajo el Sol de la lunación de verano de 2027.",
                   )}
                 </p>
               </div>
-              <div className="placa-hero entra">
-                <Suspense
-                  fallback={
-                    <div className="escena cargando" style={{ height: 430 }}>
-                      {t("Loading the 3D terrain…", "Cargando el terreno 3D…")}
-                    </div>
-                  }
-                >
-                  <HeroTerreno motor={motor} onAbrir={() => go("lab")} />
-                </Suspense>
-              </div>
-            </div>
-            <nav
-              className="puertas"
-              aria-label={t("What you can do here", "Qué puedes hacer aquí")}
-            >
-              {(
-                [
+              <Suspense
+                fallback={
+                  <div className="escena cargando" style={{ height: 480 }}>
+                    {t("Loading the 3D terrain…", "Cargando el terreno 3D…")}
+                  </div>
+                }
+              >
+                <HeroTerreno motor={motor} onAbrir={() => go("lab")} />
+              </Suspense>
+              <nav
+                className="puertas"
+                aria-label={t("What you can do here", "Qué puedes hacer aquí")}
+              >
+                {(
                   [
-                    "lab",
-                    Moon,
-                    t("Park a rover", "Estaciona un rover"),
-                    t(
-                      "Click the real lunar relief, pick a season and watch the battery through the night.",
-                      "Haz clic en el relieve lunar real, elige una estación y mira la batería durante la noche.",
-                    ),
-                    t("3D lab →", "Laboratorio 3D →"),
-                  ],
-                  [
-                    "compare",
-                    Earth,
-                    t("Compare two worlds", "Compara dos mundos"),
-                    t(
-                      "The same rover under the same Sun on the Moon and on Earth: shadows, power, gravity, time.",
-                      "El mismo rover bajo el mismo Sol en la Luna y en la Tierra: sombras, energía, gravedad, tiempo.",
-                    ),
-                    t("Earth / Moon in 3D →", "Tierra / Luna en 3D →"),
-                  ],
-                  [
-                    "explore",
-                    MapPin,
-                    t("Choose a rehearsal site", "Elige un sitio de ensayo"),
-                    t(
-                      "Open a candidate, read compatibility and evidence separately, then put candidates side by side.",
-                      "Abre una candidata, lee compatibilidad y evidencia por separado y pon candidatas lado a lado.",
-                    ),
-                    t("Candidates →", "Candidatas →"),
-                  ],
-                  [
-                    "guide",
-                    Sunset,
-                    t("Measure a real shadow", "Mide una sombra real"),
-                    t(
-                      "A 0.50 m board at sunset is enough to test the Sun model on real ground.",
-                      "Una tablita de 0,50 m al atardecer alcanza para probar el modelo del Sol en terreno real.",
-                    ),
-                    t("Field kit →", "Kit de campo →"),
-                  ],
-                ] as const
-              ).map(([to, Icono, h, p, cta]) => (
-                <a
-                  className="puerta"
-                  key={to}
-                  href={`#${to}`}
-                  onClick={() => setTour(null)}
-                >
-                  <Icono aria-hidden="true" />
-                  <strong>{h}</strong>
-                  <span>{p}</span>
-                  <em>{cta}</em>
-                </a>
-              ))}
-            </nav>
+                    [
+                      "lab",
+                      Moon,
+                      t("Park a rover", "Estaciona un rover"),
+                      t(
+                        "Click the real lunar relief, pick a season and watch the battery through the night.",
+                        "Haz clic en el relieve lunar real, elige una estación y mira la batería durante la noche.",
+                      ),
+                      t("3D lab", "Laboratorio 3D"),
+                    ],
+                    [
+                      "compare",
+                      Earth,
+                      t("Compare two worlds", "Compara dos mundos"),
+                      t(
+                        "The same rover under the same Sun on the Moon and on Earth: shadows, power, gravity, time.",
+                        "El mismo rover bajo el mismo Sol en la Luna y en la Tierra: sombras, energía, gravedad, tiempo.",
+                      ),
+                      t("Earth / Moon in 3D", "Tierra / Luna en 3D"),
+                    ],
+                    [
+                      "explore",
+                      MapPin,
+                      t("Choose a rehearsal site", "Elige un sitio de ensayo"),
+                      t(
+                        "Open a candidate, read compatibility and evidence separately, then put candidates side by side.",
+                        "Abre una candidata, lee compatibilidad y evidencia por separado y pon candidatas lado a lado.",
+                      ),
+                      t("Candidates", "Candidatas"),
+                    ],
+                    [
+                      "guide",
+                      Sunset,
+                      t("Measure a real shadow", "Mide una sombra real"),
+                      t(
+                        "A 0.50 m board at sunset is enough to test the Sun model on real ground.",
+                        "Una tablita de 0,50 m al atardecer alcanza para probar el modelo del Sol en terreno real.",
+                      ),
+                      t("Field kit", "Kit de campo"),
+                    ],
+                  ] as const
+                ).map(([to, Icono, h, p, cta]) => (
+                  <a
+                    className="puerta"
+                    key={to}
+                    href={`#${to}`}
+                    onClick={() => setTour(null)}
+                  >
+                    <Icono aria-hidden="true" />
+                    <strong>{h}</strong>
+                    <span>{p}</span>
+                    <em>
+                      {cta}
+                      <ArrowRight aria-hidden="true" size={16} strokeWidth={2} />
+                    </em>
+                  </a>
+                ))}
+              </nav>
+              <p className="nota-analogo">
+                {t(
+                  "A terrestrial analog is a practice site. It never reproduces every condition on the Moon.",
+                  "Un análogo terrestre es un lugar de ensayo. Nunca reproduce todas las condiciones de la Luna.",
+                )}
+              </p>
+            </section>
           </>
         )}
         {status === "loading" && (
@@ -828,10 +838,15 @@ function AppContent() {
                 <p className="muted">
                   {t("Model bounds (L–U)", "Límites del modelo (L–U)")}:{" "}
                   {number(ficha.L)}–{number(ficha.U)} ·{" "}
-                  {t(
-                    "Example values from the candidate file.",
-                    "Valores de ejemplo del archivo de la candidata.",
-                  )}
+                  {ficha.maqueta
+                    ? t(
+                        "Example values from the candidate file.",
+                        "Valores de ejemplo del archivo de la candidata.",
+                      )
+                    : t(
+                        "Values from the candidate file, computed by the scoring engine.",
+                        "Valores del archivo de la candidata, calculados por el motor de puntaje.",
+                      )}
                 </p>
               </section>
               <section className="panel">
@@ -860,10 +875,15 @@ function AppContent() {
               </section>
               <section className="panel">
                 <h2>
-                  {t(
-                    "Example rehearsal window",
-                    "Ventana de ensayo de ejemplo",
-                  )}
+                  {ficha.maqueta
+                    ? t(
+                        "Example rehearsal window",
+                        "Ventana de ensayo de ejemplo",
+                      )
+                    : t(
+                        "Rehearsal windows (Sun from 7° to 1.5°)",
+                        "Ventanas de ensayo (Sol de 7° a 1,5°)",
+                      )}
                 </h2>
                 {ficha.horario.map((h, i) => (
                   <p key={i}>
@@ -871,10 +891,15 @@ function AppContent() {
                   </p>
                 ))}
                 <p className="muted">
-                  {t(
-                    "Historical mock schedule. It is not a forecast or a recommendation for today.",
-                    "Horario histórico de maqueta. No es un pronóstico ni una recomendación para hoy.",
-                  )}
+                  {ficha.maqueta
+                    ? t(
+                        "Historical mock schedule. It is not a forecast or a recommendation for today.",
+                        "Horario histórico de maqueta. No es un pronóstico ni una recomendación para hoy.",
+                      )
+                    : t(
+                        "Computed by the physics engine from the Sun's position over a flat horizon. Nearby hills can shorten a window. It is not a recommendation for today.",
+                        "Calculado por el motor físico con la posición del Sol sobre un horizonte liso. Los cerros cercanos pueden acortar una ventana. No es una recomendación para hoy.",
+                      )}
                 </p>
                 <div className="actions">
                   <button
@@ -950,10 +975,15 @@ function AppContent() {
                 )}
               </h2>
               <p>
-                {t(
-                  "These are declarations in mock data. Source files and their hashes have not been independently verified.",
-                  "Son declaraciones en datos de maqueta. Los archivos fuente y sus hashes no fueron verificados de forma independiente.",
-                )}
+                {manifest?.maqueta
+                  ? t(
+                      "These are declarations in mock data. Source files and their hashes have not been independently verified.",
+                      "Son declaraciones en datos de maqueta. Los archivos fuente y sus hashes no fueron verificados de forma independiente.",
+                    )
+                  : t(
+                      "Each source is declared in the manifest with its licence and the SHA-256 written when the data was exported. The app shows them as declared; it does not download the sources again to check them.",
+                      "Cada fuente figura en el manifiesto con su licencia y el SHA-256 registrado al exportar los datos. La app las muestra tal como están declaradas; no vuelve a descargar las fuentes para comprobarlas.",
+                    )}
               </p>
               {manifest?.fuentes.map((f) => (
                 <details key={f.id}>
@@ -1005,14 +1035,24 @@ function AppContent() {
                   ),
                 ],
                 [
-                  t(
-                    "Can I trust the example numbers?",
-                    "¿Puedo confiar en las cifras de ejemplo?",
-                  ),
-                  t(
-                    "They demonstrate the interface, not a scientific conclusion. The mock banner stays visible until the source files declare real data.",
-                    "Sirven para demostrar la interfaz, no una conclusión científica. El aviso de maqueta permanece mientras los archivos declaren datos de ejemplo.",
-                  ),
+                  mock
+                    ? t(
+                        "Can I trust the example numbers?",
+                        "¿Puedo confiar en las cifras de ejemplo?",
+                      )
+                    : t(
+                        "Where do the numbers come from?",
+                        "¿De dónde salen las cifras?",
+                      ),
+                  mock
+                    ? t(
+                        "They demonstrate the interface, not a scientific conclusion. The mock banner stays visible until the source files declare real data.",
+                        "Sirven para demostrar la interfaz, no una conclusión científica. El aviso de maqueta permanece mientras los archivos declaren datos de ejemplo.",
+                      )
+                    : t(
+                        "From the exported files listed under Verification, each with its source and SHA-256. If a file is ever marked as demonstration data, a mock banner appears at the top of every page.",
+                        "De los archivos exportados que figuran en Verificación, cada uno con su fuente y su SHA-256. Si algún archivo se marca como dato de demostración, aparece un aviso de maqueta arriba en todas las páginas.",
+                      ),
                 ],
                 [
                   t("How do I use it offline?", "¿Cómo lo uso sin internet?"),
@@ -1064,11 +1104,27 @@ function AppContent() {
           TERRA-X ·{" "}
           {t("Open rehearsal explorer", "Explorador abierto de ensayos")}
         </span>
+        <div className="connection" role="status">
+          {online ? t("Online", "Con conexión") : t("Offline", "Sin conexión")} ·{" "}
+          {offlineReady
+            ? t("Saved for offline use", "Guardado para usar sin conexión")
+            : t(
+                "Offline copy not ready yet",
+                "Copia sin conexión aún no preparada",
+              )}
+          <span className={motor ? "luz vivo" : "luz"} aria-hidden="true" />
+          {motor
+            ? t("Live engine connected", "Motor en vivo conectado")
+            : t(
+                "Live engine off · using exported data",
+                "Motor en vivo apagado · se usan los datos exportados",
+              )}
+        </div>
         <a href="#checks">
           {t("Data and limitations", "Datos y limitaciones")}
         </a>
       </footer>
-      <Horizon />
+      {page !== "home" && <Horizon />}
     </>
   );
 }
@@ -1136,32 +1192,169 @@ function MarcaMeridiana() {
     </svg>
   );
 }
-function CotaSombra() {
+/**
+ * Home: a side-view shadow nomogram. A vertical 0.50 m board stands on the horizon; rays at
+ * 10°, 7°, 5°, 3° and 1.5° land where its shadow ends (0.50 / tan e). Dragging along the ground
+ * sets the shadow length, and the Sun elevation follows from it (e = atan(board / shadow)).
+ */
+function Nomograma() {
   const { t, language } = useLanguage();
   const sol = useSol();
-  const n = (v: number, d: number) =>
-    v.toLocaleString(language, {
-      minimumFractionDigits: d,
-      maximumFractionDigits: d,
-    });
+  const caja = useRef<HTMLDivElement>(null);
+  const [ancho, setAncho] = useState(1200);
+  const [mostrado, setMostrado] = useState<number | null>(null);
+  const arrastrando = useRef(false);
+  useEffect(() => {
+    const el = caja.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => setAncho(Math.max(300, Math.round(e.contentRect.width))));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  // One authored moment: the Sun sinks from 10° to the current elevation and the shadow runs out.
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const desde = 10;
+    const hasta = sol.elevacion;
+    const inicio = performance.now();
+    let id = 0;
+    const paso = (ahora: number) => {
+      const k = Math.min(1, (ahora - inicio - 250) / 1700);
+      if (k < 0) {
+        setMostrado(desde);
+      } else {
+        const suave = 1 - Math.pow(1 - k, 3);
+        setMostrado(desde + (hasta - desde) * suave);
+      }
+      if (k < 1) id = requestAnimationFrame(paso);
+      else setMostrado(null);
+    };
+    id = requestAnimationFrame(paso);
+    return () => cancelAnimationFrame(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const e = mostrado ?? sol.elevacion;
+  const W = ancho;
+  const chico = W < 640;
+  const H = Math.max(26, Math.min(58, W / 21)); // the 0.50 m board, in pixels
+  const alto = Math.round(H + (chico ? 140 : 136));
+  const x0 = Math.max(28, Math.round(W * 0.07));
+  const suelo = alto - (chico ? 58 : 66);
+  const tope = suelo - H;
+  const rad = (g: number) => (g * Math.PI) / 180;
+  const largo = (g: number) => H / Math.tan(rad(g));
+  const fmt = (v: number, d: number) =>
+    v.toLocaleString(language, { minimumFractionDigits: d, maximumFractionDigits: d });
+  const marcas = chico ? [10, 7, 3] : [10, 7, 5, 3, 1.5];
+  const punta = x0 + largo(e);
+  const fuera = punta > W - 16;
+  const solX = Math.max(12, x0 - (chico ? 22 : 44));
+  const solY = tope - (x0 - solX) * Math.tan(rad(e));
+
+  const desdePuntero = (clientX: number) => {
+    const r = caja.current?.getBoundingClientRect();
+    if (!r) return;
+    const px = clientX - r.left;
+    if (px <= x0 + 4) return;
+    const g = (Math.atan(H / (px - x0)) * 180) / Math.PI;
+    setMostrado(null);
+    sol.setElevacion(Math.round(Math.max(1.5, Math.min(10, g)) * 2) / 2);
+  };
+
   return (
-    <p className="cota entra" aria-live="polite">
-      {t(
-        `Sun ${n(sol.elevacion, 1)}° · a 0.50 m board casts ${n(sombraTablita(sol.elevacion), 2)} m of shadow`,
-        `Sol ${n(sol.elevacion, 1)}° · una tablita de 0,50 m proyecta ${n(sombraTablita(sol.elevacion), 2)} m de sombra`,
-      )}
-    </p>
+    <div className="nomograma" ref={caja}>
+      <svg
+        width={W}
+        height={alto}
+        viewBox={`0 0 ${W} ${alto}`}
+        role="slider"
+        tabIndex={0}
+        aria-label={t(
+          "Sun elevation. Drag the shadow along the ground; the Sun follows.",
+          "Elevación del Sol. Arrastra la sombra sobre el suelo; el Sol la sigue.",
+        )}
+        aria-valuemin={1.5}
+        aria-valuemax={10}
+        aria-valuenow={sol.elevacion}
+        aria-valuetext={t(
+          `Sun ${fmt(sol.elevacion, 1)}°, a 0.50 m board casts ${fmt(sombraTablita(sol.elevacion), 2)} m of shadow`,
+          `Sol ${fmt(sol.elevacion, 1)}°, una tablita de 0,50 m proyecta ${fmt(sombraTablita(sol.elevacion), 2)} m de sombra`,
+        )}
+        onKeyDown={(ev) => {
+          const d = ev.key === "ArrowRight" || ev.key === "ArrowUp" ? 0.5 : ev.key === "ArrowLeft" || ev.key === "ArrowDown" ? -0.5 : 0;
+          if (!d) return;
+          ev.preventDefault();
+          setMostrado(null);
+          sol.setElevacion((v) => v + d);
+        }}
+        onPointerDown={(ev) => {
+          arrastrando.current = true;
+          (ev.currentTarget as SVGSVGElement).setPointerCapture(ev.pointerId);
+          desdePuntero(ev.clientX);
+        }}
+        onPointerMove={(ev) => {
+          if (arrastrando.current) desdePuntero(ev.clientX);
+        }}
+        onPointerUp={() => {
+          arrastrando.current = false;
+        }}
+      >
+        <rect className="n-noche" x="0" y={suelo} width={W} height={alto - suelo} />
+        {marcas.map((m) => {
+          const fin = x0 + largo(m);
+          const visible = fin < W - 70;
+          return (
+            <g key={m} className={Math.abs(m - e) < 0.25 && mostrado === null ? "n-rayo activo" : "n-rayo"}>
+              <line x1={x0} y1={tope} x2={Math.min(fin, W)} y2={visible ? suelo : tope + (W - x0) * Math.tan(rad(m))} />
+              {visible ? (
+                <>
+                  <line className="n-marca" x1={fin} y1={suelo} x2={fin} y2={suelo + 8} />
+                  <text className="n-etq" x={fin} y={suelo + 26} textAnchor="middle">
+                    {fmt(m, m % 1 ? 1 : 0)}°
+                  </text>
+                  <text className="n-etq tenue" x={fin} y={suelo + 44} textAnchor="middle">
+                    {fmt(sombraTablita(m), 2)} m
+                  </text>
+                </>
+              ) : !chico || Math.abs(m - e) < 0.25 ? (
+                <text className="n-etq" x={W - 10} y={tope + (W - x0) * Math.tan(rad(m)) - 8} textAnchor="end">
+                  {fmt(m, m % 1 ? 1 : 0)}° → {fmt(sombraTablita(m), 1)} m
+                </text>
+              ) : null}
+            </g>
+          );
+        })}
+        <line className="n-horizonte" x1="0" y1={suelo} x2={W} y2={suelo} />
+        <rect className="n-sombra" x={x0} y={suelo - 7} width={Math.max(0, Math.min(punta, W) - x0)} height="7" />
+        <line className="n-luz" x1={solX} y1={solY} x2={Math.min(punta, W)} y2={fuera ? tope + (W - x0) * Math.tan(rad(e)) : suelo} />
+        <rect className="n-tablita" x={x0 - 3} y={tope} width="6" height={H} />
+        <text className="n-etq" x={chico ? x0 + 8 : x0 - 10} y={chico ? tope - 8 : tope + H / 2} textAnchor={chico ? "start" : "end"}>
+          0.50 m
+        </text>
+        <circle className="n-sol" cx={solX} cy={solY} r={chico ? 8 : 11} />
+        {!fuera && (
+          <g className="n-punta">
+            <line x1={punta} y1={suelo - 30} x2={punta} y2={suelo} />
+            <text x={punta} y={suelo - 40} textAnchor={punta > W - 140 ? "end" : "middle"}>
+              {fmt(sombraTablita(e), 2)} m
+            </text>
+          </g>
+        )}
+        <text className="n-lectura" x={Math.max(16, solX - 11)} y="24">
+          {t(`Sun ${fmt(e, 1)}°`, `Sol ${fmt(e, 1)}°`)}
+        </text>
+        <text className="n-ayuda" x={Math.max(16, solX - 11)} y="44">
+          {t("Drag the shadow along the ground — the Sun follows", "Arrastra la sombra sobre el suelo: el Sol la sigue")}
+        </text>
+      </svg>
+    </div>
   );
 }
 function Horizon() {
   const { t, language } = useLanguage();
   const sol = useSol();
   const marcas = [1.5, 3, 5, 7, 10];
-  // Shadow length on the wall: 2 px / tan(elevation), always falling to the lower right.
-  useEffect(() => {
-    const largo = 2 / Math.tan((sol.elevacion * Math.PI) / 180);
-    document.documentElement.style.setProperty("--sombra-l", `${largo.toFixed(1)}px`);
-  }, [sol.elevacion]);
   return (
     <div className="mvp-horizon">
       <label htmlFor="global-sun">

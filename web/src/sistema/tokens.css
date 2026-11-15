@@ -58,8 +58,9 @@
   --inco: var(--oxido);
 
   /* Type */
-  --tit: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --txt: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+  /* Self-hosted (@fontsource, OFL): the display voice survives an offline venue laptop */
+  --tit: "Archivo Variable", "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --txt: "Public Sans Variable", "Public Sans", "Helvetica Neue", Arial, sans-serif;
   --mono: "Azeret Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
 
   /* Sun (overwritten live by SolContext) */
@@ -87,6 +88,7 @@
 
 /* A basalt plate: everything lunar renders here, light on dark. */
 .placa,
+.noche-lunar,
 .escena,
 .panel.reloj,
 .panel.comparador,
@@ -225,22 +227,42 @@ h5 { font-size: 14px; line-height: 1.35; }
   }
 }
 
+/* On basalt the plaque inverts: plaster ink on night, the same oxide rule.
+   Sunlight yellow stays reserved for the Sun in data (chart lines, markers). */
 .placa .btn,
+.noche-lunar .btn,
 .escena .btn,
 .panel.reloj .btn,
 .panel.comparador .btn {
-  background-color: var(--luz-solar);
-  border-color: var(--luz-solar);
+  background-color: #eceae4;
+  border-color: #eceae4;
   color: var(--tinta);
-  box-shadow: none;
+  box-shadow: inset 0 -3px 0 var(--oxido);
 }
 
 .placa .btn.sec,
+.noche-lunar .btn.sec,
 .panel.reloj .btn.sec,
 .panel.comparador .btn.sec {
   background-color: transparent;
   border-color: var(--borde-light);
   color: var(--texto);
+  box-shadow: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .placa .btn:hover,
+  .noche-lunar .btn:hover,
+  .panel.reloj .btn:hover,
+  .panel.comparador .btn:hover {
+    background-color: #fff;
+  }
+  .placa .btn.sec:hover,
+  .noche-lunar .btn.sec:hover,
+  .panel.reloj .btn.sec:hover,
+  .panel.comparador .btn.sec:hover {
+    background-color: rgba(236, 234, 228, 0.1);
+  }
 }
 
 /* ---------------------------------------------------------------- data rows and tags */

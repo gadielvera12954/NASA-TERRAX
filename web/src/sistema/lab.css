@@ -19,10 +19,11 @@
   border-color: var(--tinta);
 }
 .placa .btn[aria-pressed="true"].sec,
+.noche-lunar .btn[aria-pressed="true"].sec,
 .panel.reloj .btn[aria-pressed="true"].sec {
-  background: var(--luz-solar);
+  background: #eceae4;
   color: var(--tinta);
-  border-color: var(--luz-solar);
+  border-color: #eceae4;
 }
 .btn:disabled {
   opacity: 0.5;
@@ -243,7 +244,7 @@ figure.escena-plana img {
   color: var(--muro-luz);
 }
 .panel.comparador .selector button[aria-pressed="true"] {
-  background: var(--luz-solar);
+  background: #eceae4;
   color: var(--tinta);
 }
 @media (hover: hover) and (pointer: fine) {
