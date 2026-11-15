@@ -163,7 +163,25 @@ export const AppContent: React.FC = () => {
         {pantallaActual === 'data' && <DataScreen />}
       </main>
 
-      <AsistenteSI pagina={pantallaActual} elevacionSolDeg={sol.elevacion} idioma={idioma === 'ES' ? 'es' : 'en'} />
+      <AsistenteSI
+        pagina={pantallaActual}
+        elevacionSolDeg={sol.elevacion}
+        idioma={idioma === 'ES' ? 'es' : 'en'}
+        onNavegar={(dest) => {
+          const mapa: Record<string, PantallaId> = {
+            home: 'mission',
+            explore: 'search',
+            card: 'ficha',
+            compare: 'two worlds',
+            lab: 'destination',
+            checks: 'tests',
+            guide: 'field',
+          };
+          setPantallaActual(mapa[dest] ?? (dest as PantallaId));
+        }}
+        onSeleccionarCandidata={(id) => handleSeleccionarParcela(id)}
+        onAjustarSol={(deg) => sol.setElevacion(deg)}
+      />
 
       {/* Fixed Horizon Bar at Bottom (Replaces traditional footer, controls Sol everywhere) */}
       <BarraHorizonte />

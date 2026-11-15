@@ -1068,10 +1068,18 @@ function AppContent() {
         pagina={page}
         ficha={ficha}
         manifest={manifest}
+        indice={candidateIndex}
         elevacionSolDeg={sol.elevacion}
         motorEnVivo={Boolean(motor)}
         idioma={language === "es" ? "es" : "en"}
         onNavegar={(dest) => go(dest as Page)}
+        onSeleccionarCandidata={(id) => {
+          setCandidateId(id);
+          const url = new URL(location.href);
+          url.searchParams.set("candidate", id);
+          history.replaceState(null, "", url);
+        }}
+        onAjustarSol={(deg) => sol.setElevacion(deg)}
       />
       <Horizon />
     </>

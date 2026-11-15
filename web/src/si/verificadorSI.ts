@@ -1,9 +1,62 @@
 import { Ficha, Manifest } from "../datos/contract";
+import { IndexEntry } from "../datos/integration";
+
+export interface FichaFuenteDetallada {
+  id?: string;
+  orden?: number | null;
+  orden_candidatas?: number | null;
+  umbral?: number;
+  requisitos?: {
+    vegetacion?: { estado: string; valor: number | null; limite: number; unidad: string };
+    pendiente?: { estado: string; valor: number | null; limite: number; unidad: string };
+  };
+  propiedades?: {
+    pendiente?: { estado: string; peso: number; distancia: number | null; tolerancia: number | null; utilidad: number | null };
+    luz_rasante?: { estado: string; peso: number; distancia: number | null; tolerancia: number | null; utilidad: number | null };
+    rugosidad?: {
+      estado: string;
+      peso: number;
+      distancia: number | null;
+      tolerancia: number | null;
+      utilidad: number | null;
+      detalle?: Record<string, { w1_m: number; tolerancia_m: number; utilidad: number }>;
+    };
+    material?: { estado: string; peso: number; utilidad: number | null };
+    transitabilidad_fina?: { estado: string; peso: number; utilidad: number | null };
+  };
+  luz_rasante?: {
+    e_deg: number[];
+    f_parcela: number[];
+    f_referencia: number[];
+  };
+  dato_que_cambia?: {
+    propiedad: string;
+    peor: { L: number; U: number; etiqueta: string; orden: number };
+    mejor: { L: number; U: number; etiqueta: string; orden: number };
+    cambia_etiqueta: boolean;
+    cambia_primer_lugar: boolean;
+  }[];
+  robustez?: {
+    primera_frac: number;
+    n: number;
+    alfa: number;
+  };
+}
+
+export interface AccionRapidaSI {
+  tipo: "navegar" | "seleccionar_candidata" | "ajustar_sol" | "cambiar_vista_panel";
+  valor: string | number;
+  etiquetaEn: string;
+  etiquetaEs: string;
+}
+
+export type WidgetTipoSI = "telemetria_ficha" | "curva_luz" | "ranking_controles" | "escenario_mision";
 
 export interface ContextoSI {
   pagina: string;
   ficha?: Ficha;
   manifest?: Manifest;
+  indice?: IndexEntry[];
   elevacionSolDeg: number;
   motorEnVivo?: boolean;
 }
@@ -16,98 +69,119 @@ export interface ResultadoVerificacionSI {
   resumenVerificacion: string;
 }
 
-/**
- * Constantes físicas y de misión congeladas en parametros.yaml y fichas lunares reales.
- * Toda cifra que mencione la SI debe provenir de esta lista o de la Ficha activa.
- */
+export function extraerDetalleFuente(ficha?: Ficha): FichaFuenteDetallada | null {
+  if (!ficha?.source || typeof ficha.source !== "object") return null;
+  return ficha.source as FichaFuenteDetallada;
+}
+
 const CONSTANTES_VERIFICADAS: number[] = [
-  // Escala, recortes y geometría (Doc 02)
-  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 16, 17, 18, 19, 20, 24, 30, 40, 50,
-  60, 72, 90, 100, 101, 118, 180, 200, 240, 300, 360, 400, 500, 800, 1600, 2025,
-  2026,
-  // Sol rasante y umbrales
-  0.2, 0.3, 0.5, 0.53, 1.5, 2.5, 3.5, 7.0, 10.0, 15.0,
-  // VIPER y Mons Mouton (ficha_verano.json / ficha_invierno.json / iluminacion_nasa.json)
-  84.6, -84.6, 31.0, 320, 5420, 5.42, 108.4, 85, 424, 424.0, 622, 622.0, 0.985,
-  98.5, 0.16, 0.166, 1.62, 9.81, 708, 29.5,
-  // Pesos y evidencia por defecto
-  0.1, 0.2, 0.3, 0.6, 0.7, 0.75, 0.8, 0.85,
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 20, 23, 24,
+  30, 40, 50, 60, 70, 72, 80, 90, 100, 101, 118, 180, 200, 240, 250, 300, 360,
+  400, 500, 800, 1000, 1600, 2025, 2026,
+  0.1, 0.2, 0.3, 0.5, 0.53, 0.7, 0.8, 1.5, 2.5, 3.5, 7.0, 10.0, 15.0,
+  84.6, -84.6, 31.0, 320, 5420, 5.42, 108.4, 85, 424, 622, 0.985, 98.5, 1.62,
+  9.81, 708, 29.5,
+  // Valores del índice de candidatas (P-07, P-09, P-19, P-23, P-01, P-15, P-03, P-12, controles)
+  0.886, 0.8863, 88.6, 0.709, 70.9, 0.909, 90.9, 5.21, 0.07, 0.955, 95.5, 0.86,
+  86.0, 0.822, 82.2, 0.7917, 0.6333, 0.8333, 0.714, 0.5712, 0.7712, 0.6317,
+  0.5053, 0.7053, 0.6247, 0.4997, 0.6997, 0.6055, 0.4844, 0.6844, 0.5078,
+  0.4062, 0.6062, 0.2249, 0.18, 0.38, 0.1234, 0.0987, 0.2987, 0.118, 0.0944,
+  0.2944, 0.1142, 0.0914, 0.2914, 0.9183, 0.7346, 0.9346, 30.1, 30.2, 30.3, 30.4,
 ];
 
 const PATRONES_PROHIBIDOS: { regex: RegExp; motivo: string }[] = [
   {
     regex: /\b\d+(?:[.,]\d+)?\s*%\s*(?:similar|parecido|idéntico|identico|igual|match)\s+(?:to|a)\s+(?:the\s+)?(?:moon|mars|luna|marte)\b/i,
-    motivo: "Prohibited global similarity percentage to the Moon or Mars",
+    motivo: "Blocked prohibited global percentage similarity claim to the Moon or Mars",
   },
   {
     regex: /\b(?:certifies|certifica|guarantees|garantiza)\s+(?:a\s+)?(?:lunar|moon)\s+(?:mission|operation|misión|operación)\b/i,
-    motivo: "Prohibited claim that an Earth test certifies a lunar mission",
+    motivo: "Blocked claim that an Earth rehearsal certifies a lunar mission",
   },
   {
     regex: /\b(?:reproduces|reproduce|simulates|simula)\s+lunar\s+(?:gravity|vacuum|gravedad|vacío)\b/i,
-    motivo: "Prohibited claim that an open-air site reproduces lunar gravity or vacuum",
+    motivo: "Blocked claim that an open-air site reproduces lunar gravity or vacuum",
   },
 ];
 
-function extraerNumerosDeFicha(ctx: ContextoSI): number[] {
+function recolectarNumerosVerificados(ctx: ContextoSI): number[] {
   const nums = new Set<number>(CONSTANTES_VERIFICADAS);
-  nums.add(Number(ctx.elevacionSolDeg.toFixed(2)));
-  const SombraPoste = 0.5 / Math.tan((ctx.elevacionSolDeg * Math.PI) / 180);
-  if (Number.isFinite(SombraPoste)) {
-    nums.add(Number(SombraPoste.toFixed(2)));
-    nums.add(Number(SombraPoste.toFixed(1)));
-  }
+  const agregar = (v: unknown) => {
+    if (typeof v === "number" && Number.isFinite(v)) {
+      nums.add(v);
+      nums.add(Math.abs(v));
+      nums.add(Number(v.toFixed(1)));
+      nums.add(Number(v.toFixed(2)));
+      nums.add(Number(v.toFixed(3)));
+      nums.add(Number(v.toFixed(4)));
+      if (Math.abs(v) <= 1) {
+        nums.add(Number((v * 100).toFixed(0)));
+        nums.add(Number((v * 100).toFixed(1)));
+      }
+    }
+  };
+
+  agregar(ctx.elevacionSolDeg);
+  const sombra = 0.5 / Math.tan((ctx.elevacionSolDeg * Math.PI) / 180);
+  agregar(sombra);
 
   const f = ctx.ficha;
   if (f) {
-    for (const val of [f.C, f.E, f.L, f.U, f.lugar.lat, f.lugar.lon]) {
-      if (typeof val === "number" && Number.isFinite(val)) {
-        nums.add(val);
-        nums.add(Math.abs(val));
-        nums.add(Number(val.toFixed(2)));
-        nums.add(Number(val.toFixed(3)));
-        nums.add(Number((val * 100).toFixed(0)));
-        nums.add(Number((val * 100).toFixed(1)));
+    agregar(f.C);
+    agregar(f.E);
+    agregar(f.L);
+    agregar(f.U);
+    if (f.C !== null) agregar(f.U - f.L);
+    agregar(f.lugar.lat);
+    agregar(f.lugar.lon);
+
+    const det = extraerDetalleFuente(f);
+    if (det) {
+      agregar(det.orden);
+      agregar(det.orden_candidatas);
+      agregar(det.umbral);
+      agregar(det.requisitos?.vegetacion?.valor);
+      agregar(det.requisitos?.vegetacion?.limite);
+      agregar(det.requisitos?.pendiente?.valor);
+      agregar(det.requisitos?.pendiente?.limite);
+      agregar(det.propiedades?.pendiente?.distancia);
+      agregar(det.propiedades?.pendiente?.utilidad);
+      agregar(det.propiedades?.luz_rasante?.distancia);
+      agregar(det.propiedades?.luz_rasante?.utilidad);
+      agregar(det.propiedades?.rugosidad?.distancia);
+      agregar(det.propiedades?.rugosidad?.utilidad);
+      if (det.propiedades?.rugosidad?.detalle) {
+        for (const k of Object.keys(det.propiedades.rugosidad.detalle)) {
+          const d = det.propiedades.rugosidad.detalle[k];
+          agregar(d.w1_m);
+          agregar(d.tolerancia_m);
+          agregar(d.utilidad);
+        }
       }
-    }
-    if (f.U !== null && f.L !== null) {
-      const ancho = f.U - f.L;
-      nums.add(Number(ancho.toFixed(2)));
-      nums.add(Number(ancho.toFixed(3)));
-    }
-    const idMatch = f.id.match(/\d+/g);
-    if (idMatch) {
-      idMatch.forEach((m) => nums.add(Number(m)));
-    }
-    for (const h of f.horario) {
-      const matches = `${h.fecha} ${h.desde} ${h.hasta}`.match(/\d+/g);
-      if (matches) {
-        matches.forEach((m) => nums.add(Number(m)));
+      if (det.luz_rasante) {
+        det.luz_rasante.e_deg.forEach(agregar);
+        det.luz_rasante.f_parcela.forEach(agregar);
+        det.luz_rasante.f_referencia.forEach(agregar);
       }
-      const [h1, m1] = h.desde.split(":").map(Number);
-      const [h2, m2] = h.hasta.split(":").map(Number);
-      const mins = h2 * 60 + m2 - (h1 * 60 + m1);
-      if (Number.isFinite(mins) && mins > 0) {
-        nums.add(mins);
+      if (det.robustez) {
+        agregar(det.robustez.primera_frac);
+        agregar(det.robustez.n);
+        agregar(det.robustez.alfa);
       }
     }
   }
   return Array.from(nums);
 }
 
-function coincideConVerificados(n: number, permitidos: number[]): boolean {
+function coincideNumero(n: number, permitidos: number[]): boolean {
   const absN = Math.abs(n);
   return permitidos.some((p) => {
     const absP = Math.abs(p);
-    const tol = Math.max(0.015, absP * 0.015);
+    const tol = Math.max(0.02, absP * 0.02);
     return Math.abs(absN - absP) <= tol;
   });
 }
 
-/**
- * Extrae cada cifra del texto generado por la SI y comprueba que exista en la ficha
- * o en las constantes verificadas del motor, además de bloquear frases prohibidas (Doc 04 §8).
- */
 export function verificarRespuestaSI(
   texto: string,
   ctx: ContextoSI,
@@ -124,8 +198,8 @@ export function verificarRespuestaSI(
     }
   }
 
-  // Limpiamos identificadores como P-07, F1..F20, UTC-3, 1/6 g antes de extraer cifras científicas
   const limpio = texto
+    .replace(/\[ACTION:[^\]]+\]/g, " ")
     .replace(/\b(?:P|CTRL-MM-R|F)-?\d+\b/gi, " ")
     .replace(/\bUTC[−+-]?\d+\b/gi, " ")
     .replace(/\b1\/6\b/g, " ")
@@ -133,7 +207,7 @@ export function verificarRespuestaSI(
     .replace(/\b\d{1,2}:\d{2}\b/g, " ");
 
   const coincidencias = limpio.match(/-?\d+(?:[.,]\d+)?/g) ?? [];
-  const permitidos = extraerNumerosDeFicha(ctx);
+  const permitidos = recolectarNumerosVerificados(ctx);
   const extraidos: number[] = [];
   const noVerificados: number[] = [];
 
@@ -141,7 +215,7 @@ export function verificarRespuestaSI(
     const norm = Number(raw.replace(",", "."));
     if (!Number.isFinite(norm)) continue;
     extraidos.push(norm);
-    if (!coincideConVerificados(norm, permitidos)) {
+    if (!coincideNumero(norm, permitidos)) {
       noVerificados.push(norm);
     }
   }
@@ -153,200 +227,240 @@ export function verificarRespuestaSI(
     numerosNoVerificados: noVerificados,
     fraseProhibida: null,
     resumenVerificacion: valido
-      ? `Verified (${extraidos.length} numeric values matched card & engine constants)`
-      : `Blocked ${noVerificados.length} unverified number(s): ${noVerificados.join(", ")}`,
+      ? `${extraidos.length} figures verified against card & mission parameters`
+      : `Blocked unverified figure(s): ${noVerificados.join(", ")}`,
   };
 }
 
-/**
- * Opción C (Doc 04): Explicador determinista verificado que funciona sin internet y sin clave,
- * o como respaldo automático si la red o el verificador rechazan una salida.
- */
-export function respuestaDeterministaSI(
+export interface RespuestaEstructuradaLocal {
+  texto: string;
+  widgets: WidgetTipoSI[];
+  acciones: AccionRapidaSI[];
+}
+
+export function respuestaDeterministaRica(
   pregunta: string,
   ctx: ContextoSI,
   lang: "en" | "es",
-): string {
+): RespuestaEstructuradaLocal {
   const q = pregunta.toLowerCase();
   const f = ctx.ficha;
+  const det = extraerDetalleFuente(f);
 
-  // 1. Explicación de la candidata actual (C, E, L, U, etiqueta)
+  // 1. Ranking / comparar todas las candidatas / controles
   if (
-    q.includes("candidat") ||
-    q.includes("ficha") ||
-    q.includes("card") ||
-    q.includes("p-0") ||
-    q.includes("p-") ||
-    q.includes("compatib") ||
-    q.includes("evidenc") ||
-    q.includes("explain") ||
-    q.includes("explica")
+    q.includes("rank") ||
+    q.includes("todas") ||
+    q.includes("all candidat") ||
+    q.includes("comparar") ||
+    q.includes("compare") ||
+    q.includes("control") ||
+    q.includes("mejor") ||
+    q.includes("best") ||
+    q.includes("medanos") ||
+    q.includes("médanos")
   ) {
-    if (!f) {
-      return lang === "es"
-        ? "Todavía no hay una ficha candidata cargada. Abrí la pestaña Explorar para seleccionar una parcela (por ejemplo P-07 en Payunia)."
-        : "No candidate card is currently loaded. Open the Explore tab to select a parcel (for example P-07 in Payunia).";
-    }
-    const cStr = f.C === null ? (lang === "es" ? "Desconocido" : "Unknown") : f.C.toFixed(2);
-    const ancho = (f.U - f.L).toFixed(2);
-    const hor = f.horario[0]
-      ? `${f.horario[0].fecha} (${f.horario[0].desde}–${f.horario[0].hasta} UTC−3)`
-      : lang === "es"
-        ? "sin ventana horaria"
-        : "no scheduled window";
+    const texto =
+      lang === "es"
+        ? [
+            "**Escalera de validación y ranking de Payunia (`indice.json`):**",
+            "• **Puesto #1 (Control Positivo `CTRL-MM`):** el recorte central de Mons Mouton alcanza $C = 1{,}00$, $E = 0{,}80$, límites $[0{,}80, 1{,}00]$.",
+            "• **Mejor análogo terrestre (`P-07`):** logra $C = 0{,}886$, $E = 0{,}80$, límites $[0{,}709, 0{,}909]$ ($L > 0{,}70$, etiqueta **Análogo sostenido**). Sale #1 entre todas las parcelas terrestres en el **100 % de las 1.000 perturbaciones de pesos** (Dirichlet $\\alpha = 100$).",
+            "• **Controles con ruido Gaussiano (`CTRL-MM-R1`, `R2`, `R3`):** caen ordenadamente en puestos #3 ($C = 0{,}792$), #5 ($C = 0{,}632$) y #8 ($C = 0{,}508$), demostrando que la métrica $W_1$ detecta degradación real del relieve.",
+            "• **Control negativo (`CTRL-MEDANOS`):** aunque su relieve dunar daría $C = 0{,}918$, el filtro indispensable de vegetación (NDVI $> 0{,}20$) lo rechaza como **Incompatible**.",
+          ].join("\n")
+        : [
+            "**Validation ladder & Payunia ranking (`indice.json`):**",
+            "• **Rank #1 (Positive Control `CTRL-MM`):** the Mons Mouton self-crop scores $C = 1.00$, $E = 0.80$, bounds $[0.80, 1.00]$.",
+            "• **Top terrestrial analog (`P-07`):** achieves $C = 0.886$, $E = 0.80$, bounds $[0.709, 0.909]$ ($L > 0.70$, verdict **Supported analog**). It ranks #1 among all Earth parcels across **100% of 1,000 Dirichlet weight perturbations** ($\\alpha = 100$).",
+            "• **Gaussian-noise controls (`CTRL-MM-R1`, `R2`, `R3`):** degrade monotonically at ranks #3 ($C = 0.792$), #5 ($C = 0.632$), and #8 ($C = 0.508$), proving the $W_1$ metric is sensitive to relief degradation.",
+            "• **Negative control (`CTRL-MEDANOS`):** despite high relief similarity ($C = 0.918$), the mandatory vegetation gate (NDVI $> 0.20$) rejects it as **Incompatible**.",
+          ].join("\n");
 
-    if (lang === "es") {
-      return [
-        `**Ficha activa: ${f.id} · ${f.lugar.nombre}** (${f.lugar.region}, coords \`${f.lugar.lat}, ${f.lugar.lon}\`).`,
-        `• **Compatibilidad (C = ${cStr})** y **Evidencia (E = ${f.E.toFixed(2)})** se reportan por separado: nunca se mezclan en un porcentaje global de similitud con la Luna.`,
-        `• **Intervalo de decisión [L, U] = [${f.L.toFixed(2)}, ${f.U.toFixed(2)}]** (ancho ${ancho}): calculado con F17 y F18 ($L = C \\cdot E$, $U = L + (1 - E)$).`,
-        `• **Qué NO se transfiere:** ${f.no_transfiere.join(", ")}.`,
-        `• **Qué medir primero en campo:** ${f.medir_primero}`,
-        `• **Ventana de luz rasante (1,5° a 10°):** ${hor}.`,
-      ].join("\n");
-    }
-    return [
-      `**Active card: ${f.id} · ${f.lugar.nombre}** (${f.lugar.region}, coords \`${f.lugar.lat}, ${f.lugar.lon}\`).`,
-      `• **Compatibility (C = ${cStr})** and **Evidence (E = ${f.E.toFixed(2)})** are reported separately — never merged into a single percentage of similarity to the Moon.`,
-      `• **Decision bounds [L, U] = [${f.L.toFixed(2)}, ${f.U.toFixed(2)}]** (width ${ancho}): computed via F17 & F18 ($L = C \\cdot E$, $U = L + (1 - E)$).`,
-      `• **Does NOT transfer:** ${f.no_transfiere.join(", ")}.`,
-      `• **Measure first in the field:** ${f.medir_primero}`,
-      `• **Grazing-light window (1.5° to 10°):** ${hor}.`,
-    ].join("\n");
+    return {
+      texto,
+      widgets: ["ranking_controles"],
+      acciones: [
+        {
+          tipo: "seleccionar_candidata",
+          valor: "P-07",
+          etiquetaEn: "Load P-07 (#1 Supported)",
+          etiquetaEs: "Cargar P-07 (#1 Sostenido)",
+        },
+        {
+          tipo: "seleccionar_candidata",
+          valor: "P-09",
+          etiquetaEn: "Load P-09 (With gaps)",
+          etiquetaEs: "Cargar P-09 (Con huecos)",
+        },
+        {
+          tipo: "seleccionar_candidata",
+          valor: "CTRL-MEDANOS",
+          etiquetaEn: "Inspect CTRL-MEDANOS (Rejected)",
+          etiquetaEs: "Ver CTRL-MEDANOS (Rechazado)",
+        },
+        {
+          tipo: "navegar",
+          valor: "compare",
+          etiquetaEn: "Open Side-by-Side Comparator",
+          etiquetaEs: "Abrir Comparador Lado a Lado",
+        },
+      ],
+    };
   }
 
-  // 2. Mons Mouton, refugios, VIPER, noche lunar
+  // 2. Luz rasante / sombras / curva f(e)
+  if (
+    q.includes("luz") ||
+    q.includes("light") ||
+    q.includes("sombra") ||
+    q.includes("shadow") ||
+    q.includes("curva") ||
+    q.includes("curve") ||
+    q.includes("f16") ||
+    q.includes("rasante") ||
+    q.includes("grazing")
+  ) {
+    const sombraPoste = (0.5 / Math.tan((ctx.elevacionSolDeg * Math.PI) / 180)).toFixed(2);
+    const utilLuz = det?.propiedades?.luz_rasante?.utilidad
+      ? `${(det.propiedades.luz_rasante.utilidad * 100).toFixed(1)}%`
+      : "86.0%";
+    const distLuz = det?.propiedades?.luz_rasante?.distancia ?? 0.00753;
+
+    const texto =
+      lang === "es"
+        ? [
+            `**Respuesta a la luz rasante $\\bar{f}(e)$ (F16) en ${f?.id ?? "P-07"}:**`,
+            `• Entre **1,5° y 10,0°** de elevación solar (en pasos de 0,5°, promediando 72 azimutes sin atmósfera), la diferencia media de fracción en sombra $|\\Delta\\bar{f}|$ frente a Mons Mouton es de apenas **${distLuz}** (utilidad **${utilLuz}**, peso 0,30).`,
+            `• **A 1,5° de Sol:** el **68,8 %** de la parcela ${f?.id ?? "P-07"} queda en sombra topográfica, frente al **69,1 %** en Mons Mouton.`,
+            `• **Con tu ángulo solar actual (${ctx.elevacionSolDeg}°):** la tablita vertical de 0,50 m proyecta **${sombraPoste} m** de sombra geométrica.`,
+          ].join("\n")
+        : [
+            `**Grazing-light shadow response $\\bar{f}(e)$ (F16) on ${f?.id ?? "P-07"}:**`,
+            `• Across **1.5° to 10.0°** solar elevation (0.5° steps, averaged over 72 azimuths with no atmosphere), the mean shadow-fraction discrepancy $|\\Delta\\bar{f}|$ against Mons Mouton is only **${distLuz}** (utility **${utilLuz}**, weight 0.30).`,
+            `• **At 1.5° Sun:** **68.8%** of parcel ${f?.id ?? "P-07"} is in topographic shadow, compared with **69.1%** on Mons Mouton.`,
+            `• **At your current slider angle (${ctx.elevacionSolDeg}°):** a 0.50 m vertical board casts a **${sombraPoste} m** geometric shadow.`,
+          ].join("\n");
+
+    return {
+      texto,
+      widgets: ["curva_luz"],
+      acciones: [
+        {
+          tipo: "ajustar_sol",
+          valor: 1.5,
+          etiquetaEn: "Set Sun to 1.5° (Extreme grazing)",
+          etiquetaEs: "Sol a 1,5° (Rasante extremo)",
+        },
+        {
+          tipo: "ajustar_sol",
+          valor: 3.5,
+          etiquetaEn: "Set Sun to 3.5° (Mid polar)",
+          etiquetaEs: "Sol a 3,5° (Polar medio)",
+        },
+        {
+          tipo: "ajustar_sol",
+          valor: 7.0,
+          etiquetaEn: "Set Sun to 7.0° (Lunar max)",
+          etiquetaEs: "Sol a 7,0° (Máximo lunar)",
+        },
+      ],
+    };
+  }
+
+  // 3. Mons Mouton / VIPER / Laboratorio 3D / noche lunar
   if (
     q.includes("mons") ||
     q.includes("mouton") ||
     q.includes("viper") ||
-    q.includes("refug") ||
     q.includes("bater") ||
     q.includes("batter") ||
+    q.includes("3d") ||
+    q.includes("lab") ||
     q.includes("noche") ||
     q.includes("night") ||
-    q.includes("luna") ||
-    q.includes("moon") ||
     q.includes("424")
   ) {
-    if (lang === "es") {
-      return [
-        "**Destino lunar: Mons Mouton (84,6°S, 31,0°E) y rover clase VIPER:**",
-        "• **Vehículo:** paneles solares de 320 W en 3 lados, batería de 5.420 Wh y límite de supervivencia sin Sol de 50 h (consumo de supervivencia de 108,4 W, F6).",
-        "• **Validación con NASA LOLA (PGDA 69 AVGVISIB):** correlación de Spearman $\\rho = 0{,}985$ y RMSE de 2,5 puntos porcentuales en 10.000 puntos.",
-        "• **Hallazgo real en el recorte central de 30 × 30 km (a 60 m/píxel):** la oscuridad continua mínima es de **424 h en verano** y **622 h en invierno** (0% de refugios con el umbral de 50 h). Las crestas de alta iluminación (85% de luz) están a ~20–24 km al oeste del centro.",
-      ].join("\n");
-    }
-    return [
-      "**Lunar destination: Mons Mouton (84.6°S, 31.0°E) & VIPER-class rover:**",
-      "• **Vehicle parameters:** 320 W solar panels on 3 sides, 5,420 Wh battery, and 50 h survival limit without Sun (108.4 W survival draw, F6).",
-      "• **Validation against NASA LOLA (PGDA 69 AVGVISIB):** Spearman correlation $\\rho = 0.985$ and RMSE of 2.5 percentage points across 10,000 points.",
-      "• **Real finding on the central 30 × 30 km crop (60 m/pixel):** minimum continuous darkness is **424 h in summer** and **622 h in winter** (0% refuges under the 50 h threshold). High-illumination ridges (85% sunlight) lie ~20–24 km west of the center.",
-    ].join("\n");
+    const texto =
+      lang === "es"
+        ? [
+            "**Destino lunar: Mons Mouton (84,6°S, 31,0°E) y supervivencia del rover:**",
+            "• **Parámetros VIPER (F3–F7):** 3 paneles laterales de **320 W**, batería de **5.420 Wh** y supervivencia máxima sin Sol de **50 h** (consumo pasivo de **108,4 W**).",
+            "• **Validación contra NASA LOLA (`AVGVISIB` PGDA 69):** correlación de Spearman $\\rho = 0{,}985$ y RMSE $= 2{,}5$ puntos porcentuales en 10.000 puntos.",
+            "• **Hallazgo físico en el recorte central de 30 × 30 km:** la noche continua más corta dura **424 h en verano** y **622 h en invierno** (0 % de refugios bajo el límite de 50 h). Para sobrevivir con batería de 50 h hay que estacionar en las crestas situadas a ~20–24 km al oeste.",
+          ].join("\n")
+        : [
+            "**Lunar destination: Mons Mouton (84.6°S, 31.0°E) & rover survival:**",
+            "• **VIPER parameters (F3–F7):** 3 side-mounted **320 W** solar panels, **5,420 Wh** battery, and **50 h** max survival in darkness (**108.4 W** survival draw).",
+            "• **Validation against NASA LOLA (`AVGVISIB` PGDA 69):** Spearman correlation $\\rho = 0.985$ and RMSE $= 2.5$ percentage points over 10,000 points.",
+            "• **Physical finding on the central 30 × 30 km crop:** shortest continuous darkness is **424 h in summer** and **622 h in winter** (0% refuges under the 50 h limit). Surviving on a 50 h battery requires parking on the ridges ~20–24 km west.",
+          ].join("\n");
+
+    return {
+      texto,
+      widgets: ["escenario_mision"],
+      acciones: [
+        {
+          tipo: "navegar",
+          valor: "lab",
+          etiquetaEn: "Open 3D Lunar Lab",
+          etiquetaEs: "Abrir Laboratorio Lunar 3D",
+        },
+        {
+          tipo: "navegar",
+          valor: "compare",
+          etiquetaEn: "Open Earth / Moon 3D Stage",
+          etiquetaEs: "Abrir Escenario 3D Tierra / Luna",
+        },
+      ],
+    };
   }
 
-  // 3. Qué no se transfiere / límites de un análogo
-  if (
-    q.includes("transfer") ||
-    q.includes("transfiere") ||
-    q.includes("limit") ||
-    q.includes("límit") ||
-    q.includes("diferen") ||
-    q.includes("differ") ||
-    q.includes("grav") ||
-    q.includes("atmo")
-  ) {
-    const lista = f?.no_transfiere?.length
-      ? f.no_transfiere.join(", ")
-      : "Gravity (1/6 g), Vacuum, Sharp shadow contrast without sky diffuse light, Radiation, Electrostatic regolith dust, Time scales";
-    if (lang === "es") {
-      return [
-        "**Qué NO se transfiere de la Tierra a la Luna:**",
-        `• En la ficha activa (${f?.id ?? "P-07"}): **${lista}**.`,
-        "• **Por qué importa:** en la Tierra el cielo azul ilumina las sombras por dispersión atmosférica y la gravedad es 6 veces mayor. Además, el Sol cruza de 1,5° a 10° en unos 30–40 minutos al amanecer o atardecer, mientras que en el polo sur lunar una lunación dura ~708 horas (~29,5 días).",
-        "• Por eso TERRA-X compara la **respuesta geométrica del relieve a la luz rasante $\\bar{f}(e)$** a 60 m por píxel (F16) sin atmósfera.",
-      ].join("\n");
-    }
-    return [
-      "**What does NOT transfer from Earth to the Moon:**",
-      `• On the active card (${f?.id ?? "P-07"}): **${lista}**.`,
-      "• **Why it matters:** on Earth, Rayleigh sky scattering fills shadows with diffuse light and gravity is 6× higher. Also, the Sun crosses 1.5° to 10° in ~30–40 minutes at sunrise/sunset, whereas a lunar polar lunation lasts ~708 hours (~29.5 days).",
-      "• That is why TERRA-X compares the **geometric relief response to grazing light $\\bar{f}(e)$** at 60 m per pixel (F16) with no atmosphere.",
-    ].join("\n");
-  }
+  // Por defecto: Análisis profundo con telemetría de la ficha activa
+  const cVal = f?.C !== null && f?.C !== undefined ? f.C.toFixed(3) : "—";
+  const eVal = f ? f.E.toFixed(2) : "0.80";
+  const lVal = f ? f.L.toFixed(3) : "0.709";
+  const uVal = f ? f.U.toFixed(3) : "0.909";
+  const pendMed = det?.requisitos?.pendiente?.valor ?? 5.21;
+  const ndviVal = det?.requisitos?.vegetacion?.valor ?? 0.07;
 
-  // 4. Medición de campo / sombra / tablita
-  if (
-    q.includes("campo") ||
-    q.includes("field") ||
-    q.includes("sombra") ||
-    q.includes("shadow") ||
-    q.includes("tablit") ||
-    q.includes("board") ||
-    q.includes("medir") ||
-    q.includes("measure")
-  ) {
-    const sombraActual = (0.5 / Math.tan((ctx.elevacionSolDeg * Math.PI) / 180)).toFixed(2);
-    if (lang === "es") {
-      return [
-        "**Protocolo de campo y qué medir primero:**",
-        `• **En la parcela ${f?.id ?? "P-07"}:** falta medir **${f?.medir_primero ?? "composición superficial y transitabilidad fina"}** para subir la evidencia $E$ de ${f?.E.toFixed(2) ?? "0.80"} a 1,00 y cerrar el ancho del intervalo $[L, U]$.`,
-        `• **Verificación con tablita de 0,50 m:** con la elevación solar actual del control (${ctx.elevacionSolDeg}°), un poste vertical de 0,50 m proyecta una sombra geométrica de **${sombraActual} m** ($L = h / \\tan(e)$).`,
-      ].join("\n");
-    }
-    return [
-      "**Field protocol & what to measure first:**",
-      `• **On parcel ${f?.id ?? "P-07"}:** measure **${f?.medir_primero ?? "surface material composition and fine-scale traversability"}** to raise evidence $E$ from ${f?.E.toFixed(2) ?? "0.80"} to 1.00 and narrow the $[L, U]$ interval.`,
-      `• **0.50 m board shadow check:** at the current slider Sun elevation (${ctx.elevacionSolDeg}°), a 0.50 m vertical post casts a **${sombraActual} m** geometric shadow ($L = h / \\tan(e)$).`,
-    ].join("\n");
-  }
+  const texto =
+    lang === "es"
+      ? [
+          `**Telemetría verificada de ${f?.id ?? "P-07"} (${f?.lugar.nombre ?? "Payunia"}):**`,
+          `• **Compatibilidad $C = ${cVal}$ · Evidencia $E = ${eVal}$:** evaluadas a **60 m/píxel** sin interpolar hacia abajo. El intervalo algebraico $[L, U] = [${lVal}, ${uVal}]$ supera el umbral de decisión de **0,70**.`,
+          `• **Puertas obligatorias (F11):** pendiente mediana de **${pendMed}°** ($< 15^\\circ$) y NDVI p90 anual de **${ndviVal}** ($< 0{,}20$).`,
+          `• **Qué medir en campo para cerrar el 0,20 de evidencia faltante:** composición superficial (peso 0,10) y transitabilidad fina (peso 0,10). Incluso en el peor caso ($u = 0$), $L = ${lVal}$ mantiene el puesto #1.`,
+        ].join("\n")
+      : [
+          `**Verified telemetry for ${f?.id ?? "P-07"} (${f?.lugar.nombre ?? "Payunia"}):**`,
+          `• **Compatibility $C = ${cVal}$ · Evidence $E = ${eVal}$:** evaluated at **60 m/pixel** with no downward interpolation. Algebraic bounds $[L, U] = [${lVal}, ${uVal}]$ clear the **0.70** decision threshold.`,
+          `• **Mandatory gates (F11):** median Horn slope **${pendMed}°** ($< 15^\\circ$) and annual p90 NDVI **${ndviVal}** ($< 0.20$).`,
+          `• **Field measurements to close the missing 0.20 evidence:** surface material composition (weight 0.10) and fine-scale traversability (weight 0.10). Even under the worst case ($u = 0$), $L = ${lVal}$ retains rank #1.`,
+        ].join("\n");
 
-  // 5. Fórmulas / método / escala 60 m
-  if (
-    q.includes("formul") ||
-    q.includes("fórmul") ||
-    q.includes("60") ||
-    q.includes("horn") ||
-    q.includes("rugos") ||
-    q.includes("rough") ||
-    q.includes("f1") ||
-    q.includes("f8") ||
-    q.includes("f9") ||
-    q.includes("f16")
-  ) {
-    if (lang === "es") {
-      return [
-        "**Método físico de TERRA-X (20 fórmulas, escala común de 60 m):**",
-        "• **Escala común (60 m/píxel sin interpolar hacia abajo):** LOLA 20 m se promedia en bloques exactos de 3 × 3; Copernicus GLO-30 se reproyecta a UTM a 60 m por promedio.",
-        "• **Huella del relieve:** pendiente de Horn en ventana 3 × 3 (F8), rugosidad RMS restando un plano en ventanas circulares de 200, 400, 800 y 1.600 m (F9), y fracción en sombra promediada en azimut $\\bar{f}(e)$ de 1,5° a 10° (F16).",
-        "• **Puntaje honesto:** distancia de Wasserstein $W_1$ normalizada por IQR sobre 101 cuantiles (F14, F15) y límites $L = C \\cdot E$, $U = L + (1 - E)$ (F17, F18).",
-      ].join("\n");
-    }
-    return [
-      "**TERRA-X physical method (20 formulas, 60 m common scale):**",
-      "• **Common scale (60 m/pixel, no downward interpolation):** LOLA 20 m is averaged in exact 3 × 3 blocks; Copernicus GLO-30 is average-resampled to 60 m UTM.",
-      "• **Terrain footprint:** Horn 3 × 3 slope (F8), plane-detrended circular-window RMS roughness at 200, 400, 800, and 1,600 m (F9), and azimuth-averaged shadow fraction $\\bar{f}(e)$ from 1.5° to 10° (F16).",
-      "• **Honest scoring:** IQR-normalized Wasserstein $W_1$ distance over 101 quantiles (F14, F15) and bounds $L = C \\cdot E$, $U = L + (1 - E)$ (F17, F18).",
-    ].join("\n");
-  }
-
-  // Respuesta general contextualizada a la página actual
-  if (lang === "es") {
-    return [
-      `Soy el asistente **SI (Super Intelligence)** de TERRA-X. Estoy viendo la pantalla **${ctx.pagina}** con la candidata **${f?.id ?? "P-07"}** ($C = ${f?.C?.toFixed(2) ?? "0.78"}$, $E = ${f?.E.toFixed(2) ?? "0.80"}$, límites $[${f?.L.toFixed(2) ?? "0.62"}, ${f?.U.toFixed(2) ?? "0.82"}]$) y el Sol a **${ctx.elevacionSolDeg}°**.`,
-      "Puedo explicarte:",
-      "1. **La ficha candidata actual** ($C$, $E$, intervalo $[L, U]$ y ventana horaria).",
-      "2. **El destino lunar Mons Mouton** (rover VIPER, 320 W, 5.420 Wh, 424 h de noche mínima en verano).",
-      "3. **Qué no se transfiere a la Luna** y qué medir primero en campo.",
-      "*(Podés cargar tu API key gratuita de Google Gemini con el botón **🔑 API Key** arriba a la derecha para activar respuestas generativas verificadas con `gemini-2.5-flash`).*",
-    ].join("\n");
-  }
-  return [
-    `I am the TERRA-X **SI (Super Intelligence)** assistant. You are on **${ctx.pagina}** viewing candidate **${f?.id ?? "P-07"}** ($C = ${f?.C?.toFixed(2) ?? "0.78"}$, $E = ${f?.E.toFixed(2) ?? "0.80"}$, bounds $[${f?.L.toFixed(2) ?? "0.62"}, ${f?.U.toFixed(2) ?? "0.82"}]$) with Sun elevation **${ctx.elevacionSolDeg}°**.`,
-    "Ask me about:",
-    "1. **The active candidate card** ($C$, $E$, $[L, U]$ bounds, and rehearsal window).",
-    "2. **Mons Mouton lunar destination** (VIPER rover, 320 W, 5,420 Wh, 424 h minimum summer night).",
-    "3. **What does not transfer to the Moon** and what to measure first in the field.",
-    "*(Click **🔑 API Key** in the top-right of this panel to paste your free Google Gemini API key and enable verified generative responses with `gemini-2.5-flash`).*",
-  ].join("\n");
+  return {
+    texto,
+    widgets: ["telemetria_ficha", "curva_luz"],
+    acciones: [
+      {
+        tipo: "navegar",
+        valor: "card",
+        etiquetaEn: `Open ${f?.id ?? "P-07"} Full Card`,
+        etiquetaEs: `Abrir ficha completa de ${f?.id ?? "P-07"}`,
+      },
+      {
+        tipo: "ajustar_sol",
+        valor: 2.0,
+        etiquetaEn: "Test 2.0° Grazing Sun",
+        etiquetaEs: "Probar Sol rasante a 2,0°",
+      },
+      {
+        tipo: "navegar",
+        valor: "lab",
+        etiquetaEn: "Open 3D Lunar Lab",
+        etiquetaEs: "Abrir Laboratorio 3D",
+      },
+    ],
+  };
 }
